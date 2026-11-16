@@ -359,19 +359,58 @@ mobileBurnBtn?.addEventListener('touchend', () => { state.touchInput.burn = fals
 mobileVentBtn?.addEventListener('touchstart', (e) => { e.preventDefault(); state.touchInput.vent = true; }, { passive: false });
 mobileVentBtn?.addEventListener('touchend', () => { state.touchInput.vent = false; });
 
+// Orbit Camera State (Drag to look around, Scroll to zoom)
+const camState = {
+  yaw: 0,
+  pitch: 0.28,
+  distance: 22,
+  dragging: false,
+  lastX: 0,
+  lastY: 0
+};
+
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  if (e.target !== renderer.domElement) return;
+  camState.dragging = true;
+  camState.lastX = e.clientX;
+  camState.lastY = e.clientY;
+});
+
+window.addEventListener('pointermove', (e) => {
+  if (!camState.dragging) return;
+  const dx = e.clientX - camState.lastX;
+  const dy = e.clientY - camState.lastY;
+  camState.lastX = e.clientX;
+  camState.lastY = e.clientY;
+  camState.yaw -= dx * 0.006;
+  camState.pitch = THREE.MathUtils.clamp(camState.pitch + dy * 0.005, -0.15, 1.15);
+});
+
+window.addEventListener('pointerup', () => { camState.dragging = false; });
+
+renderer.domElement.addEventListener('wheel', (e) => {
+  camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.015, 11, 42);
+}, { passive: true });
+
 function getFlightInput() {
   if (state.isDrawerOpen || state.isClassicMode) {
     return { x: 0, z: 0, burn: false, vent: false };
   }
-  let x = state.touchInput.x;
-  let z = state.touchInput.z;
-  if (state.keys.has('KeyA') || state.keys.has('ArrowLeft')) x -= 1;
-  if (state.keys.has('KeyD') || state.keys.has('ArrowRight')) x += 1;
-  if (state.keys.has('KeyW') || state.keys.has('ArrowUp')) z -= 1;
-  if (state.keys.has('KeyS') || state.keys.has('ArrowDown')) z += 1;
+  let rawX = state.touchInput.x;
+  let rawZ = state.touchInput.z;
+  if (state.keys.has('KeyA') || state.keys.has('ArrowLeft')) rawX -= 1;
+  if (state.keys.has('KeyD') || state.keys.has('ArrowRight')) rawX += 1;
+  if (state.keys.has('KeyW') || state.keys.has('ArrowUp')) rawZ -= 1;
+  if (state.keys.has('KeyS') || state.keys.has('ArrowDown')) rawZ += 1;
 
-  const mag = Math.hypot(x, z);
-  if (mag > 1) { x /= mag; z /= mag; }
+  const mag = Math.hypot(rawX, rawZ);
+  if (mag > 1) { rawX /= mag; rawZ /= mag; }
+
+  // Rotate input by camera yaw so W always flies forward relative to where you look
+  const cos = Math.cos(camState.yaw);
+  const sin = Math.sin(camState.yaw);
+  const x = rawX * cos + rawZ * sin;
+  const z = -rawX * sin + rawZ * cos;
 
   const burn = state.touchInput.burn || state.keys.has('Space');
   const vent = state.touchInput.vent || state.keys.has('ShiftLeft') || state.keys.has('ShiftRight') || state.keys.has('KeyC');
@@ -452,11 +491,23 @@ function animate() {
       altitude: pos.y
     });
 
-    // Smooth Chase Camera
-    const desiredCamPos = new THREE.Vector3(pos.x, pos.y + 7.5, pos.z + 18.5);
-    camera.position.lerp(desiredCamPos, Math.min(1, dt * 3.8));
-    camTarget.lerp(new THREE.Vector3(pos.x, pos.y + 2.8, pos.z), Math.min(1, dt * 5));
+    // Smooth Orbit + Chase Camera
+    const horizDist = Math.cos(camState.pitch) * camState.distance;
+    const vertDist = Math.sin(camState.pitch) * camState.distance;
+    const desiredCamPos = new THREE.Vector3(
+      pos.x + Math.sin(camState.yaw) * horizDist,
+      Math.max(2.0, pos.y + 3.2 + vertDist),
+      pos.z + Math.cos(camState.yaw) * horizDist
+    );
+    camera.position.lerp(desiredCamPos, Math.min(1, dt * 6));
+    camTarget.lerp(new THREE.Vector3(pos.x, pos.y + 3.2, pos.z), Math.min(1, dt * 7));
     camera.lookAt(camTarget);
+
+    // Collectible Sky-Rings
+    world3D.checkRingCollection(pos, () => {
+      sound.playZoneChime();
+      showToast('★ Sky-Ring Cleared!');
+    });
 
     // Zone Proximity & Telemetry
     const nearest = world3D.getNearestZone(pos);
