@@ -18,29 +18,14 @@
     code, pre, .font-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #219ebc; color: #111111; }
     @media print { .no-print { display: none !important; } }
-
-    /* Sky-to-Ground Drop Panel Animation */
-    #skyDropPanel {
-      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-    }
-    #skyDropPanel.panel-hidden {
-      transform: translateY(-115%);
-      opacity: 0;
-      pointer-events: none;
-    }
-    #skyDropPanel.panel-visible {
-      transform: translateY(0%);
-      opacity: 1;
-      pointer-events: auto;
-    }
   </style>
 </head>
 <body class="antialiased selection:bg-[#0047FF] selection:text-white">
   <div id="canvasContainer" class="fixed inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
 
-  <!-- Minimalist Helvetica HUD -->
+  <!-- Non-Intrusive Minimalist HUD -->
   <div id="hudOverlay" class="fixed inset-0 z-10 pointer-events-none select-none">
-    <!-- Top-Left Controls -->
+    <!-- Top-Left Bar -->
     <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2 pointer-events-auto">
       <div class="px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm flex items-center gap-2.5">
         <span class="w-2.5 h-2.5 rounded-full bg-[#E63946]"></span>
@@ -48,8 +33,13 @@
       </div>
       <button id="soundToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#111111] hover:text-white transition-colors">🔇 Sound Off</button>
       <button id="viewToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#0047FF] hover:text-white transition-colors">📄 2D Classic View</button>
-      <button id="contactQuickBtn" class="px-3 py-2 rounded bg-[#111111] text-white shadow-sm text-xs font-semibold hover:bg-[#0047FF] transition-colors">✉ Contact / Guestbook</button>
-      <div id="ringScoreBadge" class="px-3 py-2 rounded bg-[#FFB703] text-[#111111] shadow-sm text-xs font-mono font-bold">★ 0 / 8</div>
+      <button id="guestbookBtn" class="px-3 py-2 rounded bg-[#111111] text-white shadow-sm text-xs font-semibold hover:bg-[#0047FF] transition-colors">✉ Leave Note / Links</button>
+      <div id="ringScoreBadge" class="px-3 py-2 rounded bg-[#FFB703] text-[#111111] shadow-sm text-xs font-mono font-bold">★ 0 / 10</div>
+    </div>
+
+    <!-- Subtle Station Indicator Pill (Top-Center, non-intrusive) -->
+    <div id="stationBadge" class="hidden absolute top-16 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#111111]/85 text-white text-[11px] font-mono font-bold uppercase tracking-widest shadow">
+      Entering Station
     </div>
 
     <!-- Right Side: Speedometer -->
@@ -77,28 +67,36 @@
     </div>
     <div class="sm:hidden absolute bottom-8 right-36 flex flex-col gap-2 pointer-events-auto">
       <button id="mobileBoostBtn" class="px-4 py-2.5 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider shadow">NITRO ⚡</button>
-      <button id="mobileBrakeBtn" class="px-4 py-2.5 rounded bg-[#111111] text-white text-xs font-bold uppercase tracking-wider shadow">BRAKE</button>
     </div>
 
-    <!-- Bottom-Right: Massive Island Minimap -->
+    <!-- Bottom-Right: Massive Island GPS -->
     <div class="absolute bottom-4 right-4 p-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm">
       <div class="flex items-center justify-between text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-1 px-1">
-        <span>ISLAND GPS</span><span>5 ZONES</span>
+        <span>ISLAND GPS</span><span>5 STATIONS</span>
       </div>
       <canvas id="radarCanvas" width="136" height="136" class="block rounded bg-[#52b788]/25 border border-black/10"></canvas>
     </div>
   </div>
 
-  <!-- Automatic Sky-to-Ground Zone Info Panel -->
-  <div id="skyDropPanel" class="fixed top-16 left-1/2 -translate-x-1/2 z-30 w-[94vw] max-w-2xl max-h-[78vh] bg-white/95 backdrop-blur-lg border-2 border-[#111111] rounded-lg shadow-2xl overflow-hidden flex flex-col panel-hidden">
-    <div class="px-5 py-3 bg-[#111111] text-white flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-2">
-        <span id="panelZoneDot" class="w-2.5 h-2.5 rounded-full bg-[#E63946]"></span>
-        <span id="panelZoneLabel" class="text-xs font-mono font-bold uppercase tracking-widest">ZONE</span>
+  <!-- Optional Small Guestbook/Links Modal (only opens if user clicks button) -->
+  <div id="guestbookModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/45 backdrop-blur-sm p-4">
+    <div class="bg-white border border-black/20 rounded-lg max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-sm font-bold uppercase tracking-wider">Direct Links &amp; Sky-Guestbook</h3>
+        <button id="closeGbModal" class="px-2 py-1 text-xs border rounded hover:bg-black hover:text-white">✕</button>
       </div>
-      <button id="closePanelBtn" class="px-2.5 py-1 rounded bg-white/15 hover:bg-white/25 text-xs font-semibold">Hide ▲</button>
+      <div class="space-y-1.5 text-xs">
+        <div><strong>Email:</strong> abadandrei22@gmail.com</div>
+        <div><strong>Phone:</strong> +63 977 652 9418</div>
+        <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" class="inline-block mt-1 px-3 py-1.5 rounded bg-[#0047FF] text-white font-semibold">Open LinkedIn Profile ↗</a>
+      </div>
+      <form id="gbForm" class="space-y-2 pt-2 border-t">
+        <p class="text-xs font-bold uppercase">Post to Central Plaza 3D Notice Board</p>
+        <input name="name" required placeholder="Your Name" class="w-full px-3 py-1.5 text-xs border rounded" />
+        <textarea name="msg" required rows="2" placeholder="Your note..." class="w-full px-3 py-1.5 text-xs border rounded"></textarea>
+        <button class="w-full py-2 rounded bg-[#111111] text-white text-xs font-bold uppercase">Post Note</button>
+      </form>
     </div>
-    <div id="skyDropBody" class="p-5 sm:p-6 overflow-y-auto"></div>
   </div>
 
   <div id="classicViewContainer" class="hidden fixed inset-0 overflow-y-auto z-20 bg-[#FAFAFA]"></div>
@@ -106,90 +104,10 @@
 
   <script type="module">
     import * as THREE from 'three';
-    import * as CANNON from 'cannon-es';
-
-    const PORTFOLIO = {
-      profile: {
-        full_name: 'Miguel Andrei B. Abad',
-        tagline: 'Computer Engineering undergraduate specializing in embedded systems, computer vision, and full-stack software engineering.',
-        location: 'Cavite, Philippines',
-        email: 'abadandrei22@gmail.com',
-        phone: '+63 977 652 9418',
-        linkedin_url: 'https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/',
-        summary: 'I am an undergraduate Computer Engineering student at De La Salle University – Manila focused on bridging low-level hardware systems with intelligent software. My engineering work spans custom PCB design, microcontroller firmware integration, multi-modal sensor telemetry fusion, and deep learning pipelines for real-time gesture recognition.',
-        summary_secondary: 'Alongside hardware and machine learning development, I build responsive, data-driven web and mobile applications backed by relational databases and RESTful architectures. Outside the lab, I serve as Associate Vice President for Academics at ACCESS DLSU, leading peer mentorship and technical resource initiatives for the engineering community.'
-      },
-      education: [{
-        institution: 'De La Salle University – Manila',
-        degree: 'Bachelor of Science in Computer Engineering',
-        period: '2023 – Present',
-        honors: "Consistent Dean's Lister",
-        coursework: ['Embedded Systems', 'Microprocessor Systems & Architecture', 'Digital Logic Design', 'Signal Processing', 'Operating Systems', 'Feedback and Control Systems', 'Machine Learning']
-      }],
-      skills: [
-        { category: 'Programming Languages', items: ['C / C++', 'Python', 'Java', 'Kotlin', 'JavaScript', 'SQL', 'Verilog', 'MATLAB', 'HTML5 / CSS3'] },
-        { category: 'Frameworks & Libraries', items: ['PyTorch', 'OpenCV', 'MediaPipe', 'Keras', 'Android SDK'] },
-        { category: 'Hardware & EDA', items: ['KiCad (Schematic & PCB)', 'AutoCAD', 'PIC Microcontrollers', 'ESP32', 'Arduino', '6-DOF IMU Sensors', 'Embedded Integration'] },
-        { category: 'Tools & Platforms', items: ['Git & GitHub', 'Android Studio', 'VS Code', 'RESTful APIs', 'RDBMS / SQL'] }
-      ],
-      projects: [
-        {
-          title: 'Real-Time FSL Sign Recognition via Wearable-Vision Fusion',
-          status: 'Ongoing Thesis / Research',
-          category: 'Multi-Modal Embedded AI & Computer Vision',
-          overview: 'An ongoing Computer Engineering research implementation designed to bridge the communication gap for the Filipino Deaf community by combining wearable inertial sensing with computer vision on mobile hardware.',
-          technologies: ['Python', 'PyTorch', 'Android SDK', 'OpenCV', 'MediaPipe', 'ESP32', '6-DOF IMU', 'CNN-LSTM']
-        },
-        {
-          title: 'PIC16F877A Microcontroller Development Board',
-          status: 'Hardware / EDA',
-          category: 'Hardware Prototyping & PCB Layout',
-          overview: 'A custom-engineered microcontroller breakout and prototyping board built from schematic capture through multi-layer PCB routing to support embedded systems laboratory applications.',
-          technologies: ['KiCad', 'Schematic Capture', '4-Layer PCB Layout', 'PIC16F877A', 'Hardware Prototyping', 'DRC']
-        },
-        {
-          title: 'Web-Based PDF Reader & Digital Catalog',
-          status: 'Full-Stack Web',
-          category: 'Full-Stack Web Engineering & RDBMS',
-          overview: 'A full-stack web application enabling users to upload, organize, and read digital documents in-browser with automated metadata enrichment and persistent library state.',
-          technologies: ['JavaScript', 'SQL', 'HTML5', 'CSS3', 'RESTful APIs', 'RDBMS', 'CRUD']
-        },
-        {
-          title: 'Bit by Bit — Interactive SAP-1 Computer Simulator',
-          status: 'Computer Architecture',
-          category: 'Computer Architecture & Digital Logic',
-          overview: 'An interactive educational simulator built to demystify low-level microprocessor execution, control signals, and bus-organized computer architecture for undergraduate engineering students.',
-          technologies: ['JavaScript', 'HTML5', 'CSS3', 'Computer Architecture', 'SAP-1', 'Digital Logic']
-        }
-      ],
-      experiences: [
-        {
-          role: 'Associate Vice President for Academics — ACCESS DLSU',
-          period: 'Sept 2026 – Present',
-          bullets: [
-            'Spearhead college-wide academic assistance programs, peer-led technical tutorials, and structured reviewer distribution drives.',
-            'Conduct quantitative and qualitative research to evaluate student performance trends.',
-            'Architect and maintain centralized digital learning repositories for CpE undergraduates.'
-          ]
-        },
-        {
-          role: 'Junior Officer for Academics — ACCESS DLSU',
-          period: 'Nov 2025 – Sept 2026',
-          bullets: [
-            'Authored technical reviewers, formula sheets, and study guides covering Digital Logic, Circuits, and Programming.',
-            'Facilitated peer review sessions prior to departmental examinations.'
-          ]
-        }
-      ],
-      references: [
-        { name: 'Department of Electronics & Computer Engineering', relationship: 'Faculty Adviser for Embedded Systems & Wearable-Vision Sign Recognition Research (DLSU – Manila).' },
-        { name: 'ACCESS DLSU Executive Board & Faculty Adviser', relationship: 'Organizational Reference for leadership as Associate Vice President for Academics.' }
-      ]
-    };
 
     const DEFAULT_NOTES = [
-      { sender_name: 'DLSU ECE Engineering Cohort', message: 'Awesome winding island circuit and instant sky-to-ground cards! Good luck on the FSL thesis.' },
-      { sender_name: 'Technical Recruiter', message: 'Super fun to drive around and explore the KiCad PCB and PyTorch projects.' }
+      { sender_name: 'DLSU ECE Cohort', message: 'Awesome 3D notice boards and winding island roads!' },
+      { sender_name: 'Tech Recruiter', message: 'Love the Swiss racecar & KiCad/PyTorch portfolio.' }
     ];
     let guestbookNotes = JSON.parse(localStorage.getItem('miguel_guestbook') || 'null') || DEFAULT_NOTES;
 
@@ -208,13 +126,9 @@
         this.engOsc.type = 'sawtooth';
         this.engOsc.frequency.value = 55;
         const engFilter = this.ctx.createBiquadFilter();
-        engFilter.type = 'lowpass';
-        engFilter.frequency.value = 280;
-        this.engGain = this.ctx.createGain();
-        this.engGain.gain.value = 0.08;
-        this.engOsc.connect(engFilter);
-        engFilter.connect(this.engGain);
-        this.engGain.connect(this.masterGain);
+        engFilter.type = 'lowpass'; engFilter.frequency.value = 260;
+        this.engGain = this.ctx.createGain(); this.engGain.gain.value = 0.08;
+        this.engOsc.connect(engFilter); engFilter.connect(this.engGain); this.engGain.connect(this.masterGain);
         this.engOsc.start();
         this.initialized = true;
       }
@@ -223,15 +137,14 @@
         if (!this.ctx) return false;
         if (this.ctx.state === 'suspended') this.ctx.resume();
         this.muted = !this.muted;
-        this.masterGain.gain.setTargetAtTime(this.muted ? 0 : 0.45, this.ctx.currentTime, 0.08);
+        this.masterGain.gain.setTargetAtTime(this.muted ? 0 : 0.42, this.ctx.currentTime, 0.08);
         return !this.muted;
       }
       updateEngine(speed, boosting) {
         if (!this.initialized || this.muted || !this.ctx) return;
         const now = this.ctx.currentTime;
-        const rpmFreq = 52 + Math.min(140, speed * 3.4) + (boosting ? 35 : 0);
-        this.engOsc.frequency.setTargetAtTime(rpmFreq, now, 0.06);
-        this.engGain.gain.setTargetAtTime(0.06 + Math.min(0.14, speed * 0.004), now, 0.08);
+        this.engOsc.frequency.setTargetAtTime(50 + Math.min(145, speed * 3.2) + (boosting ? 35 : 0), now, 0.06);
+        this.engGain.gain.setTargetAtTime(0.05 + Math.min(0.14, speed * 0.004), now, 0.08);
       }
       playChime() {
         if (!this.initialized || this.muted || !this.ctx) return;
@@ -247,48 +160,195 @@
       }
     }
 
-    // Massive Island Zone Coordinates (Spread out across a 360m x 360m island)
+    // MASSIVE 600m x 600m Island — 5 Stations spread far apart!
     const ZONES = [
-      { id: 'central', name: 'Central Plaza', x: 0, z: 0, radius: 17, color: '#E63946' },
-      { id: 'north', name: 'North Pavilion', x: -24, z: -112, radius: 18, color: '#0077FF' },
-      { id: 'east', name: 'East Hardware & AI Sky-Lab', x: 118, z: -18, radius: 22, color: '#00B4D8' },
-      { id: 'west', name: 'West Student Hub', x: -115, z: 22, radius: 18, color: '#FFB703' },
-      { id: 'south', name: 'South Lounge', x: 26, z: 114, radius: 18, color: '#FB5607' }
+      {
+        id: 'central', name: '01 // CENTRAL PLAZA', x: 0, z: 0, radius: 26, color: '#E63946', rotY: 0,
+        title: 'MIGUEL ANDREI B. ABAD',
+        subtitle: 'BS Computer Engineering · De La Salle University – Manila',
+        sections: [
+          { heading: 'SELF-INTRODUCTION', body: 'Undergraduate Computer Engineering student bridging low-level hardware systems with intelligent software: custom PCB design, microcontroller firmware, sensor telemetry fusion, and deep learning pipelines.' },
+          { heading: 'DIRECT CONTACT & LINKEDIN', body: 'Email: abadandrei22@gmail.com  |  Phone: +63 977 652 9418\nLinkedIn: linkedin.com/in/miguel-andrei-abad-a8845532a' },
+          { heading: 'LIVE SKY-GUESTBOOK', body: guestbookNotes.slice(0, 2).map(n => `• ${n.sender_name}: "${n.message}"`).join('\n') }
+        ]
+      },
+      {
+        id: 'north', name: '02 // NORTH PAVILION', x: -38, z: -195, radius: 26, color: '#0077FF', rotY: 0.15,
+        title: 'RESUME & TECHNICAL MATRIX',
+        subtitle: "DLSU Manila (2023–Present) · Consistent Dean's Lister",
+        sections: [
+          { heading: 'RELEVANT COURSEWORK', body: 'Embedded Systems · Microprocessor Systems & Architecture · Digital Logic Design · Signal Processing · Operating Systems · Feedback & Control Systems · Machine Learning' },
+          { heading: 'LANGUAGES & FRAMEWORKS', body: 'C/C++, Python, Java, Kotlin, JavaScript, SQL, Verilog, MATLAB, HTML5/CSS3 · PyTorch, OpenCV, MediaPipe, Keras, Android SDK' },
+          { heading: 'HARDWARE, EDA & TOOLS', body: 'KiCad (4-Layer PCB), AutoCAD, PIC Microcontrollers, ESP32, Arduino, 6-DOF IMU · Git/GitHub, Android Studio, RESTful APIs, RDBMS/SQL' }
+        ]
+      },
+      {
+        id: 'east', name: '03 // EAST SKY-LAB', x: 205, z: -28, radius: 28, color: '#00B4D8', rotY: -Math.PI / 2,
+        title: 'ACADEMIC WORK SAMPLES',
+        subtitle: 'Hardware Prototyping · Embedded AI · Full-Stack Systems',
+        sections: [
+          { heading: '1. REAL-TIME FSL SIGN RECOGNITION (ONGOING THESIS)', body: 'Native Android app fusing wearable ESP32 6-DOF IMU telemetry with OpenCV/MediaPipe camera feeds via a hybrid PyTorch CNN-LSTM gloss-to-text pipeline.' },
+          { heading: '2. PIC16F877A 4-LAYER DEVELOPMENT BOARD', body: 'Custom KiCad 4-layer PCB breakout with 5V LDO regulator, 20MHz crystal oscillator, dedicated power/ground planes, ICSP header, and full DRC verification.' },
+          { heading: '3. WEB PDF READER & 4. SAP-1 8-BIT SIMULATOR', body: 'In-browser PDF catalog with MangaDex/Google Books async REST APIs + SQL CRUD; plus cycle-accurate SAP-1 8-bit W-Bus & ALU architecture visualizer.' }
+        ]
+      },
+      {
+        id: 'west', name: '04 // WEST STUDENT HUB', x: -200, z: 32, radius: 26, color: '#FFB703', rotY: Math.PI / 2,
+        title: 'ACCESS DLSU LEADERSHIP',
+        subtitle: 'Association of Computer Engineering Students · Nov 2025 – Present',
+        sections: [
+          { heading: 'ASSOCIATE VICE PRESIDENT FOR ACADEMICS (SEPT 2026 – PRESENT)', body: 'Spearhead college-wide academic assistance programs, peer-led technical tutorials, student performance research, and centralized digital learning repositories.' },
+          { heading: 'JUNIOR OFFICER FOR ACADEMICS (NOV 2025 – SEPT 2026)', body: 'Authored comprehensive technical reviewers, formula sheets, and study guides for Digital Logic, Circuits, and Programming; led pre-exam peer clinics.' },
+          { heading: 'OPERATIONAL INITIATIVES', body: 'Centralized Learning Repository · Peer-Led Technical Tutorials · Academic Performance Research · Technical Reviewer Publications' }
+        ]
+      },
+      {
+        id: 'south', name: '05 // SOUTH LOUNGE', x: 42, z: 198, radius: 26, color: '#FB5607', rotY: Math.PI,
+        title: 'REFERENCES & CONTACT',
+        subtitle: 'Academic & Organizational Mentors · DLSU Manila',
+        sections: [
+          { heading: 'FACULTY / THESIS REFERENCE', body: 'Department of Electronics & Computer Engineering, De La Salle University – Manila. Faculty Adviser for Embedded Systems & Wearable-Vision FSL Research.' },
+          { heading: 'ORGANIZATIONAL REFERENCE', body: 'ACCESS DLSU Executive Board & Faculty Adviser. Can attest to leadership as AVP for Academics, curriculum support execution, and team management.' },
+          { heading: 'GET IN TOUCH', body: 'Click "Leave Note / Links" in the top bar to post to the Central Plaza Sky-Guestbook or open LinkedIn directly!' }
+        ]
+      }
     ];
 
-    function createTextPlane(lines, { width = 12, height = 3.8, accent = '#0077FF', align = 'center' } = {}) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1024; canvas.height = Math.round(1024 * (height / width));
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#111111'; ctx.lineWidth = 10; ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
-      ctx.fillStyle = accent; ctx.fillRect(6, 6, canvas.width - 12, 16);
-      let y = 84;
-      lines.forEach((l) => {
-        ctx.fillStyle = l.color || '#111111';
-        ctx.font = `${l.weight || 'bold'} ${l.size || 42}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
-        ctx.textAlign = align;
-        ctx.fillText(l.text, align === 'center' ? canvas.width / 2 : 48, y, canvas.width - 96);
-        y += (l.size || 42) + (l.gap || 18);
-      });
-      return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.4 }));
+    // Helper: Wrap text cleanly onto 2D canvas
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const paragraphs = text.split('\n');
+      let curY = y;
+      for (const para of paragraphs) {
+        const words = para.split(' ');
+        let line = '';
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+            ctx.fillText(line.trim(), x, curY);
+            line = words[n] + ' ';
+            curY += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line.trim(), x, curY);
+        curY += lineHeight;
+      }
+      return curY;
     }
 
-    // Build Curved Ribbon Road from CatmullRomCurve3 (NO straight roads!)
-    function buildCurvedRoad(scene, points, width = 7.5) {
-      const curve = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.08, z)));
-      const divisions = 90;
-      const roadPts = curve.getSpacedPoints(divisions);
-      const positions = [];
-      const indices = [];
+    // Build High-Res 3D Notice Board (Placed in the middle of each station, drops from sky when near!)
+    function create3DNoticeBoard(zone) {
+      const group = new THREE.Group();
+      const canvas = document.createElement('canvas');
+      canvas.width = 1600;
+      canvas.height = 1040;
+      const ctx = canvas.getContext('2d');
 
+      // Crisp Swiss Bulletin Board Background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = 18;
+      ctx.strokeRect(9, 9, canvas.width - 18, canvas.height - 18);
+
+      // Top Header Band
+      ctx.fillStyle = zone.color;
+      ctx.fillRect(18, 18, canvas.width - 36, 155);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 28px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      ctx.fillText(zone.name, 56, 68);
+      ctx.font = 'bold 54px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      ctx.fillText(zone.title, 56, 128);
+      ctx.font = 'normal 26px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillText(zone.subtitle, 56, 162);
+
+      // Detail Sections
+      let y = 235;
+      zone.sections.forEach((sec) => {
+        ctx.fillStyle = zone.color;
+        ctx.font = 'bold 26px "Helvetica Neue", Helvetica, Arial, sans-serif';
+        ctx.fillText(sec.heading, 56, y);
+        y += 38;
+        ctx.fillStyle = '#222222';
+        ctx.font = 'normal 28px "Helvetica Neue", Helvetica, Arial, sans-serif';
+        y = wrapText(ctx, sec.body, 56, y, canvas.width - 112, 36);
+        y += 28;
+      });
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.anisotropy = 8;
+
+      // 3D Notice Board Frame + Legs
+      const boardW = 18, boardH = 11.7;
+      const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(boardW + 0.8, boardH + 0.8, 0.7),
+        new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.45 })
+      );
+      frame.position.y = 8.4;
+      frame.castShadow = true;
+      group.add(frame);
+
+      const frontFace = new THREE.Mesh(
+        new THREE.PlaneGeometry(boardW, boardH),
+        new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35 })
+      );
+      frontFace.position.set(0, 8.4, 0.37);
+      group.add(frontFace);
+
+      const backFace = frontFace.clone();
+      backFace.rotation.y = Math.PI;
+      backFace.position.z = -0.37;
+      group.add(backFace);
+
+      // Steel support pillars
+      [-7.2, 7.2].forEach((lx) => {
+        const leg = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.28, 0.34, 8.5, 12),
+          new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.6, roughness: 0.3 })
+        );
+        leg.position.set(lx, 4.25, 0);
+        leg.castShadow = true;
+        group.add(leg);
+      });
+
+      // Floating 3D Title Banner above the Notice Board
+      const titleCanvas = document.createElement('canvas');
+      titleCanvas.width = 1024; titleCanvas.height = 192;
+      const tctx = titleCanvas.getContext('2d');
+      tctx.fillStyle = '#111111'; tctx.fillRect(0, 0, 1024, 192);
+      tctx.fillStyle = zone.color; tctx.fillRect(0, 0, 1024, 22);
+      tctx.fillStyle = '#FFFFFF';
+      tctx.font = 'bold 58px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      tctx.textAlign = 'center';
+      tctx.fillText(zone.name, 512, 125);
+      const titleBanner = new THREE.Mesh(
+        new THREE.PlaneGeometry(14, 2.6),
+        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(titleCanvas), side: THREE.DoubleSide })
+      );
+      titleBanner.position.set(0, 16.5, 0);
+      group.add(titleBanner);
+
+      group.position.set(zone.x, 42, zone.z); // Starts in the sky!
+      group.rotation.y = zone.rotY;
+      return { group, titleBanner, currentY: 42 };
+    }
+
+    // Build Curved Ribbon Road
+    function buildCurvedRoad(scene, points, width = 8.5) {
+      const curve = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.08, z)));
+      const divisions = 110;
+      const roadPts = curve.getSpacedPoints(divisions);
+      const positions = [], indices = [];
       for (let i = 0; i < roadPts.length; i++) {
         const p = roadPts[i];
-        const tangent = curve.getTangentAt(i / divisions).normalize();
-        const normal = new THREE.Vector3(-tangent.z, 0, tangent.x);
-        const left = p.clone().addScaledVector(normal, width / 2);
-        const right = p.clone().addScaledVector(normal, -width / 2);
-        positions.push(left.x, left.y, left.z, right.x, right.y, right.z);
+        const tan = curve.getTangentAt(i / divisions).normalize();
+        const norm = new THREE.Vector3(-tan.z, 0, tan.x);
+        const l = p.clone().addScaledVector(norm, width / 2);
+        const r = p.clone().addScaledVector(norm, -width / 2);
+        positions.push(l.x, l.y, l.z, r.x, r.y, r.z);
         if (i < roadPts.length - 1) {
           const a = i * 2, b = i * 2 + 1, c = (i + 1) * 2, d = (i + 1) * 2 + 1;
           indices.push(a, b, c, b, d, c);
@@ -296,224 +356,131 @@
       }
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geo.setIndex(indices);
-      geo.computeVertexNormals();
-      const roadMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.85, side: THREE.DoubleSide }));
-      roadMesh.receiveShadow = true;
-      scene.add(roadMesh);
+      geo.setIndex(indices); geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.85, side: THREE.DoubleSide }));
+      mesh.receiveShadow = true; scene.add(mesh);
 
-      // Dashed yellow center markers along curve
       const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.4 });
       for (let i = 2; i < roadPts.length - 2; i += 4) {
-        const p = roadPts[i];
-        const tan = curve.getTangentAt(i / divisions);
-        const dash = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 2.2), stripeMat);
-        dash.position.set(p.x, 0.11, p.z);
-        dash.rotation.y = Math.atan2(tan.x, tan.z);
-        scene.add(dash);
+        const p = roadPts[i], tan = curve.getTangentAt(i / divisions);
+        const dash = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.05, 2.5), stripeMat);
+        dash.position.set(p.x, 0.11, p.z); dash.rotation.y = Math.atan2(tan.x, tan.z); scene.add(dash);
       }
     }
 
-    // Scene & Renderer (Clean depth separation — ZERO grass Z-fighting!)
+    // Scene & Renderer
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x90e0ef, 130, 380);
-    const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.5, 550);
+    scene.fog = new THREE.Fog(0x90e0ef, 180, 520);
+    const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.5, 700);
     const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
 
-    // Sunset Sky Dome
     const skyMat = new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false,
       uniforms: { topColor: { value: new THREE.Color(0x0077b6) }, midColor: { value: new THREE.Color(0x90e0ef) }, bottomColor: { value: new THREE.Color(0xffd166) } },
       vertexShader: `varying vec3 vW; void main(){ vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`,
       fragmentShader: `uniform vec3 topColor; uniform vec3 midColor; uniform vec3 bottomColor; varying vec3 vW; void main(){ float h = normalize(vW).y; vec3 c = mix(bottomColor, midColor, smoothstep(-0.05,0.25,h)); c = mix(c, topColor, smoothstep(0.25,0.85,h)); gl_FragColor = vec4(c,1.0); }`
     });
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(460, 32, 20), skyMat));
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(620, 32, 20), skyMat));
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x40916c, 0.95));
     const dl = new THREE.DirectionalLight(0xfff4d2, 1.25);
-    dl.position.set(90, 120, 70); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
-    dl.shadow.camera.left = -190; dl.shadow.camera.right = 190; dl.shadow.camera.top = 190; dl.shadow.camera.bottom = -190;
+    dl.position.set(140, 180, 110); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
+    dl.shadow.camera.left = -280; dl.shadow.camera.right = 280; dl.shadow.camera.top = 280; dl.shadow.camera.bottom = -280;
     scene.add(dl);
 
-    // Physics + Massive Layered Terrain (Strict Y-gaps prevent all Z-fighting!)
-    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -18, 0) });
-    const gBody = new CANNON.Body({ mass: 0, shape: new CANNON.Plane() });
-    gBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-    world.addBody(gBody);
+    // Massive 600m x 600m Island (Zero Z-fighting)
+    const ocean = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: 0x0096c7, roughness: 0.25, metalness: 0.15 }));
+    ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2.4; scene.add(ocean);
 
-    // Ocean at y = -2.2
-    const ocean = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshStandardMaterial({ color: 0x0096c7, roughness: 0.25, metalness: 0.15 }));
-    ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2.2; scene.add(ocean);
+    const beach = new THREE.Mesh(new THREE.CylinderGeometry(325, 342, 1.6, 80), new THREE.MeshStandardMaterial({ color: 0xf4d58d, roughness: 0.9 }));
+    beach.position.y = -1.4; beach.receiveShadow = true; scene.add(beach);
 
-    // Beach top at y = -0.55 (center -1.35, height 1.6)
-    const beach = new THREE.Mesh(new THREE.CylinderGeometry(195, 206, 1.6, 72), new THREE.MeshStandardMaterial({ color: 0xf4d58d, roughness: 0.9 }));
-    beach.position.y = -1.35; beach.receiveShadow = true; scene.add(beach);
-
-    // Grass top at y = 0.0 (center -0.5, height 1.0)
-    const grass = new THREE.Mesh(new THREE.CylinderGeometry(180, 188, 1.0, 72), new THREE.MeshStandardMaterial({ color: 0x52b788, roughness: 0.85 }));
+    const grass = new THREE.Mesh(new THREE.CylinderGeometry(300, 312, 1.0, 80), new THREE.MeshStandardMaterial({ color: 0x52b788, roughness: 0.85 }));
     grass.position.y = -0.5; grass.receiveShadow = true; scene.add(grass);
 
-    // Subtle Grid cleanly above grass at y = 0.04
-    const grid = new THREE.GridHelper(340, 68, 0x40916c, 0x40916c);
-    grid.position.y = 0.04; grid.material.opacity = 0.2; grid.material.transparent = true; scene.add(grid);
+    const grid = new THREE.GridHelper(560, 80, 0x40916c, 0x40916c);
+    grid.position.y = 0.04; grid.material.opacity = 0.18; grid.material.transparent = true; scene.add(grid);
 
-    // Winding Curved S-Bend Roads connecting all 5 zones + Outer Scenic Loop
-    buildCurvedRoad(scene, [[0, 0], [18, -32], [-18, -68], [-24, -112]]);
-    buildCurvedRoad(scene, [[0, 0], [38, -22], [75, 16], [118, -18]]);
-    buildCurvedRoad(scene, [[0, 0], [-36, 28], [-76, -12], [-115, 22]]);
-    buildCurvedRoad(scene, [[0, 0], [-22, 38], [26, 72], [26, 114]]);
-    // Outer island scenic circuit
-    buildCurvedRoad(scene, [[-24, -112], [62, -108], [118, -18], [108, 78], [26, 114], [-68, 102], [-115, 22], [-98, -72], [-24, -112]], 6.0);
+    // Sweeping Winding Curved Highways connecting all 5 stations + Outer Coastal Loop
+    buildCurvedRoad(scene, [[0, 0], [34, -62], [-48, -128], [-38, -195]]);
+    buildCurvedRoad(scene, [[0, 0], [72, -38], [134, 24], [205, -28]]);
+    buildCurvedRoad(scene, [[0, 0], [-65, 48], [-138, -18], [-200, 32]]);
+    buildCurvedRoad(scene, [[0, 0], [-36, 68], [52, 132], [42, 198]]);
+    buildCurvedRoad(scene, [[-38, -195], [115, -180], [205, -28], [185, 135], [42, 198], [-115, 175], [-200, 32], [-165, -125], [-38, -195]], 7.0);
 
-    // Lush Forests, Boulders & Clouds across the massive island
+    // 130+ Stylized Pine Trees across the massive island
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7f4f24, roughness: 0.9 });
     const pineMat1 = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.75 });
     const pineMat2 = new THREE.MeshStandardMaterial({ color: 0x40916c, roughness: 0.75 });
-    for (let i = 0; i < 65; i++) {
-      const angle = (i / 65) * Math.PI * 2 + (i % 3) * 0.2;
-      const dist = 34 + ((i * 37) % 135);
-      const tx = Math.cos(angle) * dist;
-      const tz = Math.sin(angle) * dist;
-      if (ZONES.some(z => Math.hypot(tx - z.x, tz - z.z) < z.radius + 7)) continue;
+    for (let i = 0; i < 135; i++) {
+      const angle = (i / 135) * Math.PI * 2 + (i % 5) * 0.17;
+      const dist = 42 + ((i * 53) % 240);
+      const tx = Math.cos(angle) * dist, tz = Math.sin(angle) * dist;
+      if (ZONES.some(z => Math.hypot(tx - z.x, tz - z.z) < z.radius + 10)) continue;
       const t = new THREE.Group();
-      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 2.5, 8), trunkMat); tr.position.y = 1.25; tr.castShadow = true;
-      const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.2, 3.6, 8), i % 2 === 0 ? pineMat1 : pineMat2); c1.position.y = 3.5; c1.castShadow = true;
-      const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.8, 8), pineMat2); c2.position.y = 5.2; c2.castShadow = true;
-      t.add(tr, c1, c2); t.scale.setScalar(0.9 + (i % 4) * 0.22); t.position.set(tx, 0, tz); scene.add(t);
+      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.55, 2.8, 8), trunkMat); tr.position.y = 1.4; tr.castShadow = true;
+      const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4.0, 8), i % 2 === 0 ? pineMat1 : pineMat2); c1.position.y = 3.8; c1.castShadow = true;
+      const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.7, 3.0, 8), pineMat2); c2.position.y = 5.6; c2.castShadow = true;
+      t.add(tr, c1, c2); t.scale.setScalar(0.9 + (i % 4) * 0.25); t.position.set(tx, 0, tz); scene.add(t);
     }
 
-    // Collectible Golden Star Rings along the winding roads
+    // 10 Collectible Golden Star Gates along the highways
     const collectibles = [];
     let ringsCollected = 0;
-    [[18, 2.5, -32], [-18, 2.5, -68], [38, 2.5, -22], [75, 2.5, 16], [-36, 2.5, 28], [-76, 2.5, -12], [-22, 2.5, 38], [62, 2.5, -108]].forEach(([x, y, z], idx) => {
-      const m = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.28, 12, 32), new THREE.MeshStandardMaterial({ color: 0xffb703, emissive: 0xfb8500, emissiveIntensity: 0.45, roughness: 0.25, metalness: 0.6 }));
+    [[34,2.8,-62],[-48,2.8,-128],[72,2.8,-38],[134,2.8,24],[-65,2.8,48],[-138,2.8,-18],[-36,2.8,68],[52,2.8,132],[115,2.8,-180],[-115,2.8,175]].forEach(([x,y,z], idx) => {
+      const m = new THREE.Mesh(new THREE.TorusGeometry(2.8, 0.3, 12, 32), new THREE.MeshStandardMaterial({ color: 0xffb703, emissive: 0xfb8500, emissiveIntensity: 0.45, roughness: 0.25, metalness: 0.6 }));
       m.position.set(x, y, z); scene.add(m);
       collectibles.push({ mesh: m, baseY: y, phase: idx, collected: false });
     });
 
-    // Zone Landing Rings & Sky-to-Ground Beacons
-    const zoneBeacons = new Map();
+    // Build 5 Stations + Sky-to-Ground 3D Notice Boards in the middle of each station!
+    const noticeBoards = new Map();
     ZONES.forEach((z) => {
-      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.8, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
-      r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.14, z.z); scene.add(r);
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 2, z.radius - 1, 0.35, 48), new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.6 }));
+      pad.position.set(z.x, 0.18, z.z); pad.receiveShadow = true; scene.add(pad);
 
-      const beam = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.45, 1.4, 90, 16, 1, true),
-        new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.22, side: THREE.DoubleSide })
-      );
-      beam.position.set(z.x, 45, z.z);
-      scene.add(beam);
-      zoneBeacons.set(z.id, beam);
+      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.9, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
+      r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.22, z.z); scene.add(r);
+
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.8, 120, 16, 1, true), new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.16, side: THREE.DoubleSide }));
+      beam.position.set(z.x, 60, z.z); scene.add(beam);
+
+      const nb = create3DNoticeBoard(z);
+      scene.add(nb.group);
+      noticeBoards.set(z.id, nb);
     });
 
-    // Zone Landmarks
-    const cPlinth = new THREE.Mesh(new THREE.CylinderGeometry(11, 12, 0.5, 36), new THREE.MeshStandardMaterial({ color: 0xf8f9fa })); cPlinth.position.y = 0.25; scene.add(cPlinth);
-    const centralSign = createTextPlane([
-      { text: 'MIGUEL ANDREI B. ABAD', size: 66, color: '#111111', gap: 22 },
-      { text: 'BS COMPUTER ENGINEERING · DE LA SALLE UNIVERSITY', size: 30, color: '#0077FF', gap: 16 },
-      { text: '01 // CENTRAL PLAZA · DRIVE IN TO INSPECT', size: 24, weight: 'normal', color: '#595959' }
-    ], { width: 12, height: 3.6, accent: '#E63946' });
-    centralSign.position.set(0, 3.0, -7); scene.add(centralSign);
-
-    const northSign = createTextPlane([
-      { text: '02 // NORTH PAVILION', size: 34, color: '#0077FF', gap: 18 },
-      { text: 'RESUME & TECHNICAL MATRIX', size: 52, color: '#111111', gap: 20 },
-      { text: "DLSU Manila · Consistent Dean's Lister", size: 28, weight: 'normal', color: '#595959' }
-    ], { width: 12, height: 3.8, accent: '#0077FF' });
-    northSign.position.set(-24, 3.6, -120); scene.add(northSign);
-
-    const eastSign = createTextPlane([
-      { text: '03 // EAST HARDWARE & AI SKY-LAB', size: 32, color: '#0077FF', gap: 16 },
-      { text: 'ACADEMIC WORK SAMPLES', size: 52, color: '#111111', gap: 14 },
-      { text: 'FSL Fusion · PIC16F877A PCB · PDF Catalog · SAP-1', size: 26, weight: 'normal', color: '#595959' }
-    ], { width: 12.5, height: 3.8, accent: '#00B4D8' });
-    eastSign.position.set(126, 3.6, -18); eastSign.rotation.y = -Math.PI / 2; scene.add(eastSign);
-
-    const westSign = createTextPlane([
-      { text: '04 // WEST STUDENT HUB', size: 32, color: '#E63946', gap: 16 },
-      { text: 'ACCESS DLSU LEADERSHIP', size: 52, color: '#111111', gap: 18 },
-      { text: 'AVP for Academics · Junior Officer', size: 28, weight: 'normal', color: '#595959' }
-    ], { width: 12, height: 3.8, accent: '#FFB703' });
-    westSign.position.set(-123, 3.6, 22); westSign.rotation.y = Math.PI / 2; scene.add(westSign);
-
-    const southSign = createTextPlane([
-      { text: '05 // SOUTH LOUNGE', size: 34, color: '#FB5607', gap: 16 },
-      { text: 'REFERENCES & RECRUITER CONTACT', size: 46, color: '#111111', gap: 18 },
-      { text: 'Leave a Sky-Guestbook Note!', size: 28, weight: 'normal', color: '#595959' }
-    ], { width: 12, height: 3.8, accent: '#FB5607' });
-    southSign.position.set(26, 3.6, 122); southSign.rotation.y = Math.PI; scene.add(southSign);
-
-    // =========================================================================
-    // SWISS RACING CAR (Replaces Balloon!)
-    // =========================================================================
+    // Swiss Racing Car
     const carGroup = new THREE.Group();
     scene.add(carGroup);
-
-    const chassisMat = new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.3, metalness: 0.35 });
-    const stripeCarMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
-    const darkMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, metalness: 0.2 });
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.15, metalness: 0.6 });
-
-    // Main body
-    const bodyLower = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 4.4), chassisMat);
+    const bodyLower = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 4.4), new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.3, metalness: 0.35 }));
     bodyLower.position.y = 0.55; bodyLower.castShadow = true; carGroup.add(bodyLower);
-
-    // Racing stripe
-    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.57, 4.42), stripeCarMat);
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.57, 4.42), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 }));
     stripe.position.y = 0.56; carGroup.add(stripe);
-
-    // Cockpit cabin
-    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.52, 2.0), glassMat);
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.52, 2.0), new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.15, metalness: 0.6 }));
     cabin.position.set(0, 1.02, -0.15); cabin.castShadow = true; carGroup.add(cabin);
-
-    // Rear GT Wing Spoiler
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.55), darkMat);
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.55), new THREE.MeshStandardMaterial({ color: 0x111111 }));
     wing.position.set(0, 1.25, 1.95); wing.castShadow = true; carGroup.add(wing);
-    [-0.7, 0.7].forEach(wx => {
-      const strut = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.45, 0.25), darkMat);
-      strut.position.set(wx, 1.0, 1.95); carGroup.add(strut);
-    });
 
-    // Headlights & Taillights
-    const hlMat = new THREE.MeshBasicMaterial({ color: 0xfff3b0 });
-    const tlMat = new THREE.MeshBasicMaterial({ color: 0xff0022 });
-    [-0.7, 0.7].forEach(lx => {
-      const hl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.16, 0.08), hlMat); hl.position.set(lx, 0.6, -2.21); carGroup.add(hl);
-      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.08), tlMat); tl.position.set(lx, 0.6, 2.21); carGroup.add(tl);
-    });
-
-    // 4 Spinning Wheels
     const wheels = [];
-    const wGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.34, 18);
-    wGeo.rotateZ(Math.PI / 2);
+    const wGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.34, 18); wGeo.rotateZ(Math.PI / 2);
     const wMat = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.8 });
-    [[-1.12, 0.42, -1.35], [1.12, 0.42, -1.35], [-1.12, 0.42, 1.35], [1.12, 0.42, 1.35]].forEach(([wx, wy, wz]) => {
-      const w = new THREE.Mesh(wGeo, wMat);
-      w.position.set(wx, wy, wz); w.castShadow = true; carGroup.add(w);
-      wheels.push(w);
+    [[-1.12,0.42,-1.35],[1.12,0.42,-1.35],[-1.12,0.42,1.35],[1.12,0.42,1.35]].forEach(([wx,wy,wz]) => {
+      const w = new THREE.Mesh(wGeo, wMat); w.position.set(wx,wy,wz); w.castShadow = true; carGroup.add(w); wheels.push(w);
     });
-
-    // Nitro Flame Exhausts
     const nitroFlames = [-0.45, 0.45].map(fx => {
       const f = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.9, 10), new THREE.MeshBasicMaterial({ color: 0x00b4d8, transparent: true, opacity: 0 }));
-      f.rotation.x = Math.PI / 2; f.position.set(fx, 0.45, 2.55); carGroup.add(f);
-      return f;
+      f.rotation.x = Math.PI / 2; f.position.set(fx, 0.45, 2.55); carGroup.add(f); return f;
     });
 
-    // Car Arcade Physics State
-    const car = {
-      x: 0, z: 16,
-      heading: 0,
-      speed: 0,
-      steerAngle: 0
-    };
+    const car = { x: 0, z: 32, heading: 0, speed: 0 };
 
-    // Orbit Camera (Drag to look around, Scroll to zoom)
-    const camState = { yawOffset: 0, pitch: 0.28, distance: 15, dragging: false, lastX: 0, lastY: 0 };
+    // Orbit Camera
+    const camState = { yawOffset: 0, pitch: 0.28, distance: 18, dragging: false, lastX: 0, lastY: 0 };
     renderer.domElement.addEventListener('pointerdown', (e) => { camState.dragging = true; camState.lastX = e.clientX; camState.lastY = e.clientY; });
     window.addEventListener('pointermove', (e) => {
       if (!camState.dragging) return;
@@ -523,15 +490,13 @@
     });
     window.addEventListener('pointerup', () => { camState.dragging = false; });
     renderer.domElement.addEventListener('wheel', (e) => {
-      camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.015, 8, 34);
+      camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.015, 9, 44);
     }, { passive: true });
 
-    // State & Sky-to-Ground Auto Panel
     const sound = new SoundEngine();
     const keys = new Set();
-    let activeZone = null, isClassic = false, panelDismissedZoneId = null;
-    const touchInput = { steer: 0, throttle: 0, boost: false, brake: false };
-    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let activeZone = null, isClassic = false;
+    const touchInput = { boost: false };
 
     function showToast(msg) {
       const t = document.getElementById('toastBanner');
@@ -539,96 +504,37 @@
       clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.add('hidden'), 2200);
     }
 
-    const skyPanel = document.getElementById('skyDropPanel');
-    const skyBody = document.getElementById('skyDropBody');
-    const panelDot = document.getElementById('panelZoneDot');
-    const panelLabel = document.getElementById('panelZoneLabel');
-
-    function showSkyDropPanel(zone) {
-      panelDot.style.backgroundColor = zone.color;
-      panelLabel.textContent = zone.name;
-      const p = PORTFOLIO.profile, edu = PORTFOLIO.education[0];
-      if (zone.id === 'central') {
-        skyBody.innerHTML = `<div class="space-y-3">
-          <h2 class="text-xl font-bold">${esc(p.full_name)}</h2>
-          <p class="text-xs text-neutral-600">${esc(p.tagline)}</p>
-          <p class="text-xs text-neutral-700 leading-relaxed">${esc(p.summary)}</p>
-          <div class="flex flex-wrap gap-2 text-xs pt-1">
-            <span class="px-2.5 py-1 rounded bg-neutral-100 font-mono">${esc(p.email)}</span>
-            <span class="px-2.5 py-1 rounded bg-neutral-100 font-mono">${esc(p.phone)}</span>
-            <a href="${esc(p.linkedin_url)}" target="_blank" class="px-3 py-1 rounded bg-[#0047FF] text-white font-semibold">LinkedIn ↗</a>
-          </div>
-          <div class="pt-2 border-t space-y-1.5">${guestbookNotes.slice(0, 3).map(n => `<div class="p-2 rounded bg-neutral-50 border text-xs"><strong>${esc(n.sender_name)}:</strong> ${esc(n.message)}</div>`).join('')}</div>
-        </div>`;
-      } else if (zone.id === 'north') {
-        skyBody.innerHTML = `<div class="space-y-3">
-          <h2 class="text-xl font-bold">Resume & Technical Matrix</h2>
-          <div class="p-3 rounded bg-neutral-50 border text-xs"><strong>${esc(edu.institution)}</strong> · ${esc(edu.degree)} (${esc(edu.period)}) · <span class="text-[#0047FF] font-semibold">${esc(edu.honors)}</span></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${PORTFOLIO.skills.map(s => `<div class="p-2.5 rounded border text-xs"><strong>${esc(s.category)}</strong><div class="mt-1 flex flex-wrap gap-1">${s.items.map(i => `<span class="px-1.5 py-0.5 bg-neutral-100 rounded text-[11px]">${esc(i)}</span>`).join('')}</div></div>`).join('')}</div>
-        </div>`;
-      } else if (zone.id === 'east') {
-        skyBody.innerHTML = `<div class="space-y-3">
-          <h2 class="text-xl font-bold">Academic Work Samples</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${PORTFOLIO.projects.map(pr => `<div class="p-3 rounded border space-y-1"><span class="text-[10px] font-mono text-[#0077FF] font-bold">${esc(pr.status)}</span><h3 class="font-bold text-xs">${esc(pr.title)}</h3><p class="text-[11px] text-neutral-600">${esc(pr.overview)}</p><div class="flex flex-wrap gap-1">${pr.technologies.slice(0, 5).map(t => `<span class="px-1.5 py-0.5 bg-neutral-100 rounded text-[10px] font-mono">${esc(t)}</span>`).join('')}</div></div>`).join('')}</div>
-        </div>`;
-      } else if (zone.id === 'west') {
-        skyBody.innerHTML = `<div class="space-y-3">
-          <h2 class="text-xl font-bold">ACCESS DLSU — Leadership & Service</h2>
-          ${PORTFOLIO.experiences.map(e => `<div class="pl-3 border-l-2 border-[#0047FF]"><h3 class="font-bold text-xs">${esc(e.role)} <span class="font-mono text-neutral-500">(${esc(e.period)})</span></h3><ul class="list-disc ml-4 text-[11px] text-neutral-700 mt-1">${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>`).join('')}
-        </div>`;
-      } else {
-        skyBody.innerHTML = `<div class="space-y-3">
-          <h2 class="text-xl font-bold">References & Sky-Guestbook</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${PORTFOLIO.references.map(r => `<div class="p-2.5 rounded border bg-neutral-50 text-xs"><strong>${esc(r.name)}</strong><p class="text-neutral-600 mt-0.5 text-[11px]">${esc(r.relationship)}</p></div>`).join('')}</div>
-          <form id="gbForm" class="p-3 rounded border space-y-2">
-            <p class="text-xs font-bold uppercase">Leave a Sky-Guestbook Note</p>
-            <input name="name" required placeholder="Your Name" class="w-full px-3 py-1.5 text-xs border rounded" />
-            <textarea name="msg" required rows="2" placeholder="Your note..." class="w-full px-3 py-1.5 text-xs border rounded"></textarea>
-            <button class="px-4 py-1.5 rounded bg-[#111111] text-white text-xs font-bold uppercase">Post Note</button>
-          </form>
-        </div>`;
-        skyBody.querySelector('#gbForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.target);
-          guestbookNotes.unshift({ sender_name: fd.get('name'), message: fd.get('msg') });
-          localStorage.setItem('miguel_guestbook', JSON.stringify(guestbookNotes));
-          showToast('Guestbook note posted!');
-          showSkyDropPanel(ZONES[0]);
-        });
-      }
-      skyPanel.classList.remove('panel-hidden');
-      skyPanel.classList.add('panel-visible');
-    }
-
-    function hideSkyDropPanel() {
-      skyPanel.classList.remove('panel-visible');
-      skyPanel.classList.add('panel-hidden');
-    }
-
-    document.getElementById('closePanelBtn').addEventListener('click', () => {
-      if (activeZone) panelDismissedZoneId = activeZone.id;
-      hideSkyDropPanel();
-    });
     document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
       e.target.textContent = sound.toggleMute() ? '🔊 Sound On' : '🔇 Sound Off';
     });
-    document.getElementById('contactQuickBtn').addEventListener('click', () => {
-      panelDismissedZoneId = null;
-      showSkyDropPanel(ZONES[4]);
+    document.getElementById('guestbookBtn').addEventListener('click', () => {
+      document.getElementById('guestbookModal').classList.remove('hidden');
+      document.getElementById('guestbookModal').classList.add('flex');
     });
+    document.getElementById('closeGbModal').addEventListener('click', () => {
+      document.getElementById('guestbookModal').classList.add('hidden');
+      document.getElementById('guestbookModal').classList.remove('flex');
+    });
+    document.getElementById('gbForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      guestbookNotes.unshift({ sender_name: fd.get('name'), message: fd.get('msg') });
+      localStorage.setItem('miguel_guestbook', JSON.stringify(guestbookNotes));
+      e.target.reset();
+      document.getElementById('closeGbModal').click();
+      showToast('Posted to Central Plaza 3D Notice Board!');
+    });
+
     document.getElementById('viewToggleBtn').addEventListener('click', () => {
       isClassic = !isClassic;
       const cv = document.getElementById('classicViewContainer');
       if (isClassic) {
-        hideSkyDropPanel();
         cv.innerHTML = `<div class="max-w-4xl mx-auto p-8 bg-white min-h-screen space-y-6">
           <div class="flex justify-between items-center border-b pb-4">
-            <div><h1 class="text-2xl font-bold">${esc(PORTFOLIO.profile.full_name)}</h1><p class="text-xs text-neutral-500">${esc(PORTFOLIO.profile.email)} · ${esc(PORTFOLIO.profile.phone)}</p></div>
+            <div><h1 class="text-2xl font-bold">Miguel Andrei B. Abad</h1><p class="text-xs text-neutral-500">abadandrei22@gmail.com · +63 977 652 9418</p></div>
             <button id="back3d" class="px-4 py-2 rounded bg-[#E63946] text-white text-xs font-bold">🏎 3D Grand Prix Mode</button>
           </div>
-          <p class="text-sm text-neutral-700">${esc(PORTFOLIO.profile.summary)}</p>
-          <h2 class="text-lg font-bold border-b pb-1">Academic Work Samples</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${PORTFOLIO.projects.map(p => `<div class="p-4 border rounded"><span class="text-[10px] font-mono text-[#0047FF] font-bold">${esc(p.status)}</span><h3 class="font-bold mt-1">${esc(p.title)}</h3><p class="text-xs text-neutral-600 mt-1">${esc(p.overview)}</p></div>`).join('')}</div>
+          ${ZONES.map(z => `<div class="p-4 border rounded space-y-2"><h2 class="font-bold text-sm" style="color:${z.color}">${z.name} — ${z.title}</h2>${z.sections.map(s => `<div><p class="text-xs font-bold">${s.heading}</p><p class="text-xs text-neutral-700 whitespace-pre-line">${s.body}</p></div>`).join('')}</div>`).join('')}
         </div>`;
         cv.querySelector('#back3d').addEventListener('click', () => document.getElementById('viewToggleBtn').click());
         cv.classList.remove('hidden'); document.getElementById('hudOverlay').classList.add('hidden');
@@ -639,12 +545,10 @@
 
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.code === 'KeyR') { car.x = 0; car.z = 16; car.speed = 0; car.heading = 0; showToast('Car reset to start'); }
-      if (e.code === 'Escape') hideSkyDropPanel();
+      if (e.code === 'KeyR') { car.x = 0; car.z = 32; car.speed = 0; car.heading = 0; showToast('Car reset'); }
       keys.add(e.code);
     });
     window.addEventListener('keyup', (e) => keys.delete(e.code));
-
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -652,6 +556,7 @@
     });
 
     const radarCtx = document.getElementById('radarCanvas').getContext('2d');
+    const stationBadge = document.getElementById('stationBadge');
     const clock = new THREE.Clock();
     const camTarget = new THREE.Vector3();
 
@@ -667,84 +572,73 @@
         const right = !isTyping && (keys.has('KeyD') || keys.has('ArrowRight'));
         const boost = !isTyping && (keys.has('ShiftLeft') || keys.has('ShiftRight') || keys.has('Space') || touchInput.boost);
 
-        const maxSpeed = boost ? 58 : 38;
-        const accel = boost ? 62 : 34;
+        const maxSpeed = boost ? 72 : 46;
+        const accel = boost ? 74 : 42;
         if (fwd) car.speed += accel * dt;
-        else if (rev) car.speed -= 28 * dt;
+        else if (rev) car.speed -= 32 * dt;
         else car.speed *= Math.pow(0.22, dt);
-
-        car.speed = THREE.MathUtils.clamp(car.speed, -16, maxSpeed);
+        car.speed = THREE.MathUtils.clamp(car.speed, -18, maxSpeed);
 
         const steerInput = (left ? 1 : 0) - (right ? 1 : 0);
-        if (Math.abs(car.speed) > 0.5) {
-          const dir = car.speed >= 0 ? 1 : -1;
-          car.heading += steerInput * 2.25 * dt * dir;
-        }
+        if (Math.abs(car.speed) > 0.5) car.heading += steerInput * 2.25 * dt * (car.speed >= 0 ? 1 : -1);
 
         car.x -= Math.sin(car.heading) * car.speed * dt;
         car.z -= Math.cos(car.heading) * car.speed * dt;
-
-        // Keep car on massive 180m island
         const rDist = Math.hypot(car.x, car.z);
-        if (rDist > 174) {
-          const s = 174 / rDist;
-          car.x *= s; car.z *= s; car.speed *= 0.5;
-        }
+        if (rDist > 292) { const s = 292 / rDist; car.x *= s; car.z *= s; car.speed *= 0.5; }
 
         carGroup.position.set(car.x, 0, car.z);
         carGroup.rotation.y = car.heading;
         wheels.forEach(w => { w.rotation.x -= car.speed * dt * 0.9; });
         nitroFlames.forEach(f => { f.material.opacity = boost && Math.abs(car.speed) > 4 ? 0.9 : 0; });
-
         sound.updateEngine(Math.abs(car.speed), boost);
 
-        // Speedometer HUD
         const kmh = Math.round(Math.abs(car.speed) * 3.2);
         document.getElementById('speedValue').textContent = kmh;
-        document.getElementById('speedBarFill').style.height = `${Math.min(100, Math.max(4, (kmh / 185) * 100))}%`;
+        document.getElementById('speedBarFill').style.height = `${Math.min(100, Math.max(4, (kmh / 230) * 100))}%`;
         document.getElementById('boostStatus').classList.toggle('hidden', !boost);
 
-        // Orbit + Follow Camera behind car
         const camAngle = car.heading + camState.yawOffset;
         const hDist = Math.cos(camState.pitch) * camState.distance;
         const vDist = Math.sin(camState.pitch) * camState.distance;
-        const desiredCam = new THREE.Vector3(
-          car.x + Math.sin(camAngle) * hDist,
-          Math.max(2.2, 2.2 + vDist),
-          car.z + Math.cos(camAngle) * hDist
-        );
-        camera.position.lerp(desiredCam, Math.min(1, dt * 7));
-        camTarget.lerp(new THREE.Vector3(car.x, 1.6, car.z), Math.min(1, dt * 9));
+        camera.position.lerp(new THREE.Vector3(car.x + Math.sin(camAngle) * hDist, Math.max(2.5, 2.5 + vDist), car.z + Math.cos(camAngle) * hDist), Math.min(1, dt * 7));
+        camTarget.lerp(new THREE.Vector3(car.x, 2.2, car.z), Math.min(1, dt * 9));
         camera.lookAt(camTarget);
 
-        // Collectible Star Rings
         collectibles.forEach(c => {
           c.mesh.rotation.y = t * 1.5 + c.phase;
-          if (!c.collected && Math.hypot(car.x - c.mesh.position.x, car.z - c.mesh.position.z) < 4.2) {
+          if (!c.collected && Math.hypot(car.x - c.mesh.position.x, car.z - c.mesh.position.z) < 4.5) {
             c.collected = true; c.mesh.material.color.setHex(0x52b788); c.mesh.material.emissive.setHex(0x2d6a4f);
-            ringsCollected++; document.getElementById('ringScoreBadge').textContent = `★ ${ringsCollected} / 8`;
+            ringsCollected++; document.getElementById('ringScoreBadge').textContent = `★ ${ringsCollected} / 10`;
             sound.playChime(); showToast('★ Gate Cleared!');
           }
         });
 
-        // Automatic Sky-to-Ground Info Drop when entering a zone!
-        const nearest = ZONES.find(z => Math.hypot(car.x - z.x, car.z - z.z) <= z.radius) || null;
+        // Sky-to-Ground 3D Notice Board Animation (drops smoothly from sky when you drive near!)
+        const nearest = ZONES.find(z => Math.hypot(car.x - z.x, car.z - z.z) <= z.radius + 14) || null;
         if (nearest?.id !== activeZone?.id) {
           activeZone = nearest;
           if (nearest) {
             sound.playChime();
-            if (panelDismissedZoneId !== nearest.id) {
-              showSkyDropPanel(nearest);
-            }
+            stationBadge.textContent = nearest.name;
+            stationBadge.classList.remove('hidden');
           } else {
-            panelDismissedZoneId = null;
-            hideSkyDropPanel();
+            stationBadge.classList.add('hidden');
           }
         }
 
-        // Massive Island GPS Radar
+        ZONES.forEach((z) => {
+          const nb = noticeBoards.get(z.id);
+          const isNear = Math.hypot(car.x - z.x, car.z - z.z) <= z.radius + 14;
+          const targetY = isNear ? 0 : 42;
+          nb.currentY = THREE.MathUtils.lerp(nb.currentY, targetY, Math.min(1, dt * 4.5));
+          nb.group.position.y = nb.currentY;
+          nb.titleBanner.position.y = 16.5 + Math.sin(t * 2.2) * 0.35;
+        });
+
+        // 600m Island GPS Radar
         radarCtx.clearRect(0, 0, 136, 136);
-        const scale = 136 / 360;
+        const scale = 136 / 600;
         ZONES.forEach(z => { radarCtx.fillStyle = z.color; radarCtx.beginPath(); radarCtx.arc(68 + z.x * scale, 68 + z.z * scale, 4.5, 0, Math.PI * 2); radarCtx.fill(); });
         radarCtx.fillStyle = '#111111'; radarCtx.beginPath(); radarCtx.arc(68 + car.x * scale, 68 + car.z * scale, 4.5, 0, Math.PI * 2); radarCtx.fill();
 
