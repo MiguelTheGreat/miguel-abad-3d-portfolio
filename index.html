@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Miguel Andrei B. Abad — 3D Hot Air Balloon Career e-Portfolio</title>
+  <title>Miguel Andrei B. Abad — 3D Racecar Career e-Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
     {
@@ -18,6 +18,21 @@
     code, pre, .font-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #219ebc; color: #111111; }
     @media print { .no-print { display: none !important; } }
+
+    /* Sky-to-Ground Drop Panel Animation */
+    #skyDropPanel {
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+    #skyDropPanel.panel-hidden {
+      transform: translateY(-115%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    #skyDropPanel.panel-visible {
+      transform: translateY(0%);
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body class="antialiased selection:bg-[#0047FF] selection:text-white">
@@ -25,42 +40,35 @@
 
   <!-- Minimalist Helvetica HUD -->
   <div id="hudOverlay" class="fixed inset-0 z-10 pointer-events-none select-none">
+    <!-- Top-Left Controls -->
     <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2 pointer-events-auto">
       <div class="px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm flex items-center gap-2.5">
         <span class="w-2.5 h-2.5 rounded-full bg-[#E63946]"></span>
-        <span class="text-xs font-bold tracking-wider uppercase">MIGUEL ABAD // 3D PORTFOLIO</span>
+        <span class="text-xs font-bold tracking-wider uppercase">MIGUEL ABAD // 3D GRAND PRIX</span>
       </div>
       <button id="soundToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#111111] hover:text-white transition-colors">🔇 Sound Off</button>
       <button id="viewToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#0047FF] hover:text-white transition-colors">📄 2D Classic View</button>
       <button id="contactQuickBtn" class="px-3 py-2 rounded bg-[#111111] text-white shadow-sm text-xs font-semibold hover:bg-[#0047FF] transition-colors">✉ Contact / Guestbook</button>
-      <div id="ringScoreBadge" class="px-3 py-2 rounded bg-[#FFB703] text-[#111111] shadow-sm text-xs font-mono font-bold">★ 0 / 6</div>
+      <div id="ringScoreBadge" class="px-3 py-2 rounded bg-[#FFB703] text-[#111111] shadow-sm text-xs font-mono font-bold">★ 0 / 8</div>
     </div>
 
-    <div class="absolute top-20 left-1/2 -translate-x-1/2 pointer-events-auto">
-      <button id="zonePromptBtn" class="hidden px-5 py-2.5 rounded-full bg-[#111111] text-white shadow-xl border border-white/20 text-xs font-bold tracking-wider uppercase flex items-center gap-2.5 hover:bg-[#0047FF] transition-colors">
-        <span class="px-1.5 py-0.5 rounded bg-[#E63946] text-[10px] font-mono">ENTER</span>
-        <span>Inspect <span id="zonePromptName">Zone</span></span>
-      </button>
-    </div>
-
-    <!-- Altimeter -->
-    <div class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md border border-black/15 rounded p-2.5 shadow-sm flex flex-col items-center gap-2 w-14">
-      <span class="text-[10px] font-mono font-bold tracking-widest text-neutral-500">ALT</span>
-      <div class="w-2 h-36 bg-neutral-200 rounded-full relative overflow-hidden flex items-end">
-        <div id="altBarFill" class="w-full bg-[#0047FF] rounded-full transition-all duration-75" style="height: 15%"></div>
+    <!-- Right Side: Speedometer -->
+    <div class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md border border-black/15 rounded p-2.5 shadow-sm flex flex-col items-center gap-2 w-16">
+      <span class="text-[10px] font-mono font-bold tracking-widest text-neutral-500">KM/H</span>
+      <div class="w-2.5 h-36 bg-neutral-200 rounded-full relative overflow-hidden flex items-end">
+        <div id="speedBarFill" class="w-full bg-[#E63946] rounded-full transition-all duration-75" style="height: 4%"></div>
       </div>
-      <span id="altValue" class="text-[11px] font-mono font-bold">5.5m</span>
-      <span id="vsValue" class="text-[10px] font-mono text-neutral-500">+0.0</span>
+      <span id="speedValue" class="text-xs font-mono font-bold">0</span>
+      <span id="boostStatus" class="text-[9px] font-mono font-bold text-[#0047FF] hidden">NITRO</span>
     </div>
 
-    <!-- Keycaps -->
+    <!-- Bottom-Left: Keycaps -->
     <div class="hidden sm:flex absolute bottom-4 left-4 px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm items-center gap-2 text-[11px] font-mono text-neutral-700">
-      <span><strong>WASD</strong> Steer</span><span>·</span>
-      <span><strong>SPACE</strong> Burn</span><span>·</span>
-      <span><strong>SHIFT/C</strong> Vent</span><span>·</span>
+      <span><strong>WASD</strong> Drive</span><span>·</span>
+      <span><strong>SHIFT / SPACE</strong> Nitro</span><span>·</span>
       <span><strong>DRAG</strong> Look</span><span>·</span>
       <span><strong>SCROLL</strong> Zoom</span><span>·</span>
-      <span><strong>ENTER</strong> Open</span>
+      <span><strong>R</strong> Reset</span>
     </div>
 
     <!-- Mobile Controls -->
@@ -68,32 +76,32 @@
       <div id="joystickKnob" class="w-10 h-10 rounded-full bg-[#111111] shadow-md"></div>
     </div>
     <div class="sm:hidden absolute bottom-8 right-36 flex flex-col gap-2 pointer-events-auto">
-      <button id="mobileBurnBtn" class="px-4 py-2.5 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider shadow">BURN ▲</button>
-      <button id="mobileVentBtn" class="px-4 py-2.5 rounded bg-[#111111] text-white text-xs font-bold uppercase tracking-wider shadow">VENT ▼</button>
+      <button id="mobileBoostBtn" class="px-4 py-2.5 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider shadow">NITRO ⚡</button>
+      <button id="mobileBrakeBtn" class="px-4 py-2.5 rounded bg-[#111111] text-white text-xs font-bold uppercase tracking-wider shadow">BRAKE</button>
     </div>
 
-    <!-- Radar -->
+    <!-- Bottom-Right: Massive Island Minimap -->
     <div class="absolute bottom-4 right-4 p-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm">
       <div class="flex items-center justify-between text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-1 px-1">
-        <span>ISLAND MAP</span><span>5 ZONES</span>
+        <span>ISLAND GPS</span><span>5 ZONES</span>
       </div>
-      <canvas id="radarCanvas" width="128" height="128" class="block rounded bg-[#52b788]/20 border border-black/10"></canvas>
+      <canvas id="radarCanvas" width="136" height="136" class="block rounded bg-[#52b788]/25 border border-black/10"></canvas>
     </div>
+  </div>
+
+  <!-- Automatic Sky-to-Ground Zone Info Panel -->
+  <div id="skyDropPanel" class="fixed top-16 left-1/2 -translate-x-1/2 z-30 w-[94vw] max-w-2xl max-h-[78vh] bg-white/95 backdrop-blur-lg border-2 border-[#111111] rounded-lg shadow-2xl overflow-hidden flex flex-col panel-hidden">
+    <div class="px-5 py-3 bg-[#111111] text-white flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2">
+        <span id="panelZoneDot" class="w-2.5 h-2.5 rounded-full bg-[#E63946]"></span>
+        <span id="panelZoneLabel" class="text-xs font-mono font-bold uppercase tracking-widest">ZONE</span>
+      </div>
+      <button id="closePanelBtn" class="px-2.5 py-1 rounded bg-white/15 hover:bg-white/25 text-xs font-semibold">Hide ▲</button>
+    </div>
+    <div id="skyDropBody" class="p-5 sm:p-6 overflow-y-auto"></div>
   </div>
 
   <div id="classicViewContainer" class="hidden fixed inset-0 overflow-y-auto z-20 bg-[#FAFAFA]"></div>
-
-  <!-- Zone Drawer -->
-  <div id="zoneDrawer" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-    <div class="bg-white border border-black/20 rounded-lg max-w-3xl w-full max-h-[88vh] overflow-y-auto shadow-2xl">
-      <div class="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-3.5 border-b border-black/10 flex items-center justify-between">
-        <span class="text-[11px] font-mono font-bold uppercase tracking-widest text-neutral-500">Portfolio Inspector</span>
-        <button id="closeDrawerBtn" class="px-2.5 py-1 rounded border border-black/20 text-xs font-semibold hover:bg-[#111111] hover:text-white transition-colors">✕ Close [ESC]</button>
-      </div>
-      <div id="zoneDrawerBody" class="p-6 sm:p-8"></div>
-    </div>
-  </div>
-
   <div id="toastBanner" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded bg-[#111111] text-white text-xs font-semibold shadow-lg">Copied</div>
 
   <script type="module">
@@ -130,93 +138,62 @@
           status: 'Ongoing Thesis / Research',
           category: 'Multi-Modal Embedded AI & Computer Vision',
           overview: 'An ongoing Computer Engineering research implementation designed to bridge the communication gap for the Filipino Deaf community by combining wearable inertial sensing with computer vision on mobile hardware.',
-          technologies: ['Python', 'PyTorch', 'Android SDK', 'OpenCV', 'MediaPipe', 'ESP32', '6-DOF IMU', 'CNN-LSTM'],
-          bullets: [
-            'Architected a native Android application fusing wearable ESP32 6-DOF IMU sensor telemetry with real-time camera feeds for multi-modal spatial motion tracking.',
-            'Developed and trained a hybrid CNN-LSTM neural network in PyTorch to classify dynamic sign gestures using synchronized spatio-temporal datasets.',
-            'Engineered an end-to-end gloss-to-text post-processing pipeline to translate discrete model predictions into structured, natural language output.'
-          ]
+          technologies: ['Python', 'PyTorch', 'Android SDK', 'OpenCV', 'MediaPipe', 'ESP32', '6-DOF IMU', 'CNN-LSTM']
         },
         {
           title: 'PIC16F877A Microcontroller Development Board',
           status: 'Hardware / EDA',
           category: 'Hardware Prototyping & PCB Layout',
           overview: 'A custom-engineered microcontroller breakout and prototyping board built from schematic capture through multi-layer PCB routing to support embedded systems laboratory applications.',
-          technologies: ['KiCad', 'Schematic Capture', '4-Layer PCB Layout', 'PIC16F877A', 'Hardware Prototyping', 'DRC'],
-          bullets: [
-            'Designed a custom PIC16F877A breakout board featuring integrated 5V voltage regulation, an external 20MHz crystal oscillator circuit, and an ICSP programming interface.',
-            'Routed a 4-layer printed circuit board (PCB) in KiCad with dedicated internal power and ground planes to minimize signal noise and ensure power integrity.',
-            'Verified manufacturing readiness and electrical clearance through complete Design Rule Checks (DRC) and Gerber file generation.'
-          ]
+          technologies: ['KiCad', 'Schematic Capture', '4-Layer PCB Layout', 'PIC16F877A', 'Hardware Prototyping', 'DRC']
         },
         {
           title: 'Web-Based PDF Reader & Digital Catalog',
           status: 'Full-Stack Web',
           category: 'Full-Stack Web Engineering & RDBMS',
           overview: 'A full-stack web application enabling users to upload, organize, and read digital documents in-browser with automated metadata enrichment and persistent library state.',
-          technologies: ['JavaScript', 'SQL', 'HTML5', 'CSS3', 'RESTful APIs', 'RDBMS', 'CRUD'],
-          bullets: [
-            'Built a responsive in-browser PDF reader featuring dynamic document rendering, custom file upload pipelines, zoom controls, and chapter navigation.',
-            'Integrated MangaDex and Google Books REST APIs asynchronously to retrieve and display rich bibliographic metadata and cover assets dynamically.',
-            'Designed normalized relational SQL database schemas and executed CRUD queries to persist reading history, library records, and user uploads.'
-          ]
+          technologies: ['JavaScript', 'SQL', 'HTML5', 'CSS3', 'RESTful APIs', 'RDBMS', 'CRUD']
         },
         {
           title: 'Bit by Bit — Interactive SAP-1 Computer Simulator',
           status: 'Computer Architecture',
           category: 'Computer Architecture & Digital Logic',
           overview: 'An interactive educational simulator built to demystify low-level microprocessor execution, control signals, and bus-organized computer architecture for undergraduate engineering students.',
-          technologies: ['JavaScript', 'HTML5', 'CSS3', 'Computer Architecture', 'SAP-1', 'Digital Logic'],
-          bullets: [
-            'Implemented cycle-accurate simulation of the Simple-As-Possible (SAP-1) 8-bit architecture across all six T-states of the instruction fetch-decode-execute cycle.',
-            'Visualized real-time data transfers across the 8-bit W-bus between the Program Counter, Memory Address Register, 16x8 RAM, Instruction Register, Accumulator, and Adder/Subtractor ALU.',
-            'Displayed live 12-bit Controller-Sequencer control words (CON) and binary/hexadecimal register states to reinforce Digital Logic and Microprocessor coursework.'
-          ]
+          technologies: ['JavaScript', 'HTML5', 'CSS3', 'Computer Architecture', 'SAP-1', 'Digital Logic']
         }
       ],
       experiences: [
         {
-          organization: 'ACCESS DLSU — Association of Computer Engineering Students',
-          role: 'Associate Vice President for Academics',
+          role: 'Associate Vice President for Academics — ACCESS DLSU',
           period: 'Sept 2026 – Present',
           bullets: [
-            'Spearhead college-wide academic assistance programs, peer-led technical tutorials, and structured reviewer distribution drives serving Computer Engineering undergraduates.',
-            'Conduct secondary quantitative and qualitative research to evaluate student performance trends and formulate data-backed academic support strategies.',
-            'Architect, curate, and maintain centralized digital learning repositories to optimize coursework resource discovery across year levels.'
+            'Spearhead college-wide academic assistance programs, peer-led technical tutorials, and structured reviewer distribution drives.',
+            'Conduct quantitative and qualitative research to evaluate student performance trends.',
+            'Architect and maintain centralized digital learning repositories for CpE undergraduates.'
           ]
         },
         {
-          organization: 'ACCESS DLSU — Association of Computer Engineering Students',
-          role: 'Junior Officer for Academics',
+          role: 'Junior Officer for Academics — ACCESS DLSU',
           period: 'Nov 2025 – Sept 2026',
           bullets: [
-            'Authored comprehensive technical reviewers, formula sheets, and structured study guides covering foundational Computer Engineering courses (Digital Logic, Circuits, and Programming).',
-            'Facilitated peer review sessions prior to departmental examinations to strengthen student mastery of core hardware and software concepts.'
+            'Authored technical reviewers, formula sheets, and study guides covering Digital Logic, Circuits, and Programming.',
+            'Facilitated peer review sessions prior to departmental examinations.'
           ]
         }
       ],
       references: [
-        {
-          name: 'Department of Electronics & Computer Engineering',
-          title: 'Faculty / Thesis Reference',
-          organization: 'De La Salle University – Manila',
-          relationship: 'Faculty Adviser for Embedded Systems & Wearable-Vision Sign Recognition Research. Can attest to hardware prototyping, machine learning engineering, and academic standing.'
-        },
-        {
-          name: 'ACCESS DLSU Executive Board & Faculty Adviser',
-          title: 'Organizational Reference',
-          organization: 'Association of Computer Engineering Students',
-          relationship: 'Can attest to leadership as Associate Vice President for Academics, curriculum support execution, team management, and student research initiatives.'
-        }
+        { name: 'Department of Electronics & Computer Engineering', relationship: 'Faculty Adviser for Embedded Systems & Wearable-Vision Sign Recognition Research (DLSU – Manila).' },
+        { name: 'ACCESS DLSU Executive Board & Faculty Adviser', relationship: 'Organizational Reference for leadership as Associate Vice President for Academics.' }
       ]
     };
 
     const DEFAULT_NOTES = [
-      { sender_name: 'DLSU ECE Engineering Cohort', message: 'Impressive wearable-vision fusion pipeline and colorful island world! Wishing you the best on the FSL thesis.' },
-      { sender_name: 'Technical Recruiter', message: 'Love the dual 3D flight + ATS-ready 2D classic view toggle. Great showcase of KiCad PCB and PyTorch skills.' }
+      { sender_name: 'DLSU ECE Engineering Cohort', message: 'Awesome winding island circuit and instant sky-to-ground cards! Good luck on the FSL thesis.' },
+      { sender_name: 'Technical Recruiter', message: 'Super fun to drive around and explore the KiCad PCB and PyTorch projects.' }
     ];
     let guestbookNotes = JSON.parse(localStorage.getItem('miguel_guestbook') || 'null') || DEFAULT_NOTES;
 
+    // Procedural Engine & SFX Audio
     class SoundEngine {
       constructor() { this.ctx = null; this.muted = true; this.initialized = false; }
       init() {
@@ -227,17 +204,18 @@
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.value = 0;
         this.masterGain.connect(this.ctx.destination);
-        const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate);
-        const d = buf.getChannelData(0);
-        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-        const bn = this.ctx.createBufferSource(); bn.buffer = buf; bn.loop = true;
-        const bf = this.ctx.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = 340;
-        this.burnerGain = this.ctx.createGain(); this.burnerGain.gain.value = 0;
-        bn.connect(bf); bf.connect(this.burnerGain); this.burnerGain.connect(this.masterGain); bn.start();
-        const wn = this.ctx.createBufferSource(); wn.buffer = buf; wn.loop = true;
-        this.windFilter = this.ctx.createBiquadFilter(); this.windFilter.type = 'lowpass'; this.windFilter.frequency.value = 260;
-        this.windGain = this.ctx.createGain(); this.windGain.gain.value = 0;
-        wn.connect(this.windFilter); this.windFilter.connect(this.windGain); this.windGain.connect(this.masterGain); wn.start();
+        this.engOsc = this.ctx.createOscillator();
+        this.engOsc.type = 'sawtooth';
+        this.engOsc.frequency.value = 55;
+        const engFilter = this.ctx.createBiquadFilter();
+        engFilter.type = 'lowpass';
+        engFilter.frequency.value = 280;
+        this.engGain = this.ctx.createGain();
+        this.engGain.gain.value = 0.08;
+        this.engOsc.connect(engFilter);
+        engFilter.connect(this.engGain);
+        this.engGain.connect(this.masterGain);
+        this.engOsc.start();
         this.initialized = true;
       }
       toggleMute() {
@@ -245,54 +223,47 @@
         if (!this.ctx) return false;
         if (this.ctx.state === 'suspended') this.ctx.resume();
         this.muted = !this.muted;
-        this.masterGain.gain.setTargetAtTime(this.muted ? 0 : 0.65, this.ctx.currentTime, 0.08);
+        this.masterGain.gain.setTargetAtTime(this.muted ? 0 : 0.45, this.ctx.currentTime, 0.08);
         return !this.muted;
       }
-      updateFlightAudio({ isBurning, speed, altitude }) {
+      updateEngine(speed, boosting) {
         if (!this.initialized || this.muted || !this.ctx) return;
         const now = this.ctx.currentTime;
-        this.burnerGain.gain.setTargetAtTime(isBurning ? 0.34 : 0, now, 0.06);
-        this.windGain.gain.setTargetAtTime(0.02 + Math.min(1, speed / 18) * 0.16, now, 0.12);
-        this.windFilter.frequency.setTargetAtTime(220 + Math.min(1, speed / 18) * 950 + Math.min(1, altitude / 30) * 200, now, 0.12);
+        const rpmFreq = 52 + Math.min(140, speed * 3.4) + (boosting ? 35 : 0);
+        this.engOsc.frequency.setTargetAtTime(rpmFreq, now, 0.06);
+        this.engGain.gain.setTargetAtTime(0.06 + Math.min(0.14, speed * 0.004), now, 0.08);
       }
-      playZoneChime() {
+      playChime() {
         if (!this.initialized || this.muted || !this.ctx) return;
         const now = this.ctx.currentTime;
         [523.25, 659.25, 783.99].forEach((f, i) => {
           const o = this.ctx.createOscillator(), g = this.ctx.createGain();
           o.frequency.value = f;
-          g.gain.setValueAtTime(0.001, now + i * 0.06);
-          g.gain.exponentialRampToValueAtTime(0.08, now + i * 0.06 + 0.03);
-          g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.45);
-          o.connect(g); g.connect(this.masterGain); o.start(now + i * 0.06); o.stop(now + i * 0.06 + 0.48);
+          g.gain.setValueAtTime(0.001, now + i * 0.055);
+          g.gain.exponentialRampToValueAtTime(0.09, now + i * 0.055 + 0.025);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.055 + 0.4);
+          o.connect(g); g.connect(this.masterGain); o.start(now + i * 0.055); o.stop(now + i * 0.055 + 0.42);
         });
-      }
-      playClick() {
-        if (!this.initialized || this.muted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-        o.type = 'triangle'; o.frequency.setValueAtTime(920, now); o.frequency.exponentialRampToValueAtTime(280, now + 0.045);
-        g.gain.setValueAtTime(0.09, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-        o.connect(g); g.connect(this.masterGain); o.start(now); o.stop(now + 0.055);
       }
     }
 
+    // Massive Island Zone Coordinates (Spread out across a 360m x 360m island)
     const ZONES = [
-      { id: 'central', name: 'Central Plaza', x: 0, z: 0, radius: 13, color: '#E63946' },
-      { id: 'north', name: 'North Pavilion', x: 0, z: -48, radius: 13, color: '#0077FF' },
-      { id: 'east', name: 'East Hardware & AI Sky-Lab', x: 52, z: 0, radius: 17, color: '#00B4D8' },
-      { id: 'west', name: 'West Student Hub', x: -52, z: 0, radius: 13, color: '#FFB703' },
-      { id: 'south', name: 'South Lounge', x: 0, z: 48, radius: 13, color: '#FB5607' }
+      { id: 'central', name: 'Central Plaza', x: 0, z: 0, radius: 17, color: '#E63946' },
+      { id: 'north', name: 'North Pavilion', x: -24, z: -112, radius: 18, color: '#0077FF' },
+      { id: 'east', name: 'East Hardware & AI Sky-Lab', x: 118, z: -18, radius: 22, color: '#00B4D8' },
+      { id: 'west', name: 'West Student Hub', x: -115, z: 22, radius: 18, color: '#FFB703' },
+      { id: 'south', name: 'South Lounge', x: 26, z: 114, radius: 18, color: '#FB5607' }
     ];
 
-    function createTextPlane(lines, { width = 10, height = 3, accent = '#0077FF', align = 'center' } = {}) {
+    function createTextPlane(lines, { width = 12, height = 3.8, accent = '#0077FF', align = 'center' } = {}) {
       const canvas = document.createElement('canvas');
       canvas.width = 1024; canvas.height = Math.round(1024 * (height / width));
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = '#111111'; ctx.lineWidth = 10; ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
       ctx.fillStyle = accent; ctx.fillRect(6, 6, canvas.width - 12, 16);
-      let y = 82;
+      let y = 84;
       lines.forEach((l) => {
         ctx.fillStyle = l.color || '#111111';
         ctx.font = `${l.weight || 'bold'} ${l.size || 42}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
@@ -303,209 +274,263 @@
       return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.4 }));
     }
 
-    // Scene & Gradient Sky
+    // Build Curved Ribbon Road from CatmullRomCurve3 (NO straight roads!)
+    function buildCurvedRoad(scene, points, width = 7.5) {
+      const curve = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.08, z)));
+      const divisions = 90;
+      const roadPts = curve.getSpacedPoints(divisions);
+      const positions = [];
+      const indices = [];
+
+      for (let i = 0; i < roadPts.length; i++) {
+        const p = roadPts[i];
+        const tangent = curve.getTangentAt(i / divisions).normalize();
+        const normal = new THREE.Vector3(-tangent.z, 0, tangent.x);
+        const left = p.clone().addScaledVector(normal, width / 2);
+        const right = p.clone().addScaledVector(normal, -width / 2);
+        positions.push(left.x, left.y, left.z, right.x, right.y, right.z);
+        if (i < roadPts.length - 1) {
+          const a = i * 2, b = i * 2 + 1, c = (i + 1) * 2, d = (i + 1) * 2 + 1;
+          indices.push(a, b, c, b, d, c);
+        }
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+      const roadMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.85, side: THREE.DoubleSide }));
+      roadMesh.receiveShadow = true;
+      scene.add(roadMesh);
+
+      // Dashed yellow center markers along curve
+      const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.4 });
+      for (let i = 2; i < roadPts.length - 2; i += 4) {
+        const p = roadPts[i];
+        const tan = curve.getTangentAt(i / divisions);
+        const dash = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 2.2), stripeMat);
+        dash.position.set(p.x, 0.11, p.z);
+        dash.rotation.y = Math.atan2(tan.x, tan.z);
+        scene.add(dash);
+      }
+    }
+
+    // Scene & Renderer (Clean depth separation — ZERO grass Z-fighting!)
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xa8dadc, 75, 195);
-    const camera = new THREE.PerspectiveCamera(54, window.innerWidth / window.innerHeight, 0.2, 300);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    scene.fog = new THREE.Fog(0x90e0ef, 130, 380);
+    const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.5, 550);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
 
+    // Sunset Sky Dome
     const skyMat = new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false,
-      uniforms: { topColor: { value: new THREE.Color(0x219ebc) }, midColor: { value: new THREE.Color(0x8ecae6) }, bottomColor: { value: new THREE.Color(0xffd166) } },
+      uniforms: { topColor: { value: new THREE.Color(0x0077b6) }, midColor: { value: new THREE.Color(0x90e0ef) }, bottomColor: { value: new THREE.Color(0xffd166) } },
       vertexShader: `varying vec3 vW; void main(){ vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`,
       fragmentShader: `uniform vec3 topColor; uniform vec3 midColor; uniform vec3 bottomColor; varying vec3 vW; void main(){ float h = normalize(vW).y; vec3 c = mix(bottomColor, midColor, smoothstep(-0.05,0.25,h)); c = mix(c, topColor, smoothstep(0.25,0.85,h)); gl_FragColor = vec4(c,1.0); }`
     });
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(250, 32, 20), skyMat));
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(460, 32, 20), skyMat));
 
-    const sun = new THREE.Mesh(new THREE.SphereGeometry(9, 20, 20), new THREE.MeshBasicMaterial({ color: 0xffe599 }));
-    sun.position.set(110, 82, -120); scene.add(sun);
-
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x52b788, 0.9));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x40916c, 0.95));
     const dl = new THREE.DirectionalLight(0xfff4d2, 1.25);
-    dl.position.set(48, 72, 38); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
-    dl.shadow.camera.left = -90; dl.shadow.camera.right = 90; dl.shadow.camera.top = 90; dl.shadow.camera.bottom = -90;
+    dl.position.set(90, 120, 70); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
+    dl.shadow.camera.left = -190; dl.shadow.camera.right = 190; dl.shadow.camera.top = 190; dl.shadow.camera.bottom = -190;
     scene.add(dl);
 
-    // Physics + Island Terrain
-    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
+    // Physics + Massive Layered Terrain (Strict Y-gaps prevent all Z-fighting!)
+    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -18, 0) });
     const gBody = new CANNON.Body({ mass: 0, shape: new CANNON.Plane() });
     gBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
     world.addBody(gBody);
 
-    const ocean = new THREE.Mesh(new THREE.PlaneGeometry(520, 520), new THREE.MeshStandardMaterial({ color: 0x0096c7, roughness: 0.25, metalness: 0.15 }));
-    ocean.rotation.x = -Math.PI / 2; ocean.position.y = -0.75; ocean.receiveShadow = true; scene.add(ocean);
+    // Ocean at y = -2.2
+    const ocean = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshStandardMaterial({ color: 0x0096c7, roughness: 0.25, metalness: 0.15 }));
+    ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2.2; scene.add(ocean);
 
-    const beach = new THREE.Mesh(new THREE.CylinderGeometry(86, 92, 0.9, 64), new THREE.MeshStandardMaterial({ color: 0xf4d58d, roughness: 0.85 }));
-    beach.position.y = -0.42; beach.receiveShadow = true; scene.add(beach);
+    // Beach top at y = -0.55 (center -1.35, height 1.6)
+    const beach = new THREE.Mesh(new THREE.CylinderGeometry(195, 206, 1.6, 72), new THREE.MeshStandardMaterial({ color: 0xf4d58d, roughness: 0.9 }));
+    beach.position.y = -1.35; beach.receiveShadow = true; scene.add(beach);
 
-    const grass = new THREE.Mesh(new THREE.CylinderGeometry(78, 82, 0.7, 64), new THREE.MeshStandardMaterial({ color: 0x52b788, roughness: 0.82 }));
-    grass.position.y = -0.32; grass.receiveShadow = true; scene.add(grass);
+    // Grass top at y = 0.0 (center -0.5, height 1.0)
+    const grass = new THREE.Mesh(new THREE.CylinderGeometry(180, 188, 1.0, 72), new THREE.MeshStandardMaterial({ color: 0x52b788, roughness: 0.85 }));
+    grass.position.y = -0.5; grass.receiveShadow = true; scene.add(grass);
 
-    const grid = new THREE.GridHelper(148, 37, 0x40916c, 0x40916c);
-    grid.position.y = 0.04; grid.material.opacity = 0.22; grid.material.transparent = true; scene.add(grid);
+    // Subtle Grid cleanly above grass at y = 0.04
+    const grid = new THREE.GridHelper(340, 68, 0x40916c, 0x40916c);
+    grid.position.y = 0.04; grid.material.opacity = 0.2; grid.material.transparent = true; scene.add(grid);
 
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.75 });
-    const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.5 });
-    const nsRoad = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 96), roadMat); nsRoad.position.y = 0.04; nsRoad.receiveShadow = true;
-    const ewRoad = new THREE.Mesh(new THREE.BoxGeometry(104, 0.08, 4.2), roadMat); ewRoad.position.y = 0.04; ewRoad.receiveShadow = true;
-    scene.add(nsRoad, ewRoad);
-    for (let i = -42; i <= 42; i += 6) {
-      if (Math.abs(i) < 10) continue;
-      const s1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.09, 2.5), stripeMat); s1.position.set(0, 0.05, i);
-      const s2 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.09, 0.3), stripeMat); s2.position.set(i, 0.05, 0);
-      scene.add(s1, s2);
-    }
+    // Winding Curved S-Bend Roads connecting all 5 zones + Outer Scenic Loop
+    buildCurvedRoad(scene, [[0, 0], [18, -32], [-18, -68], [-24, -112]]);
+    buildCurvedRoad(scene, [[0, 0], [38, -22], [75, 16], [118, -18]]);
+    buildCurvedRoad(scene, [[0, 0], [-36, 28], [-76, -12], [-115, 22]]);
+    buildCurvedRoad(scene, [[0, 0], [-22, 38], [26, 72], [26, 114]]);
+    // Outer island scenic circuit
+    buildCurvedRoad(scene, [[-24, -112], [62, -108], [118, -18], [108, 78], [26, 114], [-68, 102], [-115, 22], [-98, -72], [-24, -112]], 6.0);
 
-    // Trees, Rocks, Clouds
+    // Lush Forests, Boulders & Clouds across the massive island
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7f4f24, roughness: 0.9 });
     const pineMat1 = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.75 });
     const pineMat2 = new THREE.MeshStandardMaterial({ color: 0x40916c, roughness: 0.75 });
-    [[-18,-18],[-24,-12],[-15,-28],[18,-18],[26,-15],[16,-32],[-20,18],[-28,22],[-14,30],[20,18],[28,24],[16,32],[-36,-24],[36,-24],[-36,24],[36,24],[-64,-22],[-64,22],[68,-28],[68,28]].forEach(([tx, tz], i) => {
+    for (let i = 0; i < 65; i++) {
+      const angle = (i / 65) * Math.PI * 2 + (i % 3) * 0.2;
+      const dist = 34 + ((i * 37) % 135);
+      const tx = Math.cos(angle) * dist;
+      const tz = Math.sin(angle) * dist;
+      if (ZONES.some(z => Math.hypot(tx - z.x, tz - z.z) < z.radius + 7)) continue;
       const t = new THREE.Group();
-      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.45, 2.2, 8), trunkMat); tr.position.y = 1.1; tr.castShadow = true;
-      const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.0, 3.2, 8), i % 2 === 0 ? pineMat1 : pineMat2); c1.position.y = 3.2; c1.castShadow = true;
-      const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.5, 8), pineMat2); c2.position.y = 4.7; c2.castShadow = true;
-      t.add(tr, c1, c2); t.scale.setScalar(0.85 + (i % 4) * 0.18); t.position.set(tx, 0, tz); scene.add(t);
-    });
+      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 2.5, 8), trunkMat); tr.position.y = 1.25; tr.castShadow = true;
+      const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.2, 3.6, 8), i % 2 === 0 ? pineMat1 : pineMat2); c1.position.y = 3.5; c1.castShadow = true;
+      const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.8, 8), pineMat2); c2.position.y = 5.2; c2.castShadow = true;
+      t.add(tr, c1, c2); t.scale.setScalar(0.9 + (i % 4) * 0.22); t.position.set(tx, 0, tz); scene.add(t);
+    }
 
-    const clouds = [];
-    const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
-    [[-34,26,-28],[28,30,-34],[42,27,26],[-38,29,32],[0,33,-72],[75,28,-10]].forEach(([cx, cy, cz], idx) => {
-      const cg = new THREE.Group();
-      for (let i = 0; i < 3; i++) {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(2.4 - i * 0.35, 10, 10), cloudMat);
-        b.scale.set(1.4, 0.65, 1.0); b.position.set((i - 1) * 2.3, (i % 2) * 0.45, 0); cg.add(b);
-      }
-      cg.position.set(cx, cy, cz); scene.add(cg); clouds.push({ mesh: cg, baseX: cx, phase: idx });
-    });
-
-    // Collectible Golden Sky-Rings
+    // Collectible Golden Star Rings along the winding roads
     const collectibles = [];
     let ringsCollected = 0;
-    [[0,10,-24,0],[26,11,0,Math.PI/2],[-26,11,0,Math.PI/2],[0,10,24,0],[28,15,-26,Math.PI/4],[-28,15,26,Math.PI/4]].forEach(([x,y,z,ry], idx) => {
-      const m = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.22, 12, 32), new THREE.MeshStandardMaterial({ color: 0xffb703, emissive: 0xfb8500, emissiveIntensity: 0.45, roughness: 0.25, metalness: 0.6 }));
-      m.position.set(x, y, z); m.rotation.y = ry; scene.add(m);
+    [[18, 2.5, -32], [-18, 2.5, -68], [38, 2.5, -22], [75, 2.5, 16], [-36, 2.5, 28], [-76, 2.5, -12], [-22, 2.5, 38], [62, 2.5, -108]].forEach(([x, y, z], idx) => {
+      const m = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.28, 12, 32), new THREE.MeshStandardMaterial({ color: 0xffb703, emissive: 0xfb8500, emissiveIntensity: 0.45, roughness: 0.25, metalness: 0.6 }));
+      m.position.set(x, y, z); scene.add(m);
       collectibles.push({ mesh: m, baseY: y, phase: idx, collected: false });
     });
 
-    // Zone Landmarks
+    // Zone Landing Rings & Sky-to-Ground Beacons
+    const zoneBeacons = new Map();
     ZONES.forEach((z) => {
-      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.7, z.radius, 48), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
-      r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.08, z.z); scene.add(r);
+      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.8, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
+      r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.14, z.z); scene.add(r);
+
+      const beam = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.45, 1.4, 90, 16, 1, true),
+        new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.22, side: THREE.DoubleSide })
+      );
+      beam.position.set(z.x, 45, z.z);
+      scene.add(beam);
+      zoneBeacons.set(z.id, beam);
     });
 
-    // Central Plaza
-    const cPlinth = new THREE.Mesh(new THREE.CylinderGeometry(8.8, 9.6, 0.6, 36), new THREE.MeshStandardMaterial({ color: 0xf8f9fa })); cPlinth.position.y = 0.3; scene.add(cPlinth);
-    const cInner = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 6.5, 0.64, 36), new THREE.MeshStandardMaterial({ color: 0xe63946 })); cInner.position.y = 0.3; scene.add(cInner);
-    const cMon = new THREE.Mesh(new THREE.BoxGeometry(11.6, 3.7, 1.2), new THREE.MeshStandardMaterial({ color: 0x1d3557 })); cMon.position.set(0, 2.4, -4.8); cMon.castShadow = true; scene.add(cMon);
+    // Zone Landmarks
+    const cPlinth = new THREE.Mesh(new THREE.CylinderGeometry(11, 12, 0.5, 36), new THREE.MeshStandardMaterial({ color: 0xf8f9fa })); cPlinth.position.y = 0.25; scene.add(cPlinth);
     const centralSign = createTextPlane([
-      { text: 'MIGUEL ANDREI B. ABAD', size: 68, color: '#111111', gap: 22 },
-      { text: 'BS COMPUTER ENGINEERING · DE LA SALLE UNIVERSITY', size: 32, color: '#0077FF', gap: 16 },
-      { text: '01 // CENTRAL PLAZA · PRESS [ENTER] TO INSPECT', size: 24, weight: 'normal', color: '#595959' }
-    ], { width: 11.2, height: 3.3, accent: '#E63946' });
-    centralSign.position.set(0, 2.4, -4.18); scene.add(centralSign);
+      { text: 'MIGUEL ANDREI B. ABAD', size: 66, color: '#111111', gap: 22 },
+      { text: 'BS COMPUTER ENGINEERING · DE LA SALLE UNIVERSITY', size: 30, color: '#0077FF', gap: 16 },
+      { text: '01 // CENTRAL PLAZA · DRIVE IN TO INSPECT', size: 24, weight: 'normal', color: '#595959' }
+    ], { width: 12, height: 3.6, accent: '#E63946' });
+    centralSign.position.set(0, 3.0, -7); scene.add(centralSign);
 
-    // North Pavilion
-    const nBase = new THREE.Mesh(new THREE.BoxGeometry(14, 0.7, 14), new THREE.MeshStandardMaterial({ color: 0xf8f9fa })); nBase.position.set(0, 0.35, -48); scene.add(nBase);
-    [[-5.5,-5.5],[5.5,-5.5],[-5.5,5.5],[5.5,5.5]].forEach(([px,pz]) => {
-      const p = new THREE.Mesh(new THREE.BoxGeometry(0.95, 7.5, 0.95), new THREE.MeshStandardMaterial({ color: 0x1d3557 })); p.position.set(px, 4.1, -48 + pz); p.castShadow = true; scene.add(p);
-    });
-    const nRoof = new THREE.Mesh(new THREE.BoxGeometry(13.4, 0.75, 13.4), new THREE.MeshStandardMaterial({ color: 0x0077ff })); nRoof.position.set(0, 8.15, -48); scene.add(nRoof);
     const northSign = createTextPlane([
       { text: '02 // NORTH PAVILION', size: 34, color: '#0077FF', gap: 18 },
-      { text: 'RESUME & TECHNICAL MATRIX', size: 54, color: '#111111', gap: 20 },
-      { text: "DLSU Manila · Consistent Dean's Lister (2023–Present)", size: 30, weight: 'normal', color: '#595959' }
-    ], { width: 10, height: 3.4, accent: '#0077FF' });
-    northSign.position.set(0, 4.5, -42.6); scene.add(northSign);
+      { text: 'RESUME & TECHNICAL MATRIX', size: 52, color: '#111111', gap: 20 },
+      { text: "DLSU Manila · Consistent Dean's Lister", size: 28, weight: 'normal', color: '#595959' }
+    ], { width: 12, height: 3.8, accent: '#0077FF' });
+    northSign.position.set(-24, 3.6, -120); scene.add(northSign);
 
-    // East Lab
-    const eDeck = new THREE.Mesh(new THREE.BoxGeometry(26, 0.7, 30), new THREE.MeshStandardMaterial({ color: 0x2b2d42 })); eDeck.position.set(52, 0.35, 0); scene.add(eDeck);
     const eastSign = createTextPlane([
       { text: '03 // EAST HARDWARE & AI SKY-LAB', size: 32, color: '#0077FF', gap: 16 },
-      { text: 'ACADEMIC WORK SAMPLES', size: 54, color: '#111111', gap: 14 },
-      { text: 'FSL Fusion · PIC16F877A PCB · PDF Catalog · SAP-1', size: 28, weight: 'normal', color: '#595959' }
-    ], { width: 11, height: 3.4, accent: '#00B4D8' });
-    eastSign.position.set(41.5, 5.2, 0); eastSign.rotation.y = -Math.PI / 2; scene.add(eastSign);
-    // 4 Colorful Project Centerpieces on East Deck
-    [[47.5,2.8,-8.5,0xe63946],[57.5,4.0,-5.5,0x0a7e48],[57.5,4.0,6.5,0x0077ff],[47.5,2.8,9.0,0x00b4d8]].forEach(([px,py,pz,col]) => {
-      const pad = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.5, 0.35, 24), new THREE.MeshStandardMaterial({ color: 0xf8f9fa })); pad.position.set(px, py, pz); scene.add(pad);
-      const blk = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.25 })); blk.position.set(px, py + 1.4, pz); blk.castShadow = true; scene.add(blk);
-    });
+      { text: 'ACADEMIC WORK SAMPLES', size: 52, color: '#111111', gap: 14 },
+      { text: 'FSL Fusion · PIC16F877A PCB · PDF Catalog · SAP-1', size: 26, weight: 'normal', color: '#595959' }
+    ], { width: 12.5, height: 3.8, accent: '#00B4D8' });
+    eastSign.position.set(126, 3.6, -18); eastSign.rotation.y = -Math.PI / 2; scene.add(eastSign);
 
-    // West Hub
-    [0,1,2].forEach((tier) => {
-      const r = 10.2 - tier * 2.2;
-      const s = new THREE.Mesh(new THREE.CylinderGeometry(r, r + 0.35, 0.6, 32), new THREE.MeshStandardMaterial({ color: tier===0?0xf8f9fa:tier===1?0xffb703:0x1d3557 }));
-      s.position.set(-52, 0.3 + tier * 0.6, 0); scene.add(s);
-    });
     const westSign = createTextPlane([
       { text: '04 // WEST STUDENT HUB', size: 32, color: '#E63946', gap: 16 },
-      { text: 'ACCESS DLSU LEADERSHIP', size: 54, color: '#111111', gap: 18 },
-      { text: 'AVP for Academics (2026–Present) · Junior Officer (2025–2026)', size: 27, weight: 'normal', color: '#595959' }
-    ], { width: 10.5, height: 3.4, accent: '#FFB703' });
-    westSign.position.set(-45.2, 4.7, 0); westSign.rotation.y = Math.PI / 2; scene.add(westSign);
+      { text: 'ACCESS DLSU LEADERSHIP', size: 52, color: '#111111', gap: 18 },
+      { text: 'AVP for Academics · Junior Officer', size: 28, weight: 'normal', color: '#595959' }
+    ], { width: 12, height: 3.8, accent: '#FFB703' });
+    westSign.position.set(-123, 3.6, 22); westSign.rotation.y = Math.PI / 2; scene.add(westSign);
 
-    // South Lounge
-    const sTerr = new THREE.Mesh(new THREE.BoxGeometry(16, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0xf4d58d })); sTerr.position.set(0, 0.35, 48); scene.add(sTerr);
     const southSign = createTextPlane([
       { text: '05 // SOUTH LOUNGE', size: 34, color: '#FB5607', gap: 16 },
-      { text: 'REFERENCES & RECRUITER CONTACT', size: 48, color: '#111111', gap: 18 },
-      { text: 'Send Direct Message or Leave a Sky-Guestbook Note', size: 28, weight: 'normal', color: '#595959' }
-    ], { width: 11, height: 3.4, accent: '#FB5607' });
-    southSign.position.set(0, 4.5, 44.5); southSign.rotation.y = Math.PI; scene.add(southSign);
+      { text: 'REFERENCES & RECRUITER CONTACT', size: 46, color: '#111111', gap: 18 },
+      { text: 'Leave a Sky-Guestbook Note!', size: 28, weight: 'normal', color: '#595959' }
+    ], { width: 12, height: 3.8, accent: '#FB5607' });
+    southSign.position.set(26, 3.6, 122); southSign.rotation.y = Math.PI; scene.add(southSign);
 
-    // Balloon
-    const balloonRoot = new THREE.Group();
-    const swayGroup = new THREE.Group();
-    balloonRoot.add(swayGroup);
-    scene.add(balloonRoot);
+    // =========================================================================
+    // SWISS RACING CAR (Replaces Balloon!)
+    // =========================================================================
+    const carGroup = new THREE.Group();
+    scene.add(carGroup);
 
-    const basket = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.85, 1.3), new THREE.MeshStandardMaterial({ color: 0x1c1c1e, roughness: 0.75 }));
-    basket.position.y = 0.45; basket.castShadow = true; swayGroup.add(basket);
-    const rim = new THREE.Mesh(new THREE.BoxGeometry(1.42, 0.12, 1.42), new THREE.MeshStandardMaterial({ color: 0xe63946 }));
-    rim.position.y = 0.9; swayGroup.add(rim);
-    const flameMesh = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.95, 12), new THREE.MeshBasicMaterial({ color: 0xff7b00, transparent: true, opacity: 0 }));
-    flameMesh.position.y = 2.48; swayGroup.add(flameMesh);
-    const burnerLight = new THREE.PointLight(0xff7722, 0, 14, 1.6);
-    burnerLight.position.set(0, 3.6, 0); swayGroup.add(burnerLight);
+    const chassisMat = new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.3, metalness: 0.35 });
+    const stripeCarMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, metalness: 0.2 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.15, metalness: 0.6 });
 
-    const lathePts = [new THREE.Vector2(0.85, 2.85), new THREE.Vector2(1.45, 3.5), new THREE.Vector2(2.25, 4.5), new THREE.Vector2(2.55, 5.5), new THREE.Vector2(2.35, 6.5), new THREE.Vector2(1.7, 7.3), new THREE.Vector2(0.85, 7.8), new THREE.Vector2(0.01, 7.95)];
-    const palette = [0xe63946, 0xffffff, 0x111111, 0xffffff];
-    for (let i = 0; i < 12; i++) {
-      const geo = new THREE.LatheGeometry(lathePts, 4, i * (Math.PI * 2 / 12), (Math.PI * 2 / 12) + 0.004);
-      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: palette[i % 4], side: THREE.DoubleSide, emissive: 0xff5500, emissiveIntensity: 0 }));
-      m.castShadow = true; swayGroup.add(m);
-    }
+    // Main body
+    const bodyLower = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 4.4), chassisMat);
+    bodyLower.position.y = 0.55; bodyLower.castShadow = true; carGroup.add(bodyLower);
 
-    const shadowRing = new THREE.Mesh(new THREE.RingGeometry(1.5, 1.85, 36), new THREE.MeshBasicMaterial({ color: 0xe63946, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
-    shadowRing.rotation.x = -Math.PI / 2; shadowRing.position.y = 0.09; scene.add(shadowRing);
+    // Racing stripe
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.57, 4.42), stripeCarMat);
+    stripe.position.y = 0.56; carGroup.add(stripe);
 
-    const bBody = new CANNON.Body({ mass: 8, shape: new CANNON.Sphere(1.4), position: new CANNON.Vec3(0, 5.5, 14), linearDamping: 0.55, fixedRotation: true });
-    world.addBody(bBody);
+    // Cockpit cabin
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.52, 2.0), glassMat);
+    cabin.position.set(0, 1.02, -0.15); cabin.castShadow = true; carGroup.add(cabin);
+
+    // Rear GT Wing Spoiler
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.55), darkMat);
+    wing.position.set(0, 1.25, 1.95); wing.castShadow = true; carGroup.add(wing);
+    [-0.7, 0.7].forEach(wx => {
+      const strut = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.45, 0.25), darkMat);
+      strut.position.set(wx, 1.0, 1.95); carGroup.add(strut);
+    });
+
+    // Headlights & Taillights
+    const hlMat = new THREE.MeshBasicMaterial({ color: 0xfff3b0 });
+    const tlMat = new THREE.MeshBasicMaterial({ color: 0xff0022 });
+    [-0.7, 0.7].forEach(lx => {
+      const hl = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.16, 0.08), hlMat); hl.position.set(lx, 0.6, -2.21); carGroup.add(hl);
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.08), tlMat); tl.position.set(lx, 0.6, 2.21); carGroup.add(tl);
+    });
+
+    // 4 Spinning Wheels
+    const wheels = [];
+    const wGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.34, 18);
+    wGeo.rotateZ(Math.PI / 2);
+    const wMat = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.8 });
+    [[-1.12, 0.42, -1.35], [1.12, 0.42, -1.35], [-1.12, 0.42, 1.35], [1.12, 0.42, 1.35]].forEach(([wx, wy, wz]) => {
+      const w = new THREE.Mesh(wGeo, wMat);
+      w.position.set(wx, wy, wz); w.castShadow = true; carGroup.add(w);
+      wheels.push(w);
+    });
+
+    // Nitro Flame Exhausts
+    const nitroFlames = [-0.45, 0.45].map(fx => {
+      const f = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.9, 10), new THREE.MeshBasicMaterial({ color: 0x00b4d8, transparent: true, opacity: 0 }));
+      f.rotation.x = Math.PI / 2; f.position.set(fx, 0.45, 2.55); carGroup.add(f);
+      return f;
+    });
+
+    // Car Arcade Physics State
+    const car = {
+      x: 0, z: 16,
+      heading: 0,
+      speed: 0,
+      steerAngle: 0
+    };
 
     // Orbit Camera (Drag to look around, Scroll to zoom)
-    const camState = { yaw: 0, pitch: 0.28, distance: 22, dragging: false, lastX: 0, lastY: 0 };
+    const camState = { yawOffset: 0, pitch: 0.28, distance: 15, dragging: false, lastX: 0, lastY: 0 };
     renderer.domElement.addEventListener('pointerdown', (e) => { camState.dragging = true; camState.lastX = e.clientX; camState.lastY = e.clientY; });
     window.addEventListener('pointermove', (e) => {
       if (!camState.dragging) return;
-      camState.yaw -= (e.clientX - camState.lastX) * 0.006;
-      camState.pitch = THREE.MathUtils.clamp(camState.pitch + (e.clientY - camState.lastY) * 0.005, -0.15, 1.15);
+      camState.yawOffset -= (e.clientX - camState.lastX) * 0.006;
+      camState.pitch = THREE.MathUtils.clamp(camState.pitch + (e.clientY - camState.lastY) * 0.005, 0.06, 1.05);
       camState.lastX = e.clientX; camState.lastY = e.clientY;
     });
     window.addEventListener('pointerup', () => { camState.dragging = false; });
     renderer.domElement.addEventListener('wheel', (e) => {
-      camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.015, 11, 42);
+      camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.015, 8, 34);
     }, { passive: true });
 
-    // State & UI
+    // State & Sky-to-Ground Auto Panel
     const sound = new SoundEngine();
     const keys = new Set();
-    let activeZone = null, isDrawerOpen = false, isClassic = false;
-    const touchInput = { x: 0, z: 0, burn: false, vent: false };
+    let activeZone = null, isClassic = false, panelDismissedZoneId = null;
+    const touchInput = { steer: 0, throttle: 0, boost: false, brake: false };
     const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     function showToast(msg) {
@@ -514,85 +539,92 @@
       clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.add('hidden'), 2200);
     }
 
-    function openZone(zoneId) {
-      sound.playClick(); isDrawerOpen = true;
-      const body = document.getElementById('zoneDrawerBody');
+    const skyPanel = document.getElementById('skyDropPanel');
+    const skyBody = document.getElementById('skyDropBody');
+    const panelDot = document.getElementById('panelZoneDot');
+    const panelLabel = document.getElementById('panelZoneLabel');
+
+    function showSkyDropPanel(zone) {
+      panelDot.style.backgroundColor = zone.color;
+      panelLabel.textContent = zone.name;
       const p = PORTFOLIO.profile, edu = PORTFOLIO.education[0];
-      if (zoneId === 'central') {
-        body.innerHTML = `<div class="space-y-4">
-          <span class="text-xs font-mono font-bold text-[#E63946]">01 // CENTRAL PLAZA</span>
-          <h2 class="text-2xl font-bold">${esc(p.full_name)}</h2>
-          <p class="text-sm text-neutral-600">${esc(p.tagline)}</p>
-          <p class="text-sm text-neutral-700">${esc(p.summary)}</p>
-          <div class="p-4 rounded bg-neutral-50 border border-neutral-200 space-y-2 text-xs">
-            <div><strong>Email:</strong> ${esc(p.email)}</div>
-            <div><strong>Phone:</strong> ${esc(p.phone)}</div>
-            <a href="${esc(p.linkedin_url)}" target="_blank" class="inline-block px-3 py-1.5 rounded bg-[#0047FF] text-white font-semibold">Open LinkedIn ↗</a>
+      if (zone.id === 'central') {
+        skyBody.innerHTML = `<div class="space-y-3">
+          <h2 class="text-xl font-bold">${esc(p.full_name)}</h2>
+          <p class="text-xs text-neutral-600">${esc(p.tagline)}</p>
+          <p class="text-xs text-neutral-700 leading-relaxed">${esc(p.summary)}</p>
+          <div class="flex flex-wrap gap-2 text-xs pt-1">
+            <span class="px-2.5 py-1 rounded bg-neutral-100 font-mono">${esc(p.email)}</span>
+            <span class="px-2.5 py-1 rounded bg-neutral-100 font-mono">${esc(p.phone)}</span>
+            <a href="${esc(p.linkedin_url)}" target="_blank" class="px-3 py-1 rounded bg-[#0047FF] text-white font-semibold">LinkedIn ↗</a>
           </div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500">Live Sky-Guestbook</h3>
-          <div class="space-y-2">${guestbookNotes.map(n => `<div class="p-3 rounded bg-neutral-50 border text-xs"><strong>${esc(n.sender_name)}</strong>: ${esc(n.message)}</div>`).join('')}</div>
+          <div class="pt-2 border-t space-y-1.5">${guestbookNotes.slice(0, 3).map(n => `<div class="p-2 rounded bg-neutral-50 border text-xs"><strong>${esc(n.sender_name)}:</strong> ${esc(n.message)}</div>`).join('')}</div>
         </div>`;
-      } else if (zoneId === 'north') {
-        body.innerHTML = `<div class="space-y-4">
-          <span class="text-xs font-mono font-bold text-[#0047FF]">02 // NORTH PAVILION</span>
-          <h2 class="text-2xl font-bold">Resume & Technical Matrix</h2>
-          <div class="p-4 rounded bg-neutral-50 border"><strong>${esc(edu.institution)}</strong><br><span class="text-xs text-[#0047FF]">${esc(edu.degree)} (${esc(edu.period)}) · ${esc(edu.honors)}</span></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${PORTFOLIO.skills.map(s => `<div class="p-3 rounded border text-xs"><strong>${esc(s.category)}</strong><div class="mt-1 flex flex-wrap gap-1">${s.items.map(i => `<span class="px-2 py-0.5 bg-neutral-100 rounded">${esc(i)}</span>`).join('')}</div></div>`).join('')}</div>
+      } else if (zone.id === 'north') {
+        skyBody.innerHTML = `<div class="space-y-3">
+          <h2 class="text-xl font-bold">Resume & Technical Matrix</h2>
+          <div class="p-3 rounded bg-neutral-50 border text-xs"><strong>${esc(edu.institution)}</strong> · ${esc(edu.degree)} (${esc(edu.period)}) · <span class="text-[#0047FF] font-semibold">${esc(edu.honors)}</span></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${PORTFOLIO.skills.map(s => `<div class="p-2.5 rounded border text-xs"><strong>${esc(s.category)}</strong><div class="mt-1 flex flex-wrap gap-1">${s.items.map(i => `<span class="px-1.5 py-0.5 bg-neutral-100 rounded text-[11px]">${esc(i)}</span>`).join('')}</div></div>`).join('')}</div>
         </div>`;
-      } else if (zoneId === 'east') {
-        body.innerHTML = `<div class="space-y-4">
-          <span class="text-xs font-mono font-bold text-[#0047FF]">03 // EAST HARDWARE & AI SKY-LAB</span>
-          <h2 class="text-2xl font-bold">Academic Work Samples</h2>
-          ${PORTFOLIO.projects.map(pr => `<div class="p-4 rounded border space-y-1.5"><span class="text-[10px] font-mono text-[#0047FF] font-bold">${esc(pr.status)}</span><h3 class="font-bold text-sm">${esc(pr.title)}</h3><p class="text-xs text-neutral-600">${esc(pr.overview)}</p><div class="flex flex-wrap gap-1">${pr.technologies.map(t => `<span class="px-2 py-0.5 bg-neutral-100 rounded text-[11px] font-mono">${esc(t)}</span>`).join('')}</div></div>`).join('')}
+      } else if (zone.id === 'east') {
+        skyBody.innerHTML = `<div class="space-y-3">
+          <h2 class="text-xl font-bold">Academic Work Samples</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${PORTFOLIO.projects.map(pr => `<div class="p-3 rounded border space-y-1"><span class="text-[10px] font-mono text-[#0077FF] font-bold">${esc(pr.status)}</span><h3 class="font-bold text-xs">${esc(pr.title)}</h3><p class="text-[11px] text-neutral-600">${esc(pr.overview)}</p><div class="flex flex-wrap gap-1">${pr.technologies.slice(0, 5).map(t => `<span class="px-1.5 py-0.5 bg-neutral-100 rounded text-[10px] font-mono">${esc(t)}</span>`).join('')}</div></div>`).join('')}</div>
         </div>`;
-      } else if (zoneId === 'west') {
-        body.innerHTML = `<div class="space-y-4">
-          <span class="text-xs font-mono font-bold text-[#E63946]">04 // WEST STUDENT HUB</span>
-          <h2 class="text-2xl font-bold">ACCESS DLSU — Leadership & Service</h2>
-          ${PORTFOLIO.experiences.map(e => `<div class="pl-3 border-l-2 border-[#0047FF]"><h3 class="font-bold text-sm">${esc(e.role)} <span class="text-xs font-mono text-neutral-500">(${esc(e.period)})</span></h3><ul class="list-disc ml-4 text-xs text-neutral-700 mt-1">${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>`).join('')}
+      } else if (zone.id === 'west') {
+        skyBody.innerHTML = `<div class="space-y-3">
+          <h2 class="text-xl font-bold">ACCESS DLSU — Leadership & Service</h2>
+          ${PORTFOLIO.experiences.map(e => `<div class="pl-3 border-l-2 border-[#0047FF]"><h3 class="font-bold text-xs">${esc(e.role)} <span class="font-mono text-neutral-500">(${esc(e.period)})</span></h3><ul class="list-disc ml-4 text-[11px] text-neutral-700 mt-1">${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>`).join('')}
         </div>`;
       } else {
-        body.innerHTML = `<div class="space-y-4">
-          <span class="text-xs font-mono font-bold text-[#E63946]">05 // SOUTH LOUNGE</span>
-          <h2 class="text-2xl font-bold">References & Guestbook</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${PORTFOLIO.references.map(r => `<div class="p-3 rounded border bg-neutral-50 text-xs"><strong>${esc(r.name)}</strong><p class="text-neutral-600 mt-1">${esc(r.relationship)}</p></div>`).join('')}</div>
-          <form id="gbForm" class="p-4 rounded border space-y-2">
+        skyBody.innerHTML = `<div class="space-y-3">
+          <h2 class="text-xl font-bold">References & Sky-Guestbook</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${PORTFOLIO.references.map(r => `<div class="p-2.5 rounded border bg-neutral-50 text-xs"><strong>${esc(r.name)}</strong><p class="text-neutral-600 mt-0.5 text-[11px]">${esc(r.relationship)}</p></div>`).join('')}</div>
+          <form id="gbForm" class="p-3 rounded border space-y-2">
             <p class="text-xs font-bold uppercase">Leave a Sky-Guestbook Note</p>
             <input name="name" required placeholder="Your Name" class="w-full px-3 py-1.5 text-xs border rounded" />
             <textarea name="msg" required rows="2" placeholder="Your note..." class="w-full px-3 py-1.5 text-xs border rounded"></textarea>
-            <button class="px-4 py-2 rounded bg-[#111111] text-white text-xs font-bold uppercase">Post Note</button>
+            <button class="px-4 py-1.5 rounded bg-[#111111] text-white text-xs font-bold uppercase">Post Note</button>
           </form>
         </div>`;
-        body.querySelector('#gbForm').addEventListener('submit', (e) => {
+        skyBody.querySelector('#gbForm').addEventListener('submit', (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
           guestbookNotes.unshift({ sender_name: fd.get('name'), message: fd.get('msg') });
           localStorage.setItem('miguel_guestbook', JSON.stringify(guestbookNotes));
-          openZone('central');
+          showToast('Guestbook note posted!');
+          showSkyDropPanel(ZONES[0]);
         });
       }
-      document.getElementById('zoneDrawer').classList.remove('hidden');
-      document.getElementById('zoneDrawer').classList.add('flex');
+      skyPanel.classList.remove('panel-hidden');
+      skyPanel.classList.add('panel-visible');
     }
 
-    document.getElementById('closeDrawerBtn').addEventListener('click', () => {
-      isDrawerOpen = false;
-      document.getElementById('zoneDrawer').classList.add('hidden');
-      document.getElementById('zoneDrawer').classList.remove('flex');
+    function hideSkyDropPanel() {
+      skyPanel.classList.remove('panel-visible');
+      skyPanel.classList.add('panel-hidden');
+    }
+
+    document.getElementById('closePanelBtn').addEventListener('click', () => {
+      if (activeZone) panelDismissedZoneId = activeZone.id;
+      hideSkyDropPanel();
     });
     document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
       e.target.textContent = sound.toggleMute() ? '🔊 Sound On' : '🔇 Sound Off';
     });
-    document.getElementById('contactQuickBtn').addEventListener('click', () => openZone('south'));
-    document.getElementById('zonePromptBtn').addEventListener('click', () => activeZone && openZone(activeZone.id));
+    document.getElementById('contactQuickBtn').addEventListener('click', () => {
+      panelDismissedZoneId = null;
+      showSkyDropPanel(ZONES[4]);
+    });
     document.getElementById('viewToggleBtn').addEventListener('click', () => {
       isClassic = !isClassic;
       const cv = document.getElementById('classicViewContainer');
       if (isClassic) {
+        hideSkyDropPanel();
         cv.innerHTML = `<div class="max-w-4xl mx-auto p-8 bg-white min-h-screen space-y-6">
           <div class="flex justify-between items-center border-b pb-4">
             <div><h1 class="text-2xl font-bold">${esc(PORTFOLIO.profile.full_name)}</h1><p class="text-xs text-neutral-500">${esc(PORTFOLIO.profile.email)} · ${esc(PORTFOLIO.profile.phone)}</p></div>
-            <button id="back3d" class="px-4 py-2 rounded bg-[#E63946] text-white text-xs font-bold">✈ 3D Flight Mode</button>
+            <button id="back3d" class="px-4 py-2 rounded bg-[#E63946] text-white text-xs font-bold">🏎 3D Grand Prix Mode</button>
           </div>
           <p class="text-sm text-neutral-700">${esc(PORTFOLIO.profile.summary)}</p>
           <h2 class="text-lg font-bold border-b pb-1">Academic Work Samples</h2>
@@ -606,9 +638,9 @@
     });
 
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'Enter' && activeZone && !isDrawerOpen) openZone(activeZone.id);
-      if (e.code === 'KeyR' && !isDrawerOpen) { bBody.position.set(0, 5.5, 14); bBody.velocity.set(0, 0, 0); }
-      if (e.code === 'Escape' && isDrawerOpen) document.getElementById('closeDrawerBtn').click();
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'KeyR') { car.x = 0; car.z = 16; car.speed = 0; car.heading = 0; showToast('Car reset to start'); }
+      if (e.code === 'Escape') hideSkyDropPanel();
       keys.add(e.code);
     });
     window.addEventListener('keyup', (e) => keys.delete(e.code));
@@ -628,68 +660,93 @@
       const dt = Math.min(clock.getDelta(), 0.05);
       const t = clock.elapsedTime;
       if (!isClassic) {
-        world.step(1 / 60, dt, 3);
-        let rawX = 0, rawZ = 0;
-        if (!isDrawerOpen) {
-          if (keys.has('KeyA') || keys.has('ArrowLeft')) rawX -= 1;
-          if (keys.has('KeyD') || keys.has('ArrowRight')) rawX += 1;
-          if (keys.has('KeyW') || keys.has('ArrowUp')) rawZ -= 1;
-          if (keys.has('KeyS') || keys.has('ArrowDown')) rawZ += 1;
+        const isTyping = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+        const fwd = !isTyping && (keys.has('KeyW') || keys.has('ArrowUp'));
+        const rev = !isTyping && (keys.has('KeyS') || keys.has('ArrowDown'));
+        const left = !isTyping && (keys.has('KeyA') || keys.has('ArrowLeft'));
+        const right = !isTyping && (keys.has('KeyD') || keys.has('ArrowRight'));
+        const boost = !isTyping && (keys.has('ShiftLeft') || keys.has('ShiftRight') || keys.has('Space') || touchInput.boost);
+
+        const maxSpeed = boost ? 58 : 38;
+        const accel = boost ? 62 : 34;
+        if (fwd) car.speed += accel * dt;
+        else if (rev) car.speed -= 28 * dt;
+        else car.speed *= Math.pow(0.22, dt);
+
+        car.speed = THREE.MathUtils.clamp(car.speed, -16, maxSpeed);
+
+        const steerInput = (left ? 1 : 0) - (right ? 1 : 0);
+        if (Math.abs(car.speed) > 0.5) {
+          const dir = car.speed >= 0 ? 1 : -1;
+          car.heading += steerInput * 2.25 * dt * dir;
         }
-        const mag = Math.hypot(rawX, rawZ);
-        if (mag > 1) { rawX /= mag; rawZ /= mag; }
-        const cos = Math.cos(camState.yaw), sin = Math.sin(camState.yaw);
-        const ix = rawX * cos + rawZ * sin;
-        const iz = -rawX * sin + rawZ * cos;
 
-        const burn = !isDrawerOpen && (keys.has('Space') || touchInput.burn);
-        const vent = !isDrawerOpen && (keys.has('ShiftLeft') || keys.has('ShiftRight') || keys.has('KeyC') || touchInput.vent);
-        bBody.applyForce(new CANNON.Vec3(ix * 125 + Math.sin(t * 0.3) * 3, 78.56 + (burn ? 185 : 0) - (vent ? 135 : 0), iz * 125), bBody.position);
-        if (bBody.position.y < 1.5) { bBody.position.y = 1.5; bBody.velocity.y = Math.max(0, bBody.velocity.y); }
-        if (bBody.position.y > 38) { bBody.position.y = 38; bBody.velocity.y = Math.min(0, bBody.velocity.y); }
-        balloonRoot.position.set(bBody.position.x, bBody.position.y - 1.2, bBody.position.z);
-        swayGroup.rotation.set(THREE.MathUtils.clamp(bBody.velocity.z * 0.024, -0.24, 0.24), 0, THREE.MathUtils.clamp(-bBody.velocity.x * 0.024, -0.24, 0.24));
-        burnerLight.intensity = burn ? 3.2 : 0;
-        flameMesh.material.opacity = burn ? 0.9 : 0;
-        shadowRing.position.set(bBody.position.x, 0.09, bBody.position.z);
-        sound.updateFlightAudio({ isBurning: burn, speed: bBody.velocity.length(), altitude: bBody.position.y });
+        car.x -= Math.sin(car.heading) * car.speed * dt;
+        car.z -= Math.cos(car.heading) * car.speed * dt;
 
-        clouds.forEach(c => { c.mesh.position.x = c.baseX + Math.sin(t * 0.15 + c.phase) * 3.5; });
-        collectibles.forEach(c => {
-          c.mesh.position.y = c.baseY + Math.sin(t * 2 + c.phase) * 0.45;
-          if (!c.collected && Math.hypot(bBody.position.x - c.mesh.position.x, bBody.position.y - c.mesh.position.y, bBody.position.z - c.mesh.position.z) < 3.6) {
-            c.collected = true; c.mesh.material.color.setHex(0x52b788); c.mesh.material.emissive.setHex(0x2d6a4f);
-            ringsCollected++; document.getElementById('ringScoreBadge').textContent = `★ ${ringsCollected} / 6`;
-            sound.playZoneChime(); showToast('★ Sky-Ring Cleared!');
-          }
-        });
+        // Keep car on massive 180m island
+        const rDist = Math.hypot(car.x, car.z);
+        if (rDist > 174) {
+          const s = 174 / rDist;
+          car.x *= s; car.z *= s; car.speed *= 0.5;
+        }
 
+        carGroup.position.set(car.x, 0, car.z);
+        carGroup.rotation.y = car.heading;
+        wheels.forEach(w => { w.rotation.x -= car.speed * dt * 0.9; });
+        nitroFlames.forEach(f => { f.material.opacity = boost && Math.abs(car.speed) > 4 ? 0.9 : 0; });
+
+        sound.updateEngine(Math.abs(car.speed), boost);
+
+        // Speedometer HUD
+        const kmh = Math.round(Math.abs(car.speed) * 3.2);
+        document.getElementById('speedValue').textContent = kmh;
+        document.getElementById('speedBarFill').style.height = `${Math.min(100, Math.max(4, (kmh / 185) * 100))}%`;
+        document.getElementById('boostStatus').classList.toggle('hidden', !boost);
+
+        // Orbit + Follow Camera behind car
+        const camAngle = car.heading + camState.yawOffset;
         const hDist = Math.cos(camState.pitch) * camState.distance;
         const vDist = Math.sin(camState.pitch) * camState.distance;
         const desiredCam = new THREE.Vector3(
-          bBody.position.x + Math.sin(camState.yaw) * hDist,
-          Math.max(2.0, bBody.position.y + 3.2 + vDist),
-          bBody.position.z + Math.cos(camState.yaw) * hDist
+          car.x + Math.sin(camAngle) * hDist,
+          Math.max(2.2, 2.2 + vDist),
+          car.z + Math.cos(camAngle) * hDist
         );
-        camera.position.lerp(desiredCam, Math.min(1, dt * 6));
-        camTarget.lerp(new THREE.Vector3(bBody.position.x, bBody.position.y + 3.2, bBody.position.z), Math.min(1, dt * 7));
+        camera.position.lerp(desiredCam, Math.min(1, dt * 7));
+        camTarget.lerp(new THREE.Vector3(car.x, 1.6, car.z), Math.min(1, dt * 9));
         camera.lookAt(camTarget);
 
-        const nearest = ZONES.find(z => Math.hypot(bBody.position.x - z.x, bBody.position.z - z.z) <= z.radius) || null;
+        // Collectible Star Rings
+        collectibles.forEach(c => {
+          c.mesh.rotation.y = t * 1.5 + c.phase;
+          if (!c.collected && Math.hypot(car.x - c.mesh.position.x, car.z - c.mesh.position.z) < 4.2) {
+            c.collected = true; c.mesh.material.color.setHex(0x52b788); c.mesh.material.emissive.setHex(0x2d6a4f);
+            ringsCollected++; document.getElementById('ringScoreBadge').textContent = `★ ${ringsCollected} / 8`;
+            sound.playChime(); showToast('★ Gate Cleared!');
+          }
+        });
+
+        // Automatic Sky-to-Ground Info Drop when entering a zone!
+        const nearest = ZONES.find(z => Math.hypot(car.x - z.x, car.z - z.z) <= z.radius) || null;
         if (nearest?.id !== activeZone?.id) {
           activeZone = nearest;
-          const btn = document.getElementById('zonePromptBtn');
-          if (nearest) { sound.playZoneChime(); document.getElementById('zonePromptName').textContent = nearest.name; btn.classList.remove('hidden'); }
-          else btn.classList.add('hidden');
+          if (nearest) {
+            sound.playChime();
+            if (panelDismissedZoneId !== nearest.id) {
+              showSkyDropPanel(nearest);
+            }
+          } else {
+            panelDismissedZoneId = null;
+            hideSkyDropPanel();
+          }
         }
 
-        document.getElementById('altValue').textContent = `${bBody.position.y.toFixed(1)}m`;
-        document.getElementById('vsValue').textContent = `${bBody.velocity.y >= 0 ? '+' : ''}${bBody.velocity.y.toFixed(1)}`;
-        document.getElementById('altBarFill').style.height = `${Math.min(100, Math.max(4, (bBody.position.y / 38) * 100))}%`;
-
-        radarCtx.clearRect(0, 0, 128, 128);
-        ZONES.forEach(z => { radarCtx.fillStyle = z.color; radarCtx.beginPath(); radarCtx.arc(64 + z.x * 0.8, 64 + z.z * 0.8, 4.5, 0, Math.PI * 2); radarCtx.fill(); });
-        radarCtx.fillStyle = '#E63946'; radarCtx.beginPath(); radarCtx.arc(64 + bBody.position.x * 0.8, 64 + bBody.position.z * 0.8, 5.5, 0, Math.PI * 2); radarCtx.fill();
+        // Massive Island GPS Radar
+        radarCtx.clearRect(0, 0, 136, 136);
+        const scale = 136 / 360;
+        ZONES.forEach(z => { radarCtx.fillStyle = z.color; radarCtx.beginPath(); radarCtx.arc(68 + z.x * scale, 68 + z.z * scale, 4.5, 0, Math.PI * 2); radarCtx.fill(); });
+        radarCtx.fillStyle = '#111111'; radarCtx.beginPath(); radarCtx.arc(68 + car.x * scale, 68 + car.z * scale, 4.5, 0, Math.PI * 2); radarCtx.fill();
 
         renderer.render(scene, camera);
       }
