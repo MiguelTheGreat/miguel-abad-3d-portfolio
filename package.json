@@ -1,0 +1,16 @@
+{
+  "name": "miguel-abad-3d-portfolio",
+  "version": "1.0.0",
+  "description": "Full-Stack Interactive 3D Hot Air Balloon Career e-Portfolio for Miguel Andrei B. Abad",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,red\" \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start",
+    "seed": "npm --prefix server run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
