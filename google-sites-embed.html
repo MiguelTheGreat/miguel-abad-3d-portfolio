@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Miguel Andrei B. Abad — 3D Racecar Career e-Portfolio</title>
+  <title>Miguel Andrei B. Abad — 3D Career e-Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
     {
@@ -17,6 +17,12 @@
     * { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     code, pre, .font-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #219ebc; color: #111111; }
+    .swiss-grid-bg {
+      background-size: 32px 32px;
+      background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+    }
     @media print { .no-print { display: none !important; } body { overflow: visible !important; } }
   </style>
 </head>
@@ -25,11 +31,10 @@
 
   <!-- Non-Intrusive Minimalist HUD -->
   <div id="hudOverlay" class="fixed inset-0 z-10 pointer-events-none select-none">
-    <!-- Top-Left Bar -->
     <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2 pointer-events-auto">
       <div class="px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm flex items-center gap-2.5">
         <span class="w-2.5 h-2.5 rounded-full bg-[#E63946]"></span>
-        <span class="text-xs font-bold tracking-wider uppercase">MIGUEL ABAD // 3D GRAND PRIX</span>
+        <span class="text-xs font-bold tracking-wider uppercase">MIGUEL ABAD // 3D PORTFOLIO</span>
       </div>
       <button id="soundToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#111111] hover:text-white transition-colors">🔇 Sound Off</button>
       <button id="viewToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#0047FF] hover:text-white transition-colors">📄 2D Classic View</button>
@@ -37,12 +42,11 @@
       <div id="ringScoreBadge" class="px-3 py-2 rounded bg-[#FFB703] text-[#111111] shadow-sm text-xs font-mono font-bold">★ 0 / 10</div>
     </div>
 
-    <!-- Subtle Station Indicator Pill (Top-Center, non-intrusive) -->
     <div id="stationBadge" class="hidden absolute top-16 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#111111]/85 text-white text-[11px] font-mono font-bold uppercase tracking-widest shadow">
-      Entering Station
+      Station
     </div>
 
-    <!-- Right Side: Speedometer -->
+    <!-- Speedometer -->
     <div class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md border border-black/15 rounded p-2.5 shadow-sm flex flex-col items-center gap-2 w-16">
       <span class="text-[10px] font-mono font-bold tracking-widest text-neutral-500">KM/H</span>
       <div class="w-2.5 h-36 bg-neutral-200 rounded-full relative overflow-hidden flex items-end">
@@ -52,11 +56,11 @@
       <span id="boostStatus" class="text-[9px] font-mono font-bold text-[#0047FF] hidden">NITRO</span>
     </div>
 
-    <!-- Bottom-Left: Keycaps -->
+    <!-- Keycaps -->
     <div class="hidden sm:flex absolute bottom-4 left-4 px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm items-center gap-2 text-[11px] font-mono text-neutral-700">
       <span><strong>WASD</strong> Drive</span><span>·</span>
       <span><strong>SHIFT / SPACE</strong> Nitro</span><span>·</span>
-      <span><strong>DRAG</strong> Look</span><span>·</span>
+      <span><strong>DRAG</strong> Tilt/Look</span><span>·</span>
       <span><strong>SCROLL</strong> Zoom</span><span>·</span>
       <span><strong>R</strong> Reset</span>
     </div>
@@ -69,7 +73,7 @@
       <button id="mobileBoostBtn" class="px-4 py-2.5 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider shadow active:scale-95">NITRO ⚡</button>
     </div>
 
-    <!-- Bottom-Right: Interactive Island GPS (Click a station to warp!) -->
+    <!-- Interactive Island GPS -->
     <div class="absolute bottom-4 right-4 p-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm pointer-events-auto">
       <div class="flex items-center justify-between text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-1 px-1">
         <span>GPS (CLICK WARP)</span><span>5 STATIONS</span>
@@ -78,7 +82,7 @@
     </div>
   </div>
 
-  <!-- Optional Guestbook/Links Modal (only opens when user clicks button) -->
+  <!-- Optional Guestbook/Links Modal -->
   <div id="guestbookModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/45 backdrop-blur-sm p-4">
     <div class="bg-white border border-black/20 rounded-lg max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b pb-3">
@@ -97,7 +101,7 @@
         <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" rel="noopener noreferrer" class="inline-block mt-1 px-3 py-1.5 rounded bg-[#0047FF] text-white font-semibold">Open LinkedIn Profile ↗</a>
       </div>
       <form id="gbForm" class="space-y-2 pt-2 border-t">
-        <p class="text-xs font-bold uppercase">Post to Central Plaza 3D Notice Board</p>
+        <p class="text-xs font-bold uppercase">Post to Central Plaza Notice Board</p>
         <input name="name" required placeholder="Your Name" class="w-full px-3 py-1.5 text-xs border rounded" />
         <textarea name="msg" required rows="2" placeholder="Your note..." class="w-full px-3 py-1.5 text-xs border rounded"></textarea>
         <button class="w-full py-2 rounded bg-[#111111] text-white text-xs font-bold uppercase hover:bg-[#0047FF] transition-colors">Post Note</button>
@@ -105,19 +109,19 @@
     </div>
   </div>
 
-  <div id="classicViewContainer" class="hidden fixed inset-0 overflow-y-auto z-20 bg-[#FAFAFA]"></div>
+  <!-- Rich 2D Classic View -->
+  <div id="classicViewContainer" class="hidden fixed inset-0 overflow-y-auto z-20 bg-[#FAFAFA] swiss-grid-bg"></div>
   <div id="toastBanner" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded bg-[#111111] text-white text-xs font-semibold shadow-lg">Copied</div>
 
   <script type="module">
     import * as THREE from 'three';
 
     const DEFAULT_NOTES = [
-      { sender_name: 'DLSU ECE Cohort', message: 'Awesome 3D notice boards and winding island roads!' },
+      { sender_name: 'DLSU ECE Cohort', message: 'Awesome Chinatown Wars overhead view & scattered info plaques!' },
       { sender_name: 'Tech Recruiter', message: 'Love the Swiss racecar & KiCad/PyTorch portfolio.' }
     ];
     let guestbookNotes = JSON.parse(localStorage.getItem('miguel_guestbook') || 'null') || DEFAULT_NOTES;
 
-    // Procedural Engine & SFX Audio
     class SoundEngine {
       constructor() { this.ctx = null; this.muted = true; this.initialized = false; }
       init() {
@@ -129,8 +133,7 @@
         this.masterGain.gain.value = 0;
         this.masterGain.connect(this.ctx.destination);
         this.engOsc = this.ctx.createOscillator();
-        this.engOsc.type = 'sawtooth';
-        this.engOsc.frequency.value = 55;
+        this.engOsc.type = 'sawtooth'; this.engOsc.frequency.value = 55;
         const engFilter = this.ctx.createBiquadFilter();
         engFilter.type = 'lowpass'; engFilter.frequency.value = 260;
         this.engGain = this.ctx.createGain(); this.engGain.gain.value = 0.08;
@@ -166,56 +169,66 @@
       }
     }
 
+    // 5 Stations with Main Notice Board + Scattered Info Plaques around the plaza!
     function getZones() {
       return [
         {
-          id: 'central', name: '01 // CENTRAL PLAZA', x: 0, z: 0, radius: 26, color: '#E63946', rotY: 0,
+          id: 'central', name: '01 // CENTRAL PLAZA', x: 0, z: 0, radius: 28, color: '#E63946',
           title: 'MIGUEL ANDREI B. ABAD',
           subtitle: 'BS Computer Engineering · De La Salle University – Manila',
-          sections: [
-            { heading: 'SELF-INTRODUCTION', body: 'Undergraduate Computer Engineering student bridging low-level hardware systems with intelligent software: custom PCB design, microcontroller firmware, sensor telemetry fusion, and deep learning pipelines.' },
-            { heading: 'DIRECT CONTACT & LINKEDIN', body: 'Email: abadandrei22@gmail.com  |  Phone: +63 977 652 9418\nLinkedIn: linkedin.com/in/miguel-andrei-abad-a8845532a' },
-            { heading: 'LIVE SKY-GUESTBOOK', body: guestbookNotes.slice(0, 2).map(n => `• ${n.sender_name}: "${n.message}"`).join('\n') }
+          mainBody: 'Undergraduate Computer Engineering student specializing in embedded systems, computer vision, and full-stack software engineering. Bridging custom PCB hardware with intelligent software.',
+          plaques: [
+            { dx: -16, dz: 10, label: 'DIRECT CONTACT', text: 'abadandrei22@gmail.com\n+63 977 652 9418' },
+            { dx: 16, dz: 10, label: 'LINKEDIN & LOCATION', text: 'linkedin.com/in/miguel-andrei-abad\nCavite, Philippines' },
+            { dx: -15, dz: -10, label: 'SKY-GUESTBOOK', text: guestbookNotes[0] ? `${guestbookNotes[0].sender_name}:\n"${guestbookNotes[0].message}"` : 'Leave a note!' },
+            { dx: 15, dz: -10, label: '3 PILLARS', text: '01 Hardware & PCB\n02 Computer Vision & ML\n03 Full-Stack & Mobile' }
           ]
         },
         {
-          id: 'north', name: '02 // NORTH PAVILION', x: -38, z: -195, radius: 26, color: '#0077FF', rotY: 0.15,
+          id: 'north', name: '02 // NORTH PAVILION', x: -38, z: -195, radius: 28, color: '#0077FF',
           title: 'RESUME & TECHNICAL MATRIX',
           subtitle: "DLSU Manila (2023–Present) · Consistent Dean's Lister",
-          sections: [
-            { heading: 'RELEVANT COURSEWORK', body: 'Embedded Systems · Microprocessor Systems & Architecture · Digital Logic Design · Signal Processing · Operating Systems · Feedback & Control Systems · Machine Learning' },
-            { heading: 'LANGUAGES & FRAMEWORKS', body: 'C/C++, Python, Java, Kotlin, JavaScript, SQL, Verilog, MATLAB, HTML5/CSS3 · PyTorch, OpenCV, MediaPipe, Keras, Android SDK' },
-            { heading: 'HARDWARE, EDA & TOOLS', body: 'KiCad (4-Layer PCB), AutoCAD, PIC Microcontrollers, ESP32, Arduino, 6-DOF IMU · Git/GitHub, Android Studio, RESTful APIs, RDBMS/SQL' }
+          mainBody: 'BS Computer Engineering undergraduate with a strong foundation in embedded microcontrollers, signal processing, digital logic, operating systems, and machine learning.',
+          plaques: [
+            { dx: -17, dz: 10, label: 'PROGRAMMING', text: 'C / C++, Python, Java, Kotlin\nJavaScript, SQL, Verilog, MATLAB' },
+            { dx: 17, dz: 10, label: 'FRAMEWORKS & ML', text: 'PyTorch, OpenCV, MediaPipe\nKeras, Android SDK' },
+            { dx: -16, dz: -10, label: 'HARDWARE & EDA', text: 'KiCad (4-Layer PCB), AutoCAD\nPIC16F877A, ESP32, 6-DOF IMU' },
+            { dx: 16, dz: -10, label: 'COURSEWORK', text: 'Embedded Systems · Microprocessors\nDigital Logic · Control Systems' }
           ]
         },
         {
-          id: 'east', name: '03 // EAST SKY-LAB', x: 205, z: -28, radius: 28, color: '#00B4D8', rotY: -Math.PI / 2,
+          id: 'east', name: '03 // EAST SKY-LAB', x: 205, z: -28, radius: 30, color: '#00B4D8',
           title: 'ACADEMIC WORK SAMPLES',
           subtitle: 'Hardware Prototyping · Embedded AI · Full-Stack Systems',
-          sections: [
-            { heading: '1. REAL-TIME FSL SIGN RECOGNITION (ONGOING THESIS)', body: 'Native Android app fusing wearable ESP32 6-DOF IMU telemetry with OpenCV/MediaPipe camera feeds via a hybrid PyTorch CNN-LSTM gloss-to-text pipeline.' },
-            { heading: '2. PIC16F877A 4-LAYER DEVELOPMENT BOARD', body: 'Custom KiCad 4-layer PCB breakout with 5V LDO regulator, 20MHz crystal oscillator, dedicated power/ground planes, ICSP header, and full DRC verification.' },
-            { heading: '3. WEB PDF READER & 4. SAP-1 8-BIT SIMULATOR', body: 'In-browser PDF catalog with MangaDex/Google Books async REST APIs + SQL CRUD; plus cycle-accurate SAP-1 8-bit W-Bus & ALU architecture visualizer.' }
+          mainBody: 'Selected engineering artifacts built during Computer Engineering coursework and research—spanning multi-modal wearable AI, 4-layer KiCad PCBs, RESTful web apps, and 8-bit CPU simulation.',
+          plaques: [
+            { dx: -18, dz: 11, label: '01 // FSL SIGN RECOGNITION', text: 'ESP32 6-DOF IMU + Camera\nPyTorch CNN-LSTM · Android' },
+            { dx: 18, dz: 11, label: '02 // PIC16F877A PCB', text: '4-Layer KiCad Breakout Board\n5V LDO · 20MHz XTAL · ICSP' },
+            { dx: -18, dz: -11, label: '03 // WEB PDF CATALOG', text: 'In-Browser PDF Reader + SQL\nMangaDex & Google Books APIs' },
+            { dx: 18, dz: -11, label: '04 // SAP-1 SIMULATOR', text: '8-Bit W-Bus & ALU Visualizer\nCycle-Accurate T-States' }
           ]
         },
         {
-          id: 'west', name: '04 // WEST STUDENT HUB', x: -200, z: 32, radius: 26, color: '#FFB703', rotY: Math.PI / 2,
+          id: 'west', name: '04 // WEST STUDENT HUB', x: -200, z: 32, radius: 28, color: '#FFB703',
           title: 'ACCESS DLSU LEADERSHIP',
           subtitle: 'Association of Computer Engineering Students · Nov 2025 – Present',
-          sections: [
-            { heading: 'ASSOCIATE VICE PRESIDENT FOR ACADEMICS (SEPT 2026 – PRESENT)', body: 'Spearhead college-wide academic assistance programs, peer-led technical tutorials, student performance research, and centralized digital learning repositories.' },
-            { heading: 'JUNIOR OFFICER FOR ACADEMICS (NOV 2025 – SEPT 2026)', body: 'Authored comprehensive technical reviewers, formula sheets, and study guides for Digital Logic, Circuits, and Programming; led pre-exam peer clinics.' },
-            { heading: 'OPERATIONAL INITIATIVES', body: 'Centralized Learning Repository · Peer-Led Technical Tutorials · Academic Performance Research · Technical Reviewer Publications' }
+          mainBody: 'Leading peer academic mentorship, college-wide reviewer distribution, quantitative student performance research, and digital learning repositories for CpE undergraduates.',
+          plaques: [
+            { dx: -16, dz: 10, label: 'AVP FOR ACADEMICS', text: 'Sept 2026 – Present\nCollege-wide academic programs' },
+            { dx: 16, dz: 10, label: 'JUNIOR OFFICER', text: 'Nov 2025 – Sept 2026\nTechnical reviewers & clinics' },
+            { dx: -15, dz: -10, label: 'LEARNING REPOSITORY', text: 'Centralized digital archive\nby course code & lab primer' },
+            { dx: 15, dz: -10, label: 'TUTORIALS & RESEARCH', text: 'Microprocessors & Logic clinics\nStudent feedback analytics' }
           ]
         },
         {
-          id: 'south', name: '05 // SOUTH LOUNGE', x: 42, z: 198, radius: 26, color: '#FB5607', rotY: Math.PI,
+          id: 'south', name: '05 // SOUTH LOUNGE', x: 42, z: 198, radius: 28, color: '#FB5607',
           title: 'REFERENCES & CONTACT',
           subtitle: 'Academic & Organizational Mentors · DLSU Manila',
-          sections: [
-            { heading: 'FACULTY / THESIS REFERENCE', body: 'Department of Electronics & Computer Engineering, De La Salle University – Manila. Faculty Adviser for Embedded Systems & Wearable-Vision FSL Research.' },
-            { heading: 'ORGANIZATIONAL REFERENCE', body: 'ACCESS DLSU Executive Board & Faculty Adviser. Can attest to leadership as AVP for Academics, curriculum support execution, and team management.' },
-            { heading: 'GET IN TOUCH', body: 'Click "Leave Note / Links" in the top bar to post to the Central Plaza Sky-Guestbook or open LinkedIn directly!' }
+          mainBody: 'Faculty and organizational advisers familiar with my embedded systems research, machine learning engineering, and ACCESS DLSU leadership. Direct contacts available upon formal request.',
+          plaques: [
+            { dx: -16, dz: 10, label: 'FACULTY REFERENCE', text: 'Dept. of Electronics & CpE\nDLSU Manila Thesis Adviser' },
+            { dx: 16, dz: 10, label: 'ORG REFERENCE', text: 'ACCESS DLSU Executive Board\n& Faculty Adviser' },
+            { dx: 0, dz: 16, label: 'LEAVE A NOTE', text: 'Click "Leave Note / Links" above\nto sign the Sky-Guestbook!' }
           ]
         }
       ];
@@ -245,79 +258,89 @@
       return curY;
     }
 
-    function drawNoticeBoardTexture(zone) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1600; canvas.height = 1040;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#111111'; ctx.lineWidth = 18; ctx.strokeRect(9, 9, canvas.width - 18, canvas.height - 18);
-      ctx.fillStyle = zone.color; ctx.fillRect(18, 18, canvas.width - 36, 155);
+    // Tilted Overhead-Readable Main Notice Board (angled toward Chinatown Wars camera!)
+    function drawMainBoardTex(zone) {
+      const c = document.createElement('canvas');
+      c.width = 1400; c.height = 760;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#111111'; ctx.lineWidth = 18; ctx.strokeRect(9, 9, c.width - 18, c.height - 18);
+      ctx.fillStyle = zone.color; ctx.fillRect(18, 18, c.width - 36, 170);
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 28px "Helvetica Neue", Helvetica, Arial, sans-serif';
-      ctx.fillText(zone.name, 56, 68);
-      ctx.font = 'bold 54px "Helvetica Neue", Helvetica, Arial, sans-serif';
-      ctx.fillText(zone.title, 56, 128);
-      ctx.font = 'normal 26px "Helvetica Neue", Helvetica, Arial, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.fillText(zone.subtitle, 56, 162);
-
-      let y = 235;
-      zone.sections.forEach((sec) => {
-        ctx.fillStyle = zone.color;
-        ctx.font = 'bold 26px "Helvetica Neue", Helvetica, Arial, sans-serif';
-        ctx.fillText(sec.heading, 56, y);
-        y += 38;
-        ctx.fillStyle = '#222222';
-        ctx.font = 'normal 28px "Helvetica Neue", Helvetica, Arial, sans-serif';
-        y = wrapText(ctx, sec.body, 56, y, canvas.width - 112, 36);
-        y += 28;
-      });
-      const tex = new THREE.CanvasTexture(canvas);
+      ctx.font = 'bold 28px "Helvetica Neue", Helvetica, Arial, sans-serif'; ctx.fillText(zone.name, 52, 68);
+      ctx.font = 'bold 54px "Helvetica Neue", Helvetica, Arial, sans-serif'; ctx.fillText(zone.title, 52, 128);
+      ctx.font = 'normal 26px "Helvetica Neue", Helvetica, Arial, sans-serif'; ctx.fillText(zone.subtitle, 52, 168);
+      ctx.fillStyle = '#222222';
+      ctx.font = 'normal 34px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      wrapText(ctx, zone.mainBody, 52, 260, c.width - 104, 48);
+      const tex = new THREE.CanvasTexture(c);
       tex.anisotropy = 8;
       return tex;
     }
 
-    function create3DNoticeBoard(zone) {
-      const group = new THREE.Group();
-      const tex = drawNoticeBoardTexture(zone);
-      const boardW = 18, boardH = 11.7;
-      const frame = new THREE.Mesh(
-        new THREE.BoxGeometry(boardW + 0.8, boardH + 0.8, 0.7),
-        new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.45 })
+    // Tilted Scattered Info Plaque (readable from overhead Chinatown Wars camera!)
+    function createPlaqueMesh(plaque, color) {
+      const c = document.createElement('canvas');
+      c.width = 768; c.height = 420;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#111111'; ctx.lineWidth = 14; ctx.strokeRect(7, 7, c.width - 14, c.height - 14);
+      ctx.fillStyle = color; ctx.fillRect(14, 14, c.width - 28, 72);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 30px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      ctx.fillText(plaque.label, 36, 62);
+      ctx.fillStyle = '#111111';
+      ctx.font = 'bold 32px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      wrapText(ctx, plaque.text, 36, 148, c.width - 72, 48);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.anisotropy = 8;
+
+      const g = new THREE.Group();
+      const slab = new THREE.Mesh(
+        new THREE.BoxGeometry(10.5, 0.45, 5.8),
+        new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.5 })
       );
-      frame.position.y = 8.4; frame.castShadow = true; group.add(frame);
-
-      const faceMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35 });
-      const frontFace = new THREE.Mesh(new THREE.PlaneGeometry(boardW, boardH), faceMat);
-      frontFace.position.set(0, 8.4, 0.37); group.add(frontFace);
-
-      const backFace = new THREE.Mesh(new THREE.PlaneGeometry(boardW, boardH), faceMat);
-      backFace.rotation.y = Math.PI; backFace.position.set(0, 8.4, -0.37); group.add(backFace);
-
-      [-7.2, 7.2].forEach((lx) => {
-        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 8.5, 12), new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.6, roughness: 0.3 }));
-        leg.position.set(lx, 4.25, 0); leg.castShadow = true; group.add(leg);
-      });
-
-      const titleCanvas = document.createElement('canvas');
-      titleCanvas.width = 1024; titleCanvas.height = 192;
-      const tctx = titleCanvas.getContext('2d');
-      tctx.fillStyle = '#111111'; tctx.fillRect(0, 0, 1024, 192);
-      tctx.fillStyle = zone.color; tctx.fillRect(0, 0, 1024, 22);
-      tctx.fillStyle = '#FFFFFF'; tctx.font = 'bold 58px "Helvetica Neue", Helvetica, Arial, sans-serif';
-      tctx.textAlign = 'center'; tctx.fillText(zone.name, 512, 125);
-      const titleBanner = new THREE.Mesh(
-        new THREE.PlaneGeometry(14, 2.6),
-        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(titleCanvas), side: THREE.DoubleSide })
+      slab.castShadow = true;
+      const face = new THREE.Mesh(
+        new THREE.PlaneGeometry(10.2, 5.5),
+        new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35 })
       );
-      titleBanner.position.set(0, 16.5, 0); group.add(titleBanner);
-
-      group.position.set(zone.x, 42, zone.z);
-      group.rotation.y = zone.rotY;
-      return { group, titleBanner, faceMat, currentY: 42 };
+      face.rotation.x = -Math.PI / 2;
+      face.position.y = 0.24;
+      g.add(slab, face);
+      // Tilt 26° toward south/overhead camera so it's crystal clear from above!
+      g.rotation.x = 0.45;
+      g.position.set(plaque.dx, 1.4, plaque.dz);
+      return g;
     }
 
-    function buildCurvedRoad(scene, points, width = 8.5) {
+    function createStationCluster(zone) {
+      const cluster = new THREE.Group();
+      cluster.position.set(zone.x, 38, zone.z); // Starts in sky, drops when car approaches!
+
+      // Main Notice Board angled 48° upward for Chinatown Wars overhead camera
+      const mainTex = drawMainBoardTex(zone);
+      const mainMat = new THREE.MeshStandardMaterial({ map: mainTex, roughness: 0.35 });
+      const boardGroup = new THREE.Group();
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(18.6, 10.2, 0.7), new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.45 }));
+      frame.castShadow = true;
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(18, 9.6), mainMat);
+      face.position.z = 0.37;
+      boardGroup.add(frame, face);
+      boardGroup.position.set(0, 5.8, -2);
+      boardGroup.rotation.x = -0.78; // Tilted ~45° upward toward the overhead camera!
+      cluster.add(boardGroup);
+
+      // Scattered Info Plaques around the plaza leading to the Main Notice Board
+      zone.plaques.forEach(p => {
+        cluster.add(createPlaqueMesh(p, zone.color));
+      });
+
+      return { cluster, mainMat, currentY: 38 };
+    }
+
+    function buildCurvedRoad(scene, points, width = 9.0) {
       const curve = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.08, z)));
       const divisions = 110;
       const roadPts = curve.getSpacedPoints(divisions);
@@ -342,15 +365,15 @@
       const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffb703, roughness: 0.4 });
       for (let i = 2; i < roadPts.length - 2; i += 4) {
         const p = roadPts[i], tan = curve.getTangentAt(i / divisions);
-        const dash = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.05, 2.5), stripeMat);
+        const dash = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.05, 2.5), stripeMat);
         dash.position.set(p.x, 0.11, p.z); dash.rotation.y = Math.atan2(tan.x, tan.z); scene.add(dash);
       }
     }
 
-    // Scene & Renderer (Equirectangular sky gradient, zero clipping)
+    // Scene & Renderer
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x90e0ef, 220, 620);
-    const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.8, 1200);
+    scene.fog = new THREE.Fog(0x90e0ef, 240, 680);
+    const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 1.0, 1200);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -362,8 +385,8 @@
     const sctx = skyCanvas.getContext('2d');
     const grad = sctx.createLinearGradient(0, 0, 0, 512);
     grad.addColorStop(0.0, '#0077b6');
-    grad.addColorStop(0.42, '#90e0ef');
-    grad.addColorStop(0.54, '#ffd166');
+    grad.addColorStop(0.45, '#90e0ef');
+    grad.addColorStop(0.56, '#ffd166');
     grad.addColorStop(1.0, '#0096c7');
     sctx.fillStyle = grad; sctx.fillRect(0, 0, 16, 512);
     const skyTex = new THREE.CanvasTexture(skyCanvas);
@@ -373,20 +396,17 @@
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x40916c, 0.95));
     const dl = new THREE.DirectionalLight(0xfff4d2, 1.25);
-    dl.position.set(140, 180, 110); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
+    dl.position.set(140, 200, 120); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
     dl.shadow.camera.left = -280; dl.shadow.camera.right = 280; dl.shadow.camera.top = 280; dl.shadow.camera.bottom = -280;
     scene.add(dl);
 
     // Massive 600m x 600m Island
     const ocean = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), new THREE.MeshStandardMaterial({ color: 0x0096c7, roughness: 0.25, metalness: 0.15 }));
     ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2.4; scene.add(ocean);
-
     const beach = new THREE.Mesh(new THREE.CylinderGeometry(325, 342, 1.6, 80), new THREE.MeshStandardMaterial({ color: 0xf4d58d, roughness: 0.9 }));
     beach.position.y = -1.4; beach.receiveShadow = true; scene.add(beach);
-
     const grass = new THREE.Mesh(new THREE.CylinderGeometry(300, 312, 1.0, 80), new THREE.MeshStandardMaterial({ color: 0x52b788, roughness: 0.85 }));
     grass.position.y = -0.5; grass.receiveShadow = true; scene.add(grass);
-
     const grid = new THREE.GridHelper(560, 80, 0x40916c, 0x40916c);
     grid.position.y = 0.04; grid.material.opacity = 0.18; grid.material.transparent = true; scene.add(grid);
 
@@ -396,13 +416,13 @@
     buildCurvedRoad(scene, [[0, 0], [-36, 68], [52, 132], [42, 198]]);
     buildCurvedRoad(scene, [[-38, -195], [115, -180], [205, -28], [185, 135], [42, 198], [-115, 175], [-200, 32], [-165, -125], [-38, -195]], 7.0);
 
-    // Pine Forest & Drifting Clouds
+    // Pine Forest
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7f4f24, roughness: 0.9 });
     const pineMat1 = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.75 });
     const pineMat2 = new THREE.MeshStandardMaterial({ color: 0x40916c, roughness: 0.75 });
     for (let i = 0; i < 135; i++) {
       const angle = (i / 135) * Math.PI * 2 + (i % 5) * 0.17;
-      const dist = 42 + ((i * 53) % 240);
+      const dist = 44 + ((i * 53) % 238);
       const tx = Math.cos(angle) * dist, tz = Math.sin(angle) * dist;
       if (ZONES.some(z => Math.hypot(tx - z.x, tz - z.z) < z.radius + 10)) continue;
       const t = new THREE.Group();
@@ -411,17 +431,6 @@
       const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.7, 3.0, 8), pineMat2); c2.position.y = 5.6; c2.castShadow = true;
       t.add(tr, c1, c2); t.scale.setScalar(0.9 + (i % 4) * 0.25); t.position.set(tx, 0, tz); scene.add(t);
     }
-
-    const clouds = [];
-    const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
-    [[-90,52,-80],[110,58,-120],[150,50,90],[-140,56,110],[0,62,-210],[210,54,10]].forEach(([cx, cy, cz], idx) => {
-      const cg = new THREE.Group();
-      for (let i = 0; i < 3; i++) {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(5.5 - i * 0.8, 10, 10), cloudMat);
-        b.scale.set(1.5, 0.6, 1.0); b.position.set((i - 1) * 5.2, (i % 2) * 0.9, 0); cg.add(b);
-      }
-      cg.position.set(cx, cy, cz); scene.add(cg); clouds.push({ mesh: cg, baseX: cx, phase: idx });
-    });
 
     // Collectible Star Gates
     const collectibles = [];
@@ -432,18 +441,19 @@
       collectibles.push({ mesh: m, baseY: y, phase: idx, collected: false });
     });
 
-    // 5 Stations + 3D Notice Boards
-    const noticeBoards = new Map();
+    // Build 5 Stations + Overhead-Readable Scattered Plaques & Main Notice Board
+    const stationClusters = new Map();
     ZONES.forEach((z) => {
       const pad = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 2, z.radius - 1, 0.35, 48), new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.6 }));
       pad.position.set(z.x, 0.18, z.z); pad.receiveShadow = true; scene.add(pad);
       const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.9, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
       r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.22, z.z); scene.add(r);
-      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.8, 120, 16, 1, true), new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.16, side: THREE.DoubleSide }));
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 1.5, 120, 16, 1, true), new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.14, side: THREE.DoubleSide }));
       beam.position.set(z.x, 60, z.z); scene.add(beam);
-      const nb = create3DNoticeBoard(z);
-      scene.add(nb.group);
-      noticeBoards.set(z.id, nb);
+
+      const st = createStationCluster(z);
+      scene.add(st.cluster);
+      stationClusters.set(z.id, st);
     });
 
     // Swiss Racing Car
@@ -451,7 +461,6 @@
     const chassisGroup = new THREE.Group();
     carGroup.add(chassisGroup);
     scene.add(carGroup);
-
     const bodyLower = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 4.4), new THREE.MeshStandardMaterial({ color: 0xe63946, roughness: 0.3, metalness: 0.35 }));
     bodyLower.position.y = 0.55; bodyLower.castShadow = true; chassisGroup.add(bodyLower);
     const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.57, 4.42), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 }));
@@ -473,10 +482,8 @@
     const wGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.34, 18); wGeo.rotateZ(Math.PI / 2);
     const wMat = new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.8 });
     [[-1.12,0.42,-1.35],[1.12,0.42,-1.35],[-1.12,0.42,1.35],[1.12,0.42,1.35]].forEach(([wx,wy,wz]) => {
-      const pivot = new THREE.Group();
-      pivot.position.set(wx, wy, wz);
-      const w = new THREE.Mesh(wGeo, wMat);
-      w.castShadow = true; pivot.add(w); carGroup.add(pivot);
+      const pivot = new THREE.Group(); pivot.position.set(wx, wy, wz);
+      const w = new THREE.Mesh(wGeo, wMat); w.castShadow = true; pivot.add(w); carGroup.add(pivot);
       wheels.push({ pivot, mesh: w });
     });
 
@@ -485,20 +492,20 @@
       f.rotation.x = Math.PI / 2; f.position.set(fx, 0.45, 2.55); chassisGroup.add(f); return f;
     });
 
-    const car = { x: 0, z: 32, heading: 0, speed: 0 };
+    const car = { x: 0, z: 24, heading: 0, speed: 0 };
 
-    // Orbit Camera
-    const camState = { yawOffset: 0, pitch: 0.28, distance: 18, dragging: false, lastX: 0, lastY: 0 };
+    // GTA: CHINATOWN WARS Overhead Isometric/Tilted Camera!
+    const camState = { yaw: 0, pitch: 0.98, distance: 46, dragging: false, lastX: 0, lastY: 0 };
     renderer.domElement.addEventListener('pointerdown', (e) => { camState.dragging = true; camState.lastX = e.clientX; camState.lastY = e.clientY; });
     window.addEventListener('pointermove', (e) => {
       if (!camState.dragging) return;
-      camState.yawOffset -= (e.clientX - camState.lastX) * 0.006;
-      camState.pitch = THREE.MathUtils.clamp(camState.pitch + (e.clientY - camState.lastY) * 0.005, 0.06, 1.05);
+      camState.yaw -= (e.clientX - camState.lastX) * 0.005;
+      camState.pitch = THREE.MathUtils.clamp(camState.pitch + (e.clientY - camState.lastY) * 0.005, 0.45, 1.35);
       camState.lastX = e.clientX; camState.lastY = e.clientY;
     });
     window.addEventListener('pointerup', () => { camState.dragging = false; });
     renderer.domElement.addEventListener('wheel', (e) => {
-      camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.015, 9, 44);
+      camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.025, 24, 82);
     }, { passive: true });
 
     // Mobile Touch Controls
@@ -507,22 +514,14 @@
     const joyKnob = document.getElementById('joystickKnob');
     const boostBtn = document.getElementById('mobileBoostBtn');
     let joyActive = false, joyCenter = { x: 0, y: 0 };
-    joyZone?.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const r = joyZone.getBoundingClientRect();
-      joyCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-      joyActive = true;
-    }, { passive: false });
+    joyZone?.addEventListener('touchstart', (e) => { e.preventDefault(); const r = joyZone.getBoundingClientRect(); joyCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; joyActive = true; }, { passive: false });
     joyZone?.addEventListener('touchmove', (e) => {
-      if (!joyActive) return;
-      e.preventDefault();
-      const t = e.touches[0], maxR = 36;
-      const dx = t.clientX - joyCenter.x, dy = t.clientY - joyCenter.y;
+      if (!joyActive) return; e.preventDefault();
+      const t = e.touches[0], maxR = 36, dx = t.clientX - joyCenter.x, dy = t.clientY - joyCenter.y;
       const dist = Math.min(maxR, Math.hypot(dx, dy)), ang = Math.atan2(dy, dx);
       const kx = Math.cos(ang) * dist, ky = Math.sin(ang) * dist;
       joyKnob.style.transform = `translate(${kx}px, ${ky}px)`;
-      touchInput.steer = -(kx / maxR);
-      touchInput.throttle = -(ky / maxR);
+      touchInput.steer = -(kx / maxR); touchInput.throttle = -(ky / maxR);
     }, { passive: false });
     const resetJoy = () => { joyActive = false; joyKnob.style.transform = 'translate(0,0)'; touchInput.steer = 0; touchInput.throttle = 0; };
     joyZone?.addEventListener('touchend', resetJoy);
@@ -552,10 +551,7 @@
       document.getElementById('guestbookModal').classList.remove('flex');
     });
     document.querySelectorAll('[data-copy]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        navigator.clipboard?.writeText(btn.dataset.copy);
-        showToast('Copied ' + btn.dataset.copy);
-      });
+      btn.addEventListener('click', () => { navigator.clipboard?.writeText(btn.dataset.copy); showToast('Copied ' + btn.dataset.copy); });
     });
 
     document.getElementById('gbForm').addEventListener('submit', (e) => {
@@ -564,62 +560,230 @@
       guestbookNotes.unshift({ sender_name: fd.get('name'), message: fd.get('msg') });
       localStorage.setItem('miguel_guestbook', JSON.stringify(guestbookNotes));
       ZONES = getZones();
-      const centralNb = noticeBoards.get('central');
-      if (centralNb) {
-        centralNb.faceMat.map.dispose();
-        centralNb.faceMat.map = drawNoticeBoardTexture(ZONES[0]);
-        centralNb.faceMat.needsUpdate = true;
+      const centralSt = stationClusters.get('central');
+      if (centralSt) {
+        centralSt.mainMat.map.dispose();
+        centralSt.mainMat.map = drawMainBoardTex(ZONES[0]);
+        centralSt.mainMat.needsUpdate = true;
       }
       e.target.reset();
       document.getElementById('closeGbModal').click();
-      showToast('Posted to Central Plaza 3D Notice Board!');
+      showToast('Posted to Central Plaza!');
     });
+
+    // FULL SWISS EDITORIAL 2D CLASSIC VIEW (matching original HTML portfolio!)
+    function renderFull2DClassic() {
+      const cv = document.getElementById('classicViewContainer');
+      const projects = [
+        {
+          filter: 'ml hardware', status: 'Ongoing Thesis / Research', cat: 'MULTI-MODAL EMBEDDED AI',
+          title: 'Real-Time FSL Sign Recognition via Wearable-Vision Fusion',
+          desc: 'Native Android application fusing wearable ESP32 6-DOF IMU sensor telemetry with live camera feeds via a hybrid CNN-LSTM network to translate Filipino Sign Language gestures into structured text.',
+          tags: ['PyTorch', 'Android SDK', 'OpenCV', 'MediaPipe', 'ESP32 / IMU'],
+          svg: `<svg class="w-full max-w-md h-32" viewBox="0 0 420 130" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="10" y="15" width="95" height="38" rx="4" fill="#fff"/><text x="57" y="37" text-anchor="middle" font-size="9" font-weight="bold" stroke="none" fill="#111">ESP32 + 6-DOF IMU</text><rect x="10" y="75" width="95" height="38" rx="4" fill="#fff"/><text x="57" y="97" text-anchor="middle" font-size="9" font-weight="bold" stroke="none" fill="#111">RGB Camera Feed</text><path d="M105 34 H135 V55 H155 M105 94 H135 V73 H155" stroke="#0047FF" stroke-width="1.75"/><rect x="155" y="38" width="115" height="52" rx="4" stroke="#0047FF" stroke-width="2" fill="#fff"/><text x="212" y="67" text-anchor="middle" font-size="9.5" font-weight="bold" stroke="none" fill="#0047FF">CNN-LSTM MODEL</text><path d="M270 64 H305" stroke="#0047FF" stroke-width="1.75"/><rect x="308" y="38" width="102" height="52" rx="4" fill="#fff"/><text x="359" y="67" text-anchor="middle" font-size="9" font-weight="bold" stroke="none" fill="#111">Gloss-to-Text</text></svg>`
+        },
+        {
+          filter: 'hardware', status: 'Hardware / EDA', cat: 'SCHEMATIC CAPTURE & PCB LAYOUT',
+          title: 'PIC16F877A Microcontroller Development Board',
+          desc: 'Custom 4-layer printed circuit board breakout platform featuring integrated 5V voltage regulation, external 20MHz crystal oscillator circuitry, dedicated power/ground planes, and ICSP programming header verified via full DRC.',
+          tags: ['KiCad', '4-Layer PCB', 'PIC16F877A', 'DRC Verified'],
+          svg: `<svg class="w-full max-w-md h-32" viewBox="0 0 420 130" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="65" y="10" width="290" height="110" rx="6" stroke-width="2" fill="#fff"/><rect x="92" y="26" width="56" height="32" rx="2"/><text x="120" y="45" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">5V LDO</text><rect x="92" y="72" width="56" height="32" rx="2"/><text x="120" y="91" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">ICSP 6-PIN</text><rect x="178" y="25" width="76" height="80" rx="3" stroke="#0047FF" stroke-width="2"/><text x="216" y="67" text-anchor="middle" font-size="9" font-weight="bold" stroke="none" fill="#0047FF">PIC16F877A</text><path d="M148 42 H178 M148 88 H178 M254 45 H280 M254 85 H280" stroke="#0047FF"/><rect x="280" y="26" width="54" height="32" rx="2"/><text x="307" y="45" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">20MHz XTAL</text><rect x="280" y="72" width="54" height="32" rx="2"/><text x="307" y="91" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">I/O PORTS</text></svg>`
+        },
+        {
+          filter: 'software', status: 'Full-Stack Web', cat: 'WEB ENGINEERING & DATABASE DESIGN',
+          title: 'Web-Based PDF Reader & Digital Catalog',
+          desc: 'Responsive in-browser document reader with custom upload pipelines, chapter navigation, asynchronous MangaDex & Google Books REST API metadata retrieval, and SQL persistence for user libraries.',
+          tags: ['JavaScript', 'SQL RDBMS', 'REST APIs', 'HTML5 / CSS3'],
+          svg: `<svg class="w-full max-w-md h-32" viewBox="0 0 420 130" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="18" y="16" width="160" height="98" rx="4" fill="#fff"/><rect x="78" y="42" width="90" height="62" rx="2" stroke="#0047FF"/><text x="123" y="75" text-anchor="middle" font-size="8.5" font-weight="bold" stroke="none" fill="#0047FF">PDF Viewport</text><path d="M178 46 H245" stroke="#0047FF"/><path d="M178 88 H245" stroke="#111"/><rect x="245" y="22" width="155" height="40" rx="4" stroke="#0047FF" fill="#fff"/><text x="322" y="45" text-anchor="middle" font-size="8.5" font-weight="bold" stroke="none" fill="#0047FF">MangaDex &amp; Books API</text><rect x="245" y="70" width="155" height="40" rx="4" fill="#fff"/><text x="322" y="93" text-anchor="middle" font-size="8.5" font-weight="bold" stroke="none" fill="#111">Relational SQL RDBMS</text></svg>`
+        },
+        {
+          filter: 'hardware software', status: 'Computer Architecture', cat: 'MICROPROCESSOR SIMULATOR',
+          title: 'Bit by Bit — Interactive SAP-1 Computer Simulator',
+          desc: 'Educational microprocessor architecture visualizer simulating Simple-As-Possible (SAP-1) T-state fetch-decode-execute cycles, 8-bit W-bus transfers, control word bitmasks, and ALU arithmetic operations.',
+          tags: ['JavaScript', 'Digital Logic', 'SAP-1 Architecture', 'HTML5 / CSS3'],
+          svg: `<svg class="w-full max-w-md h-32" viewBox="0 0 420 130" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="210" y1="12" x2="210" y2="118" stroke="#0047FF" stroke-width="3.5"/><rect x="45" y="18" width="110" height="24" rx="2" fill="#fff"/><text x="100" y="33" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">Program Counter</text><rect x="45" y="52" width="110" height="24" rx="2" fill="#fff"/><text x="100" y="67" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">MAR &amp; 16x8 RAM</text><rect x="265" y="18" width="110" height="24" rx="2" fill="#fff"/><text x="320" y="33" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#111">Accumulator (A)</text><rect x="265" y="52" width="110" height="24" rx="2" stroke="#0047FF" fill="#fff"/><text x="320" y="67" text-anchor="middle" font-size="8" font-weight="bold" stroke="none" fill="#0047FF">Adder / Sub ALU</text></svg>`
+        }
+      ];
+
+      cv.innerHTML = `
+        <header class="sticky top-0 z-40 bg-[#FAFAFA]/95 backdrop-blur-md border-b border-black/15 no-print">
+          <div class="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded bg-[#111111] text-white flex items-center justify-center font-bold text-sm">MA</span>
+              <div class="hidden sm:block">
+                <p class="text-xs font-bold uppercase tracking-widest leading-none">Miguel Andrei B. Abad</p>
+                <p class="text-[11px] text-[#595959] mt-0.5">BS Computer Engineering · DLSU</p>
+              </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-6 text-xs font-medium uppercase tracking-wider">
+              <a href="#c-intro" class="hover:text-[#0047FF]">01. Intro</a>
+              <a href="#c-resume" class="hover:text-[#0047FF]">02. Resume</a>
+              <a href="#c-work" class="hover:text-[#0047FF]">03. Academic Work</a>
+              <a href="#c-lead" class="hover:text-[#0047FF]">04. Leadership</a>
+              <a href="#c-ref" class="hover:text-[#0047FF]">05. References</a>
+            </nav>
+            <div class="flex items-center gap-2">
+              <button onclick="window.print()" class="px-3 py-2 rounded border border-black/20 hover:bg-black hover:text-white text-xs font-semibold">Print / PDF</button>
+              <button id="back3dBtn" class="px-3.5 py-2 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider">🏎 3D World</button>
+            </div>
+          </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-8">
+          <section id="c-intro" class="py-12 border-b border-black/20 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div class="lg:col-span-4 space-y-5">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-black/20 text-[11px] font-semibold uppercase tracking-widest">
+                <span class="w-2 h-2 rounded-full bg-[#0047FF]"></span><span>Career e-Portfolio · 2026</span>
+              </div>
+              <div class="border-t border-black/15 pt-4 space-y-2.5 text-sm">
+                <div><span class="block text-[11px] uppercase tracking-widest text-[#595959]">Institution</span><span class="font-medium">De La Salle University – Manila</span></div>
+                <div><span class="block text-[11px] uppercase tracking-widest text-[#595959]">Degree</span><span class="font-medium">BS in Computer Engineering (2023 – Present)</span></div>
+                <div><span class="block text-[11px] uppercase tracking-widest text-[#595959]">Standing</span><span class="font-medium">Consistent Dean's Lister</span></div>
+                <div><span class="block text-[11px] uppercase tracking-widest text-[#595959]">Location</span><span class="font-medium">Cavite, Philippines</span></div>
+              </div>
+              <div class="p-4 rounded-lg border border-black/20 bg-white space-y-2 text-xs">
+                <div class="flex justify-between items-center"><span class="font-mono">abadandrei22@gmail.com</span><button data-c2="abadandrei22@gmail.com" class="px-2 py-0.5 border rounded">Copy</button></div>
+                <div class="flex justify-between items-center"><span class="font-mono">+63 977 652 9418</span><button data-c2="+63 977 652 9418" class="px-2 py-0.5 border rounded">Copy</button></div>
+                <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" class="block text-center py-2 rounded bg-[#0047FF] text-white font-semibold">LinkedIn Profile ↗</a>
+              </div>
+            </div>
+            <div class="lg:col-span-8 space-y-6">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#0047FF] mb-2">01 / Self-Introduction</p>
+                <h1 class="text-4xl sm:text-6xl font-bold tracking-tight">Miguel Andrei B. Abad</h1>
+                <p class="mt-3 text-xl text-[#595959]">Computer Engineering undergraduate specializing in embedded systems, computer vision, and full-stack software engineering.</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-black/15 text-sm leading-relaxed text-neutral-700">
+                <p>I am an undergraduate Computer Engineering student at <strong>De La Salle University – Manila</strong> focused on bridging low-level hardware systems with intelligent software. My work spans custom PCB design, microcontroller firmware, sensor telemetry fusion, and deep learning pipelines.</p>
+                <p>Alongside hardware and ML development, I build responsive, data-driven web and mobile apps backed by relational databases and RESTful architectures. Outside the lab, I serve as <strong>Associate Vice President for Academics at ACCESS DLSU</strong>.</p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 rounded-lg border border-black/15 bg-white"><span class="text-xs font-mono text-[#0047FF] font-bold">01 // HARDWARE</span><h2 class="font-bold text-sm mt-1">Embedded &amp; PCB Design</h2><p class="text-xs text-[#595959] mt-1">4-layer KiCad routing, PIC16F877A, ESP32, 6-DOF IMU.</p></div>
+                <div class="p-4 rounded-lg border border-black/15 bg-white"><span class="text-xs font-mono text-[#0047FF] font-bold">02 // INTELLIGENCE</span><h2 class="font-bold text-sm mt-1">Computer Vision &amp; ML</h2><p class="text-xs text-[#595959] mt-1">PyTorch, CNN-LSTM models, OpenCV &amp; MediaPipe.</p></div>
+                <div class="p-4 rounded-lg border border-black/15 bg-white"><span class="text-xs font-mono text-[#0047FF] font-bold">03 // SOFTWARE</span><h2 class="font-bold text-sm mt-1">Full-Stack &amp; Mobile</h2><p class="text-xs text-[#595959] mt-1">Android SDK, JavaScript, SQL RDBMS, REST APIs.</p></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="c-resume" class="py-12 border-b border-black/20">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#0047FF] mb-2">02 / Curriculum Vitae</p>
+            <h2 class="text-3xl font-bold tracking-tight mb-8">Resume &amp; Technical Matrix</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div class="lg:col-span-5 p-6 rounded-lg border border-black/20 bg-white">
+                <h3 class="text-xl font-bold">De La Salle University – Manila</h3>
+                <p class="text-sm font-medium text-[#0047FF]">Bachelor of Science in Computer Engineering</p>
+                <p class="text-xs font-mono text-[#595959] mt-1">2023 – Present · Consistent Dean's Lister</p>
+                <div class="mt-4 pt-4 border-t border-black/10 flex flex-wrap gap-1.5">
+                  ${['Embedded Systems','Microprocessor Systems & Architecture','Digital Logic Design','Signal Processing','Operating Systems','Feedback and Control Systems','Machine Learning'].map(c => `<span class="px-2.5 py-1 rounded border border-black/15 text-xs">${c}</span>`).join('')}
+                </div>
+              </div>
+              <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-5 rounded-lg border border-black/20 bg-white"><p class="text-xs font-bold uppercase mb-2">01 · Programming Languages</p><div class="flex flex-wrap gap-1.5">${['C / C++','Python','Java','Kotlin','JavaScript','SQL','Verilog','MATLAB','HTML5 / CSS3'].map(s=>`<span class="px-2 py-0.5 rounded bg-neutral-100 text-xs">${s}</span>`).join('')}</div></div>
+                <div class="p-5 rounded-lg border border-black/20 bg-white"><p class="text-xs font-bold uppercase mb-2">02 · Frameworks &amp; Libraries</p><div class="flex flex-wrap gap-1.5">${['PyTorch','OpenCV','MediaPipe','Keras','Android SDK'].map(s=>`<span class="px-2 py-0.5 rounded bg-neutral-100 text-xs">${s}</span>`).join('')}</div></div>
+                <div class="p-5 rounded-lg border border-black/20 bg-white"><p class="text-xs font-bold uppercase mb-2">03 · Hardware &amp; EDA</p><div class="flex flex-wrap gap-1.5">${['KiCad','AutoCAD','PIC Microcontrollers','ESP32','Arduino','6-DOF IMU'].map(s=>`<span class="px-2 py-0.5 rounded bg-neutral-100 text-xs">${s}</span>`).join('')}</div></div>
+                <div class="p-5 rounded-lg border border-black/20 bg-white"><p class="text-xs font-bold uppercase mb-2">04 · Tools &amp; Platforms</p><div class="flex flex-wrap gap-1.5">${['Git & GitHub','Android Studio','VS Code','RESTful APIs','RDBMS / SQL'].map(s=>`<span class="px-2 py-0.5 rounded bg-neutral-100 text-xs">${s}</span>`).join('')}</div></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="c-work" class="py-12 border-b border-black/20">
+            <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+              <div><p class="text-xs font-bold uppercase tracking-[0.2em] text-[#0047FF] mb-2">03 / Academic Work Samples</p><h2 class="text-3xl font-bold tracking-tight">Selected Engineering Artifacts</h2></div>
+              <div class="flex flex-wrap gap-2 no-print">
+                <button data-cf="all" class="cf-btn px-3 py-1.5 rounded text-xs font-semibold uppercase bg-[#111111] text-white">All (4)</button>
+                <button data-cf="ml" class="cf-btn px-3 py-1.5 rounded text-xs font-semibold uppercase border border-black/20">AI &amp; Vision</button>
+                <button data-cf="hardware" class="cf-btn px-3 py-1.5 rounded text-xs font-semibold uppercase border border-black/20">Hardware &amp; Arch</button>
+                <button data-cf="software" class="cf-btn px-3 py-1.5 rounded text-xs font-semibold uppercase border border-black/20">Full-Stack</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              ${projects.map(p => `
+                <article data-tags="${p.filter}" class="c-card rounded-lg border border-black/20 bg-white overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div class="h-44 bg-neutral-100 border-b border-black/10 p-4 flex items-center justify-center relative">
+                      <span class="absolute top-3 left-3 px-2 py-0.5 rounded bg-[#0047FF] text-white text-[10px] font-bold uppercase">${p.status}</span>
+                      ${p.svg}
+                    </div>
+                    <div class="p-6">
+                      <p class="text-xs font-mono text-[#595959] mb-1">${p.cat}</p>
+                      <h3 class="text-lg font-bold">${p.title}</h3>
+                      <p class="text-xs text-[#595959] mt-2 leading-relaxed">${p.desc}</p>
+                    </div>
+                  </div>
+                  <div class="px-6 pb-5 flex flex-wrap gap-1.5">${p.tags.map(t=>`<span class="px-2 py-0.5 rounded bg-neutral-100 text-[11px] font-mono">${t}</span>`).join('')}</div>
+                </article>
+              `).join('')}
+            </div>
+          </section>
+
+          <section id="c-lead" class="py-12 border-b border-black/20">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#0047FF] mb-2">04 / Leadership &amp; Service</p>
+            <h2 class="text-3xl font-bold tracking-tight mb-6">ACCESS DLSU — Association of Computer Engineering Students</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 rounded-lg border border-black/20 bg-white p-6">
+              <div class="space-y-5">
+                <div class="pl-4 border-l-2 border-[#0047FF]"><h3 class="font-bold">Associate Vice President for Academics <span class="text-xs font-mono text-[#0047FF]">(Sept 2026 – Present)</span></h3><p class="text-xs text-neutral-700 mt-1">Spearhead college-wide academic assistance programs, peer-led technical tutorials, student performance research, and centralized digital learning repositories.</p></div>
+                <div class="pl-4 border-l-2 border-black/30"><h3 class="font-bold">Junior Officer for Academics <span class="text-xs font-mono text-[#595959]">(Nov 2025 – Sept 2026)</span></h3><p class="text-xs text-neutral-700 mt-1">Authored technical reviewers, formula sheets, and study guides for Digital Logic, Circuits, and Programming; facilitated pre-exam peer clinics.</p></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="p-3 rounded border border-black/15"><strong class="text-[#0047FF]">01 · Learning Repository</strong><p class="text-[#595959] mt-1">Structured archive indexing notes &amp; lab primers.</p></div>
+                <div class="p-3 rounded border border-black/15"><strong class="text-[#0047FF]">02 · Peer Tutorials</strong><p class="text-[#595959] mt-1">Review clinics for microprocessors &amp; C/Python.</p></div>
+                <div class="p-3 rounded border border-black/15"><strong class="text-[#0047FF]">03 · Academic Research</strong><p class="text-[#595959] mt-1">Student feedback metrics &amp; bottleneck analysis.</p></div>
+                <div class="p-3 rounded border border-black/15"><strong class="text-[#0047FF]">04 · Reviewer Publications</strong><p class="text-[#595959] mt-1">High-yield exam reviewers across CpE.</p></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="c-ref" class="py-12">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#0047FF] mb-2">05 / References</p>
+            <h2 class="text-3xl font-bold tracking-tight mb-6">Academic &amp; Organizational References</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="p-6 rounded-lg border border-black/20 bg-white"><span class="text-[11px] font-mono text-[#0047FF] font-bold uppercase">Faculty / Thesis Reference</span><h3 class="font-bold mt-1">Department of Electronics &amp; Computer Engineering</h3><p class="text-xs text-neutral-600 mt-2">De La Salle University – Manila · Faculty Adviser for Embedded Systems &amp; Wearable-Vision Sign Recognition Research.</p></div>
+              <div class="p-6 rounded-lg border border-black/20 bg-white"><span class="text-[11px] font-mono text-[#0047FF] font-bold uppercase">Organizational Reference</span><h3 class="font-bold mt-1">ACCESS DLSU Executive Board &amp; Faculty Adviser</h3><p class="text-xs text-neutral-600 mt-2">Association of Computer Engineering Students · Attests to leadership as AVP for Academics and curriculum support initiatives.</p></div>
+            </div>
+          </section>
+        </main>
+      `;
+
+      cv.querySelector('#back3dBtn').addEventListener('click', () => document.getElementById('viewToggleBtn').click());
+      cv.querySelectorAll('[data-c2]').forEach(b => b.addEventListener('click', () => { navigator.clipboard?.writeText(b.dataset.c2); showToast('Copied ' + b.dataset.c2); }));
+      const fBtns = cv.querySelectorAll('.cf-btn'), cards = cv.querySelectorAll('.c-card');
+      fBtns.forEach(b => b.addEventListener('click', () => {
+        fBtns.forEach(x => { x.classList.remove('bg-[#111111]','text-white'); x.classList.add('border','border-black/20'); });
+        b.classList.add('bg-[#111111]','text-white'); b.classList.remove('border','border-black/20');
+        const f = b.dataset.cf;
+        cards.forEach(c => c.classList.toggle('hidden', f !== 'all' && !c.dataset.tags.includes(f)));
+      }));
+    }
 
     document.getElementById('viewToggleBtn').addEventListener('click', () => {
       isClassic = !isClassic;
       const cv = document.getElementById('classicViewContainer');
       if (isClassic) {
-        cv.innerHTML = `<div class="max-w-4xl mx-auto p-8 bg-white min-h-screen space-y-6">
-          <div class="flex flex-wrap justify-between items-center gap-3 border-b pb-4">
-            <div><h1 class="text-2xl font-bold">Miguel Andrei B. Abad</h1><p class="text-xs text-neutral-500">abadandrei22@gmail.com · +63 977 652 9418 · DLSU Manila</p></div>
-            <div class="flex gap-2 no-print">
-              <button onclick="window.print()" class="px-3 py-2 rounded border border-black text-xs font-bold">Print / PDF</button>
-              <button id="back3d" class="px-4 py-2 rounded bg-[#E63946] text-white text-xs font-bold">🏎 3D Grand Prix Mode</button>
-            </div>
-          </div>
-          ${ZONES.map(z => `<div class="p-4 border rounded space-y-2"><h2 class="font-bold text-sm" style="color:${z.color}">${z.name} — ${z.title}</h2>${z.sections.map(s => `<div><p class="text-xs font-bold">${s.heading}</p><p class="text-xs text-neutral-700 whitespace-pre-line">${s.body}</p></div>`).join('')}</div>`).join('')}
-        </div>`;
-        cv.querySelector('#back3d').addEventListener('click', () => document.getElementById('viewToggleBtn').click());
+        renderFull2DClassic();
         cv.classList.remove('hidden'); document.getElementById('hudOverlay').classList.add('hidden');
       } else {
         cv.classList.add('hidden'); document.getElementById('hudOverlay').classList.remove('hidden');
       }
     });
 
-    // Click GPS Minimap to Warp to Any Station
+    // Click GPS Minimap to Warp
     const radarCanvas = document.getElementById('radarCanvas');
     const radarCtx = radarCanvas.getContext('2d');
     radarCanvas.addEventListener('click', (e) => {
       const rect = radarCanvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
       const scale = 136 / 600;
-      const worldX = (mx - 68) / scale;
-      const worldZ = (my - 68) / scale;
-      const target = ZONES.find(z => Math.hypot(worldX - z.x, worldZ - z.z) < 42);
+      const wx = ((e.clientX - rect.left) - 68) / scale;
+      const wz = ((e.clientY - rect.top) - 68) / scale;
+      const target = ZONES.find(z => Math.hypot(wx - z.x, wz - z.z) < 42);
       if (target) {
-        car.x = target.x;
-        car.z = target.z + (target.id === 'south' ? -18 : 18);
-        car.speed = 0;
-        car.heading = target.rotY;
-        camState.yawOffset = 0;
+        car.x = target.x; car.z = target.z + 22; car.speed = 0; car.heading = 0;
         showToast(`Warped to ${target.name}`);
       }
     });
 
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.code === 'KeyR') { car.x = 0; car.z = 32; car.speed = 0; car.heading = 0; camState.yawOffset = 0; showToast('Car reset'); }
+      if (e.code === 'KeyR') { car.x = 0; car.z = 24; car.speed = 0; car.heading = 0; camState.yaw = 0; showToast('Car reset'); }
       keys.add(e.code);
     });
     window.addEventListener('keyup', (e) => keys.delete(e.code));
@@ -677,18 +841,12 @@
         document.getElementById('speedBarFill').style.height = `${Math.min(100, Math.max(4, (kmh / 230) * 100))}%`;
         document.getElementById('boostStatus').classList.toggle('hidden', !boost);
 
-        // Gentle camera auto-align when driving forward if user isn't dragging
-        if (!camState.dragging && Math.abs(car.speed) > 10) {
-          camState.yawOffset = THREE.MathUtils.lerp(camState.yawOffset, 0, Math.min(1, dt * 0.9));
-        }
-        const camAngle = car.heading + camState.yawOffset;
+        // GTA: Chinatown Wars Overhead Tilted Camera (fixed world orientation + drag-orbit)
         const hDist = Math.cos(camState.pitch) * camState.distance;
         const vDist = Math.sin(camState.pitch) * camState.distance;
-        camera.position.lerp(new THREE.Vector3(car.x + Math.sin(camAngle) * hDist, Math.max(2.5, 2.5 + vDist), car.z + Math.cos(camAngle) * hDist), Math.min(1, dt * 7));
-        camTarget.lerp(new THREE.Vector3(car.x, 2.2, car.z), Math.min(1, dt * 9));
+        camera.position.lerp(new THREE.Vector3(car.x + Math.sin(camState.yaw) * hDist, vDist, car.z + Math.cos(camState.yaw) * hDist), Math.min(1, dt * 7));
+        camTarget.lerp(new THREE.Vector3(car.x, 1.5, car.z), Math.min(1, dt * 9));
         camera.lookAt(camTarget);
-
-        clouds.forEach(c => { c.mesh.position.x = c.baseX + Math.sin(t * 0.1 + c.phase) * 8; });
 
         collectibles.forEach(c => {
           c.mesh.rotation.y = t * 1.5 + c.phase;
@@ -702,24 +860,17 @@
         const nearest = ZONES.find(z => Math.hypot(car.x - z.x, car.z - z.z) <= z.radius + 14) || null;
         if (nearest?.id !== activeZone?.id) {
           activeZone = nearest;
-          if (nearest) {
-            sound.playChime();
-            stationBadge.textContent = nearest.name;
-            stationBadge.classList.remove('hidden');
-          } else {
-            stationBadge.classList.add('hidden');
-          }
+          if (nearest) { sound.playChime(); stationBadge.textContent = nearest.name; stationBadge.classList.remove('hidden'); }
+          else stationBadge.classList.add('hidden');
         }
 
         ZONES.forEach((z) => {
-          const nb = noticeBoards.get(z.id);
-          const isNear = Math.hypot(car.x - z.x, car.z - z.z) <= z.radius + 14;
-          nb.currentY = THREE.MathUtils.lerp(nb.currentY, isNear ? 0 : 42, Math.min(1, dt * 4.5));
-          nb.group.position.y = nb.currentY;
-          nb.titleBanner.position.y = 16.5 + Math.sin(t * 2.2) * 0.35;
+          const st = stationClusters.get(z.id);
+          const isNear = Math.hypot(car.x - z.x, car.z - z.z) <= z.radius + 16;
+          st.currentY = THREE.MathUtils.lerp(st.currentY, isNear ? 0 : 38, Math.min(1, dt * 4.5));
+          st.cluster.position.y = st.currentY;
         });
 
-        // 600m Island GPS Radar
         radarCtx.clearRect(0, 0, 136, 136);
         const scale = 136 / 600;
         ZONES.forEach(z => { radarCtx.fillStyle = z.color; radarCtx.beginPath(); radarCtx.arc(68 + z.x * scale, 68 + z.z * scale, 5.2, 0, Math.PI * 2); radarCtx.fill(); });
