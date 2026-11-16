@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Miguel Andrei B. Abad — 3D Hot Air Balloon Career e-Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://esm.sh/three@0.170.0",
+        "cannon-es": "https://esm.sh/cannon-es@0.20.0"
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    code, pre, .font-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; background: #eef2f6; color: #111111; }
+    .swiss-grid-bg {
+      background-size: 32px 32px;
+      background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="antialiased selection:bg-[#0047FF] selection:text-white">
+  <div id="canvasContainer" class="fixed inset-0 z-0"></div>
+
+  <!-- Minimalist Helvetica HUD -->
+  <div id="hudOverlay" class="fixed inset-0 z-10 pointer-events-none select-none">
+    <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2 pointer-events-auto">
+      <div class="px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#E63946]"></span>
+        <span class="text-xs font-bold tracking-wider uppercase">MIGUEL ABAD // 3D PORTFOLIO</span>
+      </div>
+      <button id="soundToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#111111] hover:text-white transition-colors">🔇 Sound Off</button>
+      <button id="viewToggleBtn" class="px-3 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm text-xs font-semibold hover:bg-[#0047FF] hover:text-white transition-colors">📄 2D Classic View</button>
+      <button id="contactQuickBtn" class="px-3 py-2 rounded bg-[#111111] text-white shadow-sm text-xs font-semibold hover:bg-[#0047FF] transition-colors">✉ Contact / Guestbook</button>
+    </div>
+
+    <div class="absolute top-20 left-1/2 -translate-x-1/2 pointer-events-auto">
+      <button id="zonePromptBtn" class="hidden px-5 py-2.5 rounded-full bg-[#111111] text-white shadow-xl border border-white/20 text-xs font-bold tracking-wider uppercase flex items-center gap-2.5 hover:bg-[#0047FF] transition-colors">
+        <span class="px-1.5 py-0.5 rounded bg-[#E63946] text-[10px] font-mono">ENTER</span>
+        <span>Inspect <span id="zonePromptName">Zone</span></span>
+      </button>
+    </div>
+
+    <!-- Altimeter -->
+    <div class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md border border-black/15 rounded p-2.5 shadow-sm flex flex-col items-center gap-2 w-14">
+      <span class="text-[10px] font-mono font-bold tracking-widest text-neutral-500">ALT</span>
+      <div class="w-2 h-36 bg-neutral-200 rounded-full relative overflow-hidden flex items-end">
+        <div id="altBarFill" class="w-full bg-[#0047FF] rounded-full transition-all duration-75" style="height: 15%"></div>
+      </div>
+      <span id="altValue" class="text-[11px] font-mono font-bold">5.5m</span>
+      <span id="vsValue" class="text-[10px] font-mono text-neutral-500">+0.0</span>
+    </div>
+
+    <!-- Keycaps -->
+    <div class="hidden sm:flex absolute bottom-4 left-4 px-3.5 py-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm items-center gap-2 text-[11px] font-mono text-neutral-700">
+      <span><strong>WASD</strong> Steer</span><span>·</span>
+      <span><strong>SPACE</strong> Burn</span><span>·</span>
+      <span><strong>SHIFT/C</strong> Vent</span><span>·</span>
+      <span><strong>R</strong> Reset</span><span>·</span>
+      <span><strong>ENTER</strong> Open</span>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div id="mobileJoystick" class="sm:hidden absolute bottom-6 left-6 w-24 h-24 rounded-full bg-white/75 backdrop-blur-md border border-black/20 pointer-events-auto flex items-center justify-center touch-none">
+      <div id="joystickKnob" class="w-10 h-10 rounded-full bg-[#111111] shadow-md"></div>
+    </div>
+    <div class="sm:hidden absolute bottom-8 right-36 flex flex-col gap-2 pointer-events-auto">
+      <button id="mobileBurnBtn" class="px-4 py-2.5 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider shadow">BURN ▲</button>
+      <button id="mobileVentBtn" class="px-4 py-2.5 rounded bg-[#111111] text-white text-xs font-bold uppercase tracking-wider shadow">VENT ▼</button>
+    </div>
+
+    <!-- Radar -->
+    <div class="absolute bottom-4 right-4 p-2 rounded bg-white/90 backdrop-blur-md border border-black/15 shadow-sm">
+      <div class="flex items-center justify-between text-[9px] font-mono font-bold uppercase tracking-widest text-neutral-500 mb-1 px-1">
+        <span>RADAR</span><span>5 ZONES</span>
+      </div>
+      <canvas id="radarCanvas" width="128" height="128" class="block rounded bg-[#FAFAFA] border border-black/10"></canvas>
+    </div>
+  </div>
+
+  <div id="classicViewContainer" class="hidden relative z-20"></div>
+
+  <!-- Zone Drawer -->
+  <div id="zoneDrawer" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="bg-white border border-black/20 rounded-lg max-w-3xl w-full max-h-[88vh] overflow-y-auto shadow-2xl">
+      <div class="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-3.5 border-b border-black/10 flex items-center justify-between">
+        <span class="text-[11px] font-mono font-bold uppercase tracking-widest text-neutral-500">Portfolio Inspector</span>
+        <button id="closeDrawerBtn" class="px-2.5 py-1 rounded border border-black/20 text-xs font-semibold hover:bg-[#111111] hover:text-white transition-colors">✕ Close [ESC]</button>
+      </div>
+      <div id="zoneDrawerBody" class="p-6 sm:p-8"></div>
+    </div>
+  </div>
+
+  <div id="toastBanner" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded bg-[#111111] text-white text-xs font-semibold shadow-lg">Copied</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import * as CANNON from 'cannon-es';
+
+    // Embedded Portfolio Data (100% preserved from original HTML)
+    const PORTFOLIO = {
+      profile: {
+        full_name: 'Miguel Andrei B. Abad',
+        tagline: 'Computer Engineering undergraduate specializing in embedded systems, computer vision, and full-stack software engineering.',
+        location: 'Cavite, Philippines',
+        email: 'abadandrei22@gmail.com',
+        phone: '+63 977 652 9418',
+        linkedin_url: 'https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/',
+        summary: 'I am an undergraduate Computer Engineering student at De La Salle University – Manila focused on bridging low-level hardware systems with intelligent software. My engineering work spans custom PCB design, microcontroller firmware integration, multi-modal sensor telemetry fusion, and deep learning pipelines for real-time gesture recognition.',
+        summary_secondary: 'Alongside hardware and machine learning development, I build responsive, data-driven web and mobile applications backed by relational databases and RESTful architectures. Outside the lab, I serve as Associate Vice President for Academics at ACCESS DLSU, leading peer mentorship and technical resource initiatives for the engineering community.'
+      },
+      education: [{
+        institution: 'De La Salle University – Manila',
+        degree: 'Bachelor of Science in Computer Engineering',
+        period: '2023 – Present',
+        honors: "Consistent Dean's Lister",
+        coursework: ['Embedded Systems', 'Microprocessor Systems & Architecture', 'Digital Logic Design', 'Signal Processing', 'Operating Systems', 'Feedback and Control Systems', 'Machine Learning']
+      }],
+      skills: [
+        { category: 'Programming Languages', items: ['C / C++', 'Python', 'Java', 'Kotlin', 'JavaScript', 'SQL', 'Verilog', 'MATLAB', 'HTML5 / CSS3'] },
+        { category: 'Frameworks & Libraries', items: ['PyTorch', 'OpenCV', 'MediaPipe', 'Keras', 'Android SDK'] },
+        { category: 'Hardware & EDA', items: ['KiCad (Schematic & PCB)', 'AutoCAD', 'PIC Microcontrollers', 'ESP32', 'Arduino', '6-DOF IMU Sensors', 'Embedded Integration'] },
+        { category: 'Tools & Platforms', items: ['Git & GitHub', 'Android Studio', 'VS Code', 'RESTful APIs', 'RDBMS / SQL'] }
+      ],
+      projects: [
+        {
+          title: 'Real-Time FSL Sign Recognition via Wearable-Vision Fusion',
+          status: 'Ongoing Thesis / Research',
+          category: 'Multi-Modal Embedded AI & Computer Vision',
+          filter_tags: 'ml hardware',
+          overview: 'An ongoing Computer Engineering research implementation designed to bridge the communication gap for the Filipino Deaf community by combining wearable inertial sensing with computer vision on mobile hardware.',
+          technologies: ['Python', 'PyTorch', 'Android SDK', 'OpenCV', 'MediaPipe', 'ESP32', '6-DOF IMU', 'CNN-LSTM'],
+          bullets: [
+            'Architected a native Android application fusing wearable ESP32 6-DOF IMU sensor telemetry with real-time camera feeds for multi-modal spatial motion tracking.',
+            'Developed and trained a hybrid CNN-LSTM neural network in PyTorch to classify dynamic sign gestures using synchronized spatio-temporal datasets.',
+            'Engineered an end-to-end gloss-to-text post-processing pipeline to translate discrete model predictions into structured, natural language output.'
+          ],
+          diagram_type: 'fsl-fusion'
+        },
+        {
+          title: 'PIC16F877A Microcontroller Development Board',
+          status: 'Hardware / EDA',
+          category: 'Hardware Prototyping & PCB Layout',
+          filter_tags: 'hardware',
+          overview: 'A custom-engineered microcontroller breakout and prototyping board built from schematic capture through multi-layer PCB routing to support embedded systems laboratory applications.',
+          technologies: ['KiCad', 'Schematic Capture', '4-Layer PCB Layout', 'PIC16F877A', 'Hardware Prototyping', 'DRC'],
+          bullets: [
+            'Designed a custom PIC16F877A breakout board featuring integrated 5V voltage regulation, an external 20MHz crystal oscillator circuit, and an ICSP programming interface.',
+            'Routed a 4-layer printed circuit board (PCB) in KiCad with dedicated internal power and ground planes to minimize signal noise and ensure power integrity.',
+            'Verified manufacturing readiness and electrical clearance through complete Design Rule Checks (DRC) and Gerber file generation.'
+          ],
+          diagram_type: 'pcb-4layer'
+        },
+        {
+          title: 'Web-Based PDF Reader & Digital Catalog',
+          status: 'Full-Stack Web',
+          category: 'Full-Stack Web Engineering & RDBMS',
+          filter_tags: 'software',
+          overview: 'A full-stack web application enabling users to upload, organize, and read digital documents in-browser with automated metadata enrichment and persistent library state.',
+          technologies: ['JavaScript', 'SQL', 'HTML5', 'CSS3', 'RESTful APIs', 'RDBMS', 'CRUD'],
+          bullets: [
+            'Built a responsive in-browser PDF reader featuring dynamic document rendering, custom file upload pipelines, zoom controls, and chapter navigation.',
+            'Integrated MangaDex and Google Books REST APIs asynchronously to retrieve and display rich bibliographic metadata and cover assets dynamically.',
+            'Designed normalized relational SQL database schemas and executed CRUD queries to persist reading history, library records, and user uploads.'
+          ],
+          diagram_type: 'pdf-catalog'
+        },
+        {
+          title: 'Bit by Bit — Interactive SAP-1 Computer Simulator',
+          status: 'Computer Architecture',
+          category: 'Computer Architecture & Digital Logic',
+          filter_tags: 'hardware software',
+          overview: 'An interactive educational simulator built to demystify low-level microprocessor execution, control signals, and bus-organized computer architecture for undergraduate engineering students.',
+          technologies: ['JavaScript', 'HTML5', 'CSS3', 'Computer Architecture', 'SAP-1', 'Digital Logic'],
+          bullets: [
+            'Implemented cycle-accurate simulation of the Simple-As-Possible (SAP-1) 8-bit architecture across all six T-states of the instruction fetch-decode-execute cycle.',
+            'Visualized real-time data transfers across the 8-bit W-bus between the Program Counter, Memory Address Register, 16x8 RAM, Instruction Register, Accumulator, and Adder/Subtractor ALU.',
+            'Displayed live 12-bit Controller-Sequencer control words (CON) and binary/hexadecimal register states to reinforce Digital Logic and Microprocessor coursework.'
+          ],
+          diagram_type: 'sap1-bus'
+        }
+      ],
+      experiences: [
+        {
+          organization: 'ACCESS DLSU — Association of Computer Engineering Students',
+          role: 'Associate Vice President for Academics',
+          period: 'Sept 2026 – Present',
+          bullets: [
+            'Spearhead college-wide academic assistance programs, peer-led technical tutorials, and structured reviewer distribution drives serving Computer Engineering undergraduates.',
+            'Conduct secondary quantitative and qualitative research to evaluate student performance trends and formulate data-backed academic support strategies.',
+            'Architect, curate, and maintain centralized digital learning repositories to optimize coursework resource discovery across year levels.'
+          ],
+          artifacts: [
+            { code: 'INITIATIVE 01', title: 'Centralized Learning Repository', description: 'Structured digital archive indexing lecture notes, lab primers, and curated problem sets by course code for instant student access.' },
+            { code: 'INITIATIVE 02', title: 'Peer-Led Technical Tutorials', description: 'Organized hands-on review clinics for microprocessor systems, digital logic design, and C/Python programming fundamentals.' },
+            { code: 'INITIATIVE 03', title: 'Academic Performance Research', description: 'Collected and analyzed student feedback metrics to identify bottleneck courses and deploy targeted tutorial interventions.' },
+            { code: 'INITIATIVE 04', title: 'Technical Reviewer Publications', description: 'Authored and quality-checked high-yield examination reviewers distributed across the undergraduate CpE batch.' }
+          ]
+        },
+        {
+          organization: 'ACCESS DLSU — Association of Computer Engineering Students',
+          role: 'Junior Officer for Academics',
+          period: 'Nov 2025 – Sept 2026',
+          bullets: [
+            'Authored comprehensive technical reviewers, formula sheets, and structured study guides covering foundational Computer Engineering courses (Digital Logic, Circuits, and Programming).',
+            'Facilitated peer review sessions prior to departmental examinations to strengthen student mastery of core hardware and software concepts.'
+          ],
+          artifacts: []
+        }
+      ],
+      references: [
+        {
+          name: 'Department of Electronics & Computer Engineering',
+          title: 'Faculty / Thesis Reference',
+          organization: 'De La Salle University – Manila',
+          email: 'Contact details provided upon formal request',
+          relationship: 'Faculty Adviser for Embedded Systems & Wearable-Vision Sign Recognition Research. Can attest to hardware prototyping, machine learning engineering, and academic standing.'
+        },
+        {
+          name: 'ACCESS DLSU Executive Board & Faculty Adviser',
+          title: 'Organizational Reference',
+          organization: 'Association of Computer Engineering Students',
+          email: 'Contact details provided upon formal request',
+          relationship: 'Can attest to leadership as Associate Vice President for Academics, curriculum support execution, team management, and student research initiatives.'
+        }
+      ]
+    };
+
+    const DEFAULT_NOTES = [
+      { sender_name: 'DLSU ECE Engineering Cohort', company: 'ACCESS DLSU', message: 'Impressive wearable-vision fusion pipeline and clean Swiss balloon flight world! Wishing you the best on the FSL thesis.', created_at: '2026-11-16' },
+      { sender_name: 'Technical Recruiter', company: 'Embedded Systems Partner', message: 'Love the dual 3D flight + ATS-ready 2D classic view toggle. Great showcase of KiCad PCB and PyTorch skills.', created_at: '2026-11-16' }
+    ];
+    let guestbookNotes = JSON.parse(localStorage.getItem('miguel_guestbook') || 'null') || DEFAULT_NOTES;
+
+    // Sound Engine
+    class SoundEngine {
+      constructor() { this.ctx = null; this.muted = true; this.initialized = false; }
+      init() {
+        if (this.initialized) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0;
+        this.masterGain.connect(this.ctx.destination);
+        const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        const bn = this.ctx.createBufferSource(); bn.buffer = buf; bn.loop = true;
+        const bf = this.ctx.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = 340;
+        this.burnerGain = this.ctx.createGain(); this.burnerGain.gain.value = 0;
+        bn.connect(bf); bf.connect(this.burnerGain); this.burnerGain.connect(this.masterGain); bn.start();
+        const wn = this.ctx.createBufferSource(); wn.buffer = buf; wn.loop = true;
+        this.windFilter = this.ctx.createBiquadFilter(); this.windFilter.type = 'lowpass'; this.windFilter.frequency.value = 260;
+        this.windGain = this.ctx.createGain(); this.windGain.gain.value = 0;
+        wn.connect(this.windFilter); this.windFilter.connect(this.windGain); this.windGain.connect(this.masterGain); wn.start();
+        this.initialized = true;
+      }
+      toggleMute() {
+        this.init();
+        if (!this.ctx) return false;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        this.muted = !this.muted;
+        this.masterGain.gain.setTargetAtTime(this.muted ? 0 : 0.65, this.ctx.currentTime, 0.08);
+        return !this.muted;
+      }
+      updateFlightAudio({ isBurning, speed, altitude }) {
+        if (!this.initialized || this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        this.burnerGain.gain.setTargetAtTime(isBurning ? 0.34 : 0, now, 0.06);
+        this.windGain.gain.setTargetAtTime(0.02 + Math.min(1, speed / 18) * 0.16, now, 0.12);
+        this.windFilter.frequency.setTargetAtTime(220 + Math.min(1, speed / 18) * 950 + Math.min(1, altitude / 30) * 200, now, 0.12);
+      }
+      playZoneChime() {
+        if (!this.initialized || this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99].forEach((f, i) => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.001, now + i * 0.06);
+          g.gain.exponentialRampToValueAtTime(0.08, now + i * 0.06 + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.45);
+          o.connect(g); g.connect(this.masterGain); o.start(now + i * 0.06); o.stop(now + i * 0.06 + 0.48);
+        });
+      }
+      playClick() {
+        if (!this.initialized || this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'triangle'; o.frequency.setValueAtTime(920, now); o.frequency.exponentialRampToValueAtTime(280, now + 0.045);
+        g.gain.setValueAtTime(0.09, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+        o.connect(g); g.connect(this.masterGain); o.start(now); o.stop(now + 0.055);
+      }
+    }
+
+    const ZONES = [
+      { id: 'central', name: 'Central Plaza', x: 0, z: 0, radius: 13, color: '#E63946' },
+      { id: 'north', name: 'North Pavilion', x: 0, z: -48, radius: 13, color: '#0047FF' },
+      { id: 'east', name: 'East Hardware & AI Sky-Lab', x: 52, z: 0, radius: 17, color: '#0047FF' },
+      { id: 'west', name: 'West Student Hub', x: -52, z: 0, radius: 13, color: '#111111' },
+      { id: 'south', name: 'South Lounge', x: 0, z: 48, radius: 13, color: '#E63946' }
+    ];
+
+    function createTextPlane(lines, { width = 10, height = 3, accent = '#0047FF', align = 'center' } = {}) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024; canvas.height = Math.round(1024 * (height / width));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#111111'; ctx.lineWidth = 10; ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
+      ctx.fillStyle = accent; ctx.fillRect(6, 6, canvas.width - 12, 14);
+      let y = 80;
+      lines.forEach((l) => {
+        ctx.fillStyle = l.color || '#111111';
+        ctx.font = `${l.weight || 'bold'} ${l.size || 42}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+        ctx.textAlign = align;
+        ctx.fillText(l.text, align === 'center' ? canvas.width / 2 : 48, y, canvas.width - 96);
+        y += (l.size || 42) + (l.gap || 18);
+      });
+      const tex = new THREE.CanvasTexture(canvas);
+      return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.45 }));
+    }
+
+    // Scene, Physics, Balloon
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeef2f6);
+    scene.fog = new THREE.Fog(0xeef2f6, 55, 165);
+    const camera = new THREE.PerspectiveCamera(54, window.innerWidth / window.innerHeight, 0.2, 260);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    document.getElementById('canvasContainer').appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd8dce2, 0.85));
+    const dl = new THREE.DirectionalLight(0xffffff, 1.1);
+    dl.position.set(42, 68, 36); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
+    scene.add(dl);
+
+    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
+    const gBody = new CANNON.Body({ mass: 0, shape: new CANNON.Plane() });
+    gBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+    world.addBody(gBody);
+
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(320, 320), new THREE.MeshStandardMaterial({ color: 0xf4f4f1, roughness: 0.9 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    const grid = new THREE.GridHelper(220, 55, 0xc8c8c4, 0xe2e2de); grid.position.y = 0.02; scene.add(grid);
+
+    // Zone rings & monoliths
+    ZONES.forEach((z) => {
+      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.6, z.radius, 48), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.45 }));
+      r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.05, z.z); scene.add(r);
+    });
+
+    const centralSign = createTextPlane([
+      { text: 'MIGUEL ANDREI B. ABAD', size: 68, color: '#111111', gap: 22 },
+      { text: 'BS COMPUTER ENGINEERING · DE LA SALLE UNIVERSITY', size: 32, color: '#0047FF', gap: 16 },
+      { text: '01 // CENTRAL PLAZA · PRESS [ENTER] TO INSPECT', size: 24, weight: 'normal', color: '#595959' }
+    ], { width: 11.2, height: 3.3, accent: '#E63946' });
+    centralSign.position.set(0, 2.3, -4); scene.add(centralSign);
+
+    const northSign = createTextPlane([
+      { text: '02 // NORTH PAVILION', size: 34, color: '#0047FF', gap: 18 },
+      { text: 'RESUME & TECHNICAL MATRIX', size: 54, color: '#111111', gap: 20 },
+      { text: "DLSU Manila · Consistent Dean's Lister (2023–Present)", size: 30, weight: 'normal', color: '#595959' }
+    ], { width: 10, height: 3.4, accent: '#0047FF' });
+    northSign.position.set(0, 4.4, -43); scene.add(northSign);
+
+    const eastSign = createTextPlane([
+      { text: '03 // EAST HARDWARE & AI SKY-LAB', size: 32, color: '#0047FF', gap: 16 },
+      { text: 'ACADEMIC WORK SAMPLES', size: 54, color: '#111111', gap: 14 },
+      { text: 'FSL Fusion · PIC16F877A PCB · PDF Catalog · SAP-1', size: 28, weight: 'normal', color: '#595959' }
+    ], { width: 11, height: 3.4, accent: '#0047FF' });
+    eastSign.position.set(42, 4.4, 0); eastSign.rotation.y = -Math.PI / 2; scene.add(eastSign);
+
+    const westSign = createTextPlane([
+      { text: '04 // WEST STUDENT HUB', size: 32, color: '#E63946', gap: 16 },
+      { text: 'ACCESS DLSU LEADERSHIP', size: 54, color: '#111111', gap: 18 },
+      { text: 'AVP for Academics (2026–Present) · Junior Officer (2025–2026)', size: 27, weight: 'normal', color: '#595959' }
+    ], { width: 10.5, height: 3.4, accent: '#111111' });
+    westSign.position.set(-45, 4.4, 0); westSign.rotation.y = Math.PI / 2; scene.add(westSign);
+
+    const southSign = createTextPlane([
+      { text: '05 // SOUTH LOUNGE', size: 34, color: '#E63946', gap: 16 },
+      { text: 'REFERENCES & RECRUITER CONTACT', size: 48, color: '#111111', gap: 18 },
+      { text: 'Send Direct Message or Leave a Sky-Guestbook Note', size: 28, weight: 'normal', color: '#595959' }
+    ], { width: 11, height: 3.4, accent: '#E63946' });
+    southSign.position.set(0, 4.4, 44.5); southSign.rotation.y = Math.PI; scene.add(southSign);
+
+    // Balloon
+    const balloonRoot = new THREE.Group();
+    const swayGroup = new THREE.Group();
+    balloonRoot.add(swayGroup);
+    scene.add(balloonRoot);
+
+    const basket = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.85, 1.3), new THREE.MeshStandardMaterial({ color: 0x1c1c1e, roughness: 0.75 }));
+    basket.position.y = 0.45; basket.castShadow = true; swayGroup.add(basket);
+    const rim = new THREE.Mesh(new THREE.BoxGeometry(1.42, 0.12, 1.42), new THREE.MeshStandardMaterial({ color: 0xe63946 }));
+    rim.position.y = 0.9; swayGroup.add(rim);
+    const flameMesh = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.95, 12), new THREE.MeshBasicMaterial({ color: 0xff7b00, transparent: true, opacity: 0 }));
+    flameMesh.position.y = 2.48; swayGroup.add(flameMesh);
+    const burnerLight = new THREE.PointLight(0xff7722, 0, 14, 1.6);
+    burnerLight.position.set(0, 3.6, 0); swayGroup.add(burnerLight);
+
+    const lathePts = [new THREE.Vector2(0.85, 2.85), new THREE.Vector2(1.45, 3.5), new THREE.Vector2(2.25, 4.5), new THREE.Vector2(2.55, 5.5), new THREE.Vector2(2.35, 6.5), new THREE.Vector2(1.7, 7.3), new THREE.Vector2(0.85, 7.8), new THREE.Vector2(0.01, 7.95)];
+    const palette = [0xe63946, 0xffffff, 0x111111, 0xffffff];
+    for (let i = 0; i < 12; i++) {
+      const geo = new THREE.LatheGeometry(lathePts, 4, i * (Math.PI * 2 / 12), (Math.PI * 2 / 12) + 0.004);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: palette[i % 4], side: THREE.DoubleSide, emissive: 0xff5500, emissiveIntensity: 0 }));
+      m.castShadow = true; swayGroup.add(m);
+    }
+
+    const shadowRing = new THREE.Mesh(new THREE.RingGeometry(1.5, 1.85, 36), new THREE.MeshBasicMaterial({ color: 0xe63946, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
+    shadowRing.rotation.x = -Math.PI / 2; shadowRing.position.y = 0.08; scene.add(shadowRing);
+
+    const bBody = new CANNON.Body({ mass: 8, shape: new CANNON.Sphere(1.4), position: new CANNON.Vec3(0, 5.5, 14), linearDamping: 0.55, fixedRotation: true });
+    world.addBody(bBody);
+
+    // State & UI
+    const sound = new SoundEngine();
+    const keys = new Set();
+    let activeZone = null, isDrawerOpen = false, isClassic = false;
+    const touchInput = { x: 0, z: 0, burn: false, vent: false };
+
+    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    function openZone(zoneId) {
+      sound.playClick(); isDrawerOpen = true;
+      const body = document.getElementById('zoneDrawerBody');
+      const p = PORTFOLIO.profile, edu = PORTFOLIO.education[0];
+      if (zoneId === 'central') {
+        body.innerHTML = `<div class="space-y-4">
+          <span class="text-xs font-mono font-bold text-[#E63946]">01 // CENTRAL PLAZA</span>
+          <h2 class="text-2xl font-bold">${esc(p.full_name)}</h2>
+          <p class="text-sm text-neutral-600">${esc(p.tagline)}</p>
+          <p class="text-sm text-neutral-700">${esc(p.summary)}</p>
+          <div class="p-4 rounded bg-neutral-50 border border-neutral-200 space-y-2 text-xs">
+            <div><strong>Email:</strong> ${esc(p.email)}</div>
+            <div><strong>Phone:</strong> ${esc(p.phone)}</div>
+            <a href="${esc(p.linkedin_url)}" target="_blank" class="inline-block px-3 py-1.5 rounded bg-[#0047FF] text-white font-semibold">Open LinkedIn ↗</a>
+          </div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500">Live Sky-Guestbook</h3>
+          <div class="space-y-2">${guestbookNotes.map(n => `<div class="p-3 rounded bg-neutral-50 border text-xs"><strong>${esc(n.sender_name)}</strong>: ${esc(n.message)}</div>`).join('')}</div>
+        </div>`;
+      } else if (zoneId === 'north') {
+        body.innerHTML = `<div class="space-y-4">
+          <span class="text-xs font-mono font-bold text-[#0047FF]">02 // NORTH PAVILION</span>
+          <h2 class="text-2xl font-bold">Resume & Technical Matrix</h2>
+          <div class="p-4 rounded bg-neutral-50 border"><strong>${esc(edu.institution)}</strong><br><span class="text-xs text-[#0047FF]">${esc(edu.degree)} (${esc(edu.period)}) · ${esc(edu.honors)}</span></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${PORTFOLIO.skills.map(s => `<div class="p-3 rounded border text-xs"><strong>${esc(s.category)}</strong><div class="mt-1 flex flex-wrap gap-1">${s.items.map(i => `<span class="px-2 py-0.5 bg-neutral-100 rounded">${esc(i)}</span>`).join('')}</div></div>`).join('')}</div>
+        </div>`;
+      } else if (zoneId === 'east') {
+        body.innerHTML = `<div class="space-y-4">
+          <span class="text-xs font-mono font-bold text-[#0047FF]">03 // EAST HARDWARE & AI SKY-LAB</span>
+          <h2 class="text-2xl font-bold">Academic Work Samples</h2>
+          ${PORTFOLIO.projects.map(pr => `<div class="p-4 rounded border space-y-1.5"><span class="text-[10px] font-mono text-[#0047FF] font-bold">${esc(pr.status)}</span><h3 class="font-bold text-sm">${esc(pr.title)}</h3><p class="text-xs text-neutral-600">${esc(pr.overview)}</p><div class="flex flex-wrap gap-1">${pr.technologies.map(t => `<span class="px-2 py-0.5 bg-neutral-100 rounded text-[11px] font-mono">${esc(t)}</span>`).join('')}</div></div>`).join('')}
+        </div>`;
+      } else if (zoneId === 'west') {
+        body.innerHTML = `<div class="space-y-4">
+          <span class="text-xs font-mono font-bold text-[#E63946]">04 // WEST STUDENT HUB</span>
+          <h2 class="text-2xl font-bold">ACCESS DLSU — Leadership & Service</h2>
+          ${PORTFOLIO.experiences.map(e => `<div class="pl-3 border-l-2 border-[#0047FF]"><h3 class="font-bold text-sm">${esc(e.role)} <span class="text-xs font-mono text-neutral-500">(${esc(e.period)})</span></h3><ul class="list-disc ml-4 text-xs text-neutral-700 mt-1">${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>`).join('')}
+        </div>`;
+      } else {
+        body.innerHTML = `<div class="space-y-4">
+          <span class="text-xs font-mono font-bold text-[#E63946]">05 // SOUTH LOUNGE</span>
+          <h2 class="text-2xl font-bold">References & Guestbook</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${PORTFOLIO.references.map(r => `<div class="p-3 rounded border bg-neutral-50 text-xs"><strong>${esc(r.name)}</strong><p class="text-neutral-600 mt-1">${esc(r.relationship)}</p></div>`).join('')}</div>
+          <form id="gbForm" class="p-4 rounded border space-y-2">
+            <p class="text-xs font-bold uppercase">Leave a Sky-Guestbook Note</p>
+            <input name="name" required placeholder="Your Name" class="w-full px-3 py-1.5 text-xs border rounded" />
+            <textarea name="msg" required rows="2" placeholder="Your note..." class="w-full px-3 py-1.5 text-xs border rounded"></textarea>
+            <button class="px-4 py-2 rounded bg-[#111111] text-white text-xs font-bold uppercase">Post Note</button>
+          </form>
+        </div>`;
+        body.querySelector('#gbForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          guestbookNotes.unshift({ sender_name: fd.get('name'), message: fd.get('msg'), created_at: 'Today' });
+          localStorage.setItem('miguel_guestbook', JSON.stringify(guestbookNotes));
+          openZone('central');
+        });
+      }
+      document.getElementById('zoneDrawer').classList.remove('hidden');
+      document.getElementById('zoneDrawer').classList.add('flex');
+    }
+
+    document.getElementById('closeDrawerBtn').addEventListener('click', () => {
+      isDrawerOpen = false;
+      document.getElementById('zoneDrawer').classList.add('hidden');
+      document.getElementById('zoneDrawer').classList.remove('flex');
+    });
+    document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+      e.target.textContent = sound.toggleMute() ? '🔊 Sound On' : '🔇 Sound Off';
+    });
+    document.getElementById('contactQuickBtn').addEventListener('click', () => openZone('south'));
+    document.getElementById('zonePromptBtn').addEventListener('click', () => activeZone && openZone(activeZone.id));
+    document.getElementById('viewToggleBtn').addEventListener('click', () => {
+      isClassic = !isClassic;
+      const cv = document.getElementById('classicViewContainer');
+      if (isClassic) {
+        cv.innerHTML = `<div class="max-w-4xl mx-auto p-8 bg-white min-h-screen space-y-6">
+          <div class="flex justify-between items-center border-b pb-4">
+            <h1 class="text-2xl font-bold">${esc(PORTFOLIO.profile.full_name)}</h1>
+            <button id="back3d" class="px-4 py-2 rounded bg-[#E63946] text-white text-xs font-bold">✈ 3D Flight Mode</button>
+          </div>
+          <p class="text-sm text-neutral-700">${esc(PORTFOLIO.profile.summary)}</p>
+          <h2 class="text-lg font-bold border-b pb-1">Projects</h2>
+          ${PORTFOLIO.projects.map(p => `<div class="p-4 border rounded"><h3 class="font-bold">${esc(p.title)}</h3><p class="text-xs text-neutral-600 mt-1">${esc(p.overview)}</p></div>`).join('')}
+        </div>`;
+        cv.querySelector('#back3d').addEventListener('click', () => document.getElementById('viewToggleBtn').click());
+        cv.classList.remove('hidden'); document.getElementById('hudOverlay').classList.add('hidden');
+      } else {
+        cv.classList.add('hidden'); document.getElementById('hudOverlay').classList.remove('hidden');
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Enter' && activeZone && !isDrawerOpen) openZone(activeZone.id);
+      if (e.code === 'KeyR' && !isDrawerOpen) { bBody.position.set(0, 5.5, 14); bBody.velocity.set(0, 0, 0); }
+      if (e.code === 'Escape' && isDrawerOpen) document.getElementById('closeDrawerBtn').click();
+      keys.add(e.code);
+    });
+    window.addEventListener('keyup', (e) => keys.delete(e.code));
+
+    const radarCtx = document.getElementById('radarCanvas').getContext('2d');
+    const clock = new THREE.Clock();
+    const camTarget = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const t = clock.elapsedTime;
+      if (!isClassic) {
+        world.step(1 / 60, dt, 3);
+        let ix = 0, iz = 0;
+        if (!isDrawerOpen) {
+          if (keys.has('KeyA') || keys.has('ArrowLeft')) ix -= 1;
+          if (keys.has('KeyD') || keys.has('ArrowRight')) ix += 1;
+          if (keys.has('KeyW') || keys.has('ArrowUp')) iz -= 1;
+          if (keys.has('KeyS') || keys.has('ArrowDown')) iz += 1;
+        }
+        const burn = !isDrawerOpen && (keys.has('Space') || touchInput.burn);
+        const vent = !isDrawerOpen && (keys.has('ShiftLeft') || keys.has('ShiftRight') || keys.has('KeyC') || touchInput.vent);
+        bBody.applyForce(new CANNON.Vec3(ix * 125 + Math.sin(t * 0.3) * 3, 78.56 + (burn ? 185 : 0) - (vent ? 135 : 0), iz * 125), bBody.position);
+        if (bBody.position.y < 1.5) { bBody.position.y = 1.5; bBody.velocity.y = Math.max(0, bBody.velocity.y); }
+        if (bBody.position.y > 38) { bBody.position.y = 38; bBody.velocity.y = Math.min(0, bBody.velocity.y); }
+        balloonRoot.position.set(bBody.position.x, bBody.position.y - 1.2, bBody.position.z);
+        swayGroup.rotation.set(THREE.MathUtils.clamp(bBody.velocity.z * 0.024, -0.24, 0.24), 0, THREE.MathUtils.clamp(-bBody.velocity.x * 0.024, -0.24, 0.24));
+        burnerLight.intensity = burn ? 3.2 : 0;
+        flameMesh.material.opacity = burn ? 0.9 : 0;
+        shadowRing.position.set(bBody.position.x, 0.08, bBody.position.z);
+        sound.updateFlightAudio({ isBurning: burn, speed: bBody.velocity.length(), altitude: bBody.position.y });
+
+        camera.position.lerp(new THREE.Vector3(bBody.position.x, bBody.position.y + 7.5, bBody.position.z + 18.5), Math.min(1, dt * 3.8));
+        camTarget.lerp(new THREE.Vector3(bBody.position.x, bBody.position.y + 2.8, bBody.position.z), Math.min(1, dt * 5));
+        camera.lookAt(camTarget);
+
+        const nearest = ZONES.find(z => Math.hypot(bBody.position.x - z.x, bBody.position.z - z.z) <= z.radius) || null;
+        if (nearest?.id !== activeZone?.id) {
+          activeZone = nearest;
+          const btn = document.getElementById('zonePromptBtn');
+          if (nearest) { sound.playZoneChime(); document.getElementById('zonePromptName').textContent = nearest.name; btn.classList.remove('hidden'); }
+          else btn.classList.add('hidden');
+        }
+
+        document.getElementById('altValue').textContent = `${bBody.position.y.toFixed(1)}m`;
+        document.getElementById('vsValue').textContent = `${bBody.velocity.y >= 0 ? '+' : ''}${bBody.velocity.y.toFixed(1)}`;
+        document.getElementById('altBarFill').style.height = `${Math.min(100, Math.max(4, (bBody.position.y / 38) * 100))}%`;
+
+        radarCtx.clearRect(0, 0, 128, 128);
+        ZONES.forEach(z => { radarCtx.fillStyle = z.color; radarCtx.beginPath(); radarCtx.arc(64 + z.x * 0.8, 64 + z.z * 0.8, 4.5, 0, Math.PI * 2); radarCtx.fill(); });
+        radarCtx.fillStyle = '#E63946'; radarCtx.beginPath(); radarCtx.arc(64 + bBody.position.x * 0.8, 64 + bBody.position.z * 0.8, 5.5, 0, Math.PI * 2); radarCtx.fill();
+
+        renderer.render(scene, camera);
+      }
+    }
+    animate();
+  </script>
+</body>
+</html>
