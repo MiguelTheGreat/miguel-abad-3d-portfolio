@@ -488,12 +488,12 @@
     // Ground Contact Shadow & Underglow
     const shadowCanvas = document.createElement('canvas');
     shadowCanvas.width = 128; shadowCanvas.height = 256;
-    const sctx = shadowCanvas.getContext('2d');
-    const sg = sctx.createRadialGradient(64, 128, 12, 64, 128, 64);
+    const shCtx = shadowCanvas.getContext('2d');
+    const sg = shCtx.createRadialGradient(64, 128, 12, 64, 128, 64);
     sg.addColorStop(0, 'rgba(0,0,0,0.65)');
     sg.addColorStop(0.7, 'rgba(0,0,0,0.28)');
     sg.addColorStop(1, 'rgba(0,0,0,0)');
-    sctx.fillStyle = sg; sctx.fillRect(0, 0, 128, 256);
+    shCtx.fillStyle = sg; shCtx.fillRect(0, 0, 128, 256);
     const carShadow = new THREE.Mesh(
       new THREE.PlaneGeometry(3.2, 5.6),
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false })
