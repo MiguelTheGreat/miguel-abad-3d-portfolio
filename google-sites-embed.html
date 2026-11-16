@@ -370,21 +370,29 @@
 
     // Scene & Renderer
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x90e0ef, 180, 520);
-    const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.5, 700);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+    scene.fog = new THREE.Fog(0x90e0ef, 220, 620);
+    const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.8, 1200);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     document.getElementById('canvasContainer').appendChild(renderer.domElement);
 
-    const skyMat = new THREE.ShaderMaterial({
-      side: THREE.BackSide, depthWrite: false,
-      uniforms: { topColor: { value: new THREE.Color(0x0077b6) }, midColor: { value: new THREE.Color(0x90e0ef) }, bottomColor: { value: new THREE.Color(0xffd166) } },
-      vertexShader: `varying vec3 vW; void main(){ vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`,
-      fragmentShader: `uniform vec3 topColor; uniform vec3 midColor; uniform vec3 bottomColor; varying vec3 vW; void main(){ float h = normalize(vW).y; vec3 c = mix(bottomColor, midColor, smoothstep(-0.05,0.25,h)); c = mix(c, topColor, smoothstep(0.25,0.85,h)); gl_FragColor = vec4(c,1.0); }`
-    });
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(620, 32, 20), skyMat));
+    // Smooth Equirectangular Sky Gradient (no geometry to clip!)
+    const skyCanvas = document.createElement('canvas');
+    skyCanvas.width = 16; skyCanvas.height = 512;
+    const sctx = skyCanvas.getContext('2d');
+    const grad = sctx.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0.0, '#0077b6');
+    grad.addColorStop(0.42, '#90e0ef');
+    grad.addColorStop(0.54, '#ffd166');
+    grad.addColorStop(1.0, '#0096c7');
+    sctx.fillStyle = grad;
+    sctx.fillRect(0, 0, 16, 512);
+    const skyTex = new THREE.CanvasTexture(skyCanvas);
+    skyTex.mapping = THREE.EquirectangularReflectionMapping;
+    skyTex.colorSpace = THREE.SRGBColorSpace;
+    scene.background = skyTex;
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x40916c, 0.95));
     const dl = new THREE.DirectionalLight(0xfff4d2, 1.25);
