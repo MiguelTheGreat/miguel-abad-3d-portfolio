@@ -259,7 +259,7 @@ export function createSupercar(scene, startY) {
     pivot.add(caliper);
 
     pivot.add(wheelSpin);
-    carGroup.add(pivot);
+    chassisGroup.add(pivot);
     wheels.push({ pivot, mesh: wheelSpin });
   });
 

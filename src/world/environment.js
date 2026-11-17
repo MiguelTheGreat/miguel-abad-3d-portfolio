@@ -76,39 +76,56 @@ export function buildEnvironment(scene, terrain, redCurbMat, whiteCurbMat) {
 
   for (let m = 0; m < 32; m++) {
     const ang = (m / 32) * Math.PI * 2 + 0.09;
-    const r = getIslandRadius(ang) * (0.76 + (m % 3) * 0.05);
+    const r = getIslandRadius(ang) * (0.70 + (m % 3) * 0.04);
     const mx = Math.cos(ang) * r;
     const mz = Math.sin(ang) * r;
     if (!isPointClearOfRoadsAndZones(mx, mz, 24, 38)) continue;
 
-    const h = 52 + (m % 4) * 14;
+    const h = 58 + (m % 4) * 14;
     const rad = 28 + (m % 3) * 8;
-    // Sample lowest surrounding ground so mountain base is always buried cleanly into the hill/slope
+    // Sample wide perimeter (inner + outer including secondary peak reach) so mountain never floats on slopes
     let minGround = getTerrainHeight(mx, mz);
-    for (let s = 0; s < 8; s++) {
-      const sa = (s / 8) * Math.PI * 2;
-      minGround = Math.min(minGround, getTerrainHeight(mx + Math.cos(sa) * rad * 0.85, mz + Math.sin(sa) * rad * 0.85));
+    for (let s = 0; s < 12; s++) {
+      const sa = (s / 12) * Math.PI * 2;
+      minGround = Math.min(
+        minGround,
+        getTerrainHeight(mx + Math.cos(sa) * rad * 0.7, mz + Math.sin(sa) * rad * 0.7),
+        getTerrainHeight(mx + Math.cos(sa) * rad * 1.18, mz + Math.sin(sa) * rad * 1.18)
+      );
     }
 
+    const buryDepth = 14.0;
     const mGrp = new THREE.Group();
     const base = new THREE.Mesh(createJaggedMountainGeo(rad, h, m * 1.7), mtnMat);
-    base.position.y = h * 0.5 - 8.0;
+    base.position.y = h * 0.5 - buryDepth;
     base.castShadow = true; base.receiveShadow = true;
     mGrp.add(base);
 
     const cap = new THREE.Mesh(createJaggedMountainGeo(rad * 0.37, h * 0.37, m * 1.7 + 0.4), snowMat);
-    cap.position.y = h * 0.81 - 7.8;
+    cap.position.y = h * 0.81 - buryDepth + 0.2;
     mGrp.add(cap);
 
-    const sub = new THREE.Mesh(createJaggedMountainGeo(rad * 0.64, h * 0.62, m * 2.3), mtnMat);
-    sub.position.set(rad * 0.42, h * 0.31 - 8.0, rad * 0.24);
+    const subLocalX = rad * 0.42;
+    const subLocalZ = rad * 0.24;
+    const subRad = rad * 0.64;
+    const subH = h * 0.62;
+    const sub = new THREE.Mesh(createJaggedMountainGeo(subRad, subH, m * 2.3), mtnMat);
+    sub.position.set(subLocalX, subH * 0.5 - buryDepth, subLocalZ);
     sub.castShadow = true;
     mGrp.add(sub);
 
+    const rotY = m * 0.7;
     mGrp.position.set(mx, minGround, mz);
-    mGrp.rotation.y = m * 0.7;
+    mGrp.rotation.y = rotY;
     scene.add(mGrp);
-    mountainColliders.push({ x: mx, z: mz, r: rad * 0.78 });
+
+    const baseBottomY = minGround - buryDepth;
+    mountainColliders.push({ x: mx, z: mz, rad, h, baseBottomY });
+    const cosR = Math.cos(rotY);
+    const sinR = Math.sin(rotY);
+    const subWorldX = mx + subLocalX * cosR + subLocalZ * sinR;
+    const subWorldZ = mz - subLocalX * sinR + subLocalZ * cosR;
+    mountainColliders.push({ x: subWorldX, z: subWorldZ, rad: subRad, h: subH, baseBottomY });
   }
 
   // Coastal Lighthouse with Rotating Spotlight Beam (Southeast Cape)
