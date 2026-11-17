@@ -194,6 +194,8 @@
       }
     }
 
+    const STATION_DECK_H = 1.25;
+
     // 5 Stations strictly synced with miguel_andrei_b_abad_career_e_portfolio.html
     function getZones() {
       return [
@@ -210,7 +212,7 @@
           ]
         },
         {
-          id: 'north', name: '02 // ACADEMIC WORK SAMPLES', x: -38, z: -195, radius: 34, color: '#0077FF',
+          id: 'north', name: '02 // ACADEMIC WORK SAMPLES', x: -55, z: -255, radius: 34, color: '#0077FF',
           title: 'SELECTED ENGINEERING ARTIFACTS',
           subtitle: 'Park in any glowing inspection bay below to inspect full case studies',
           mainBody: 'System architectures, hardware designs, and full-stack software implementations developed during my Computer Engineering coursework and research at De La Salle University – Manila.',
@@ -220,7 +222,7 @@
           ]
         },
         {
-          id: 'east', name: '03 // HARDWARE, PCB & RESUME', x: 205, z: -28, radius: 34, color: '#10b981',
+          id: 'east', name: '03 // HARDWARE, PCB & RESUME', x: 270, z: -35, radius: 34, color: '#10b981',
           title: 'RESUME & HARDWARE MATRIX',
           subtitle: 'Drive across the 4-Layer PCB traces to light up the onboard LEDs!',
           mainBody: 'DLSU Manila BS Computer Engineering (Consistent Dean\'s Lister). Coursework: Embedded Systems, Microprocessor Systems & Architecture, Digital Logic Design, Signal Processing, Operating Systems, Feedback & Control Systems, Machine Learning.',
@@ -232,7 +234,7 @@
           ]
         },
         {
-          id: 'west', name: '04 // SOFTWARE & LEADERSHIP', x: -200, z: 32, radius: 34, color: '#00B4D8',
+          id: 'west', name: '04 // SOFTWARE & LEADERSHIP', x: -260, z: 45, radius: 34, color: '#00B4D8',
           title: 'SOFTWARE ARCH & ACCESS DLSU',
           subtitle: 'Live 3D SAP-1 8-Bit W-Bus + Holographic Software & Leadership Arena',
           mainBody: 'Showcasing Web-Based PDF Reader & Digital Catalog, Bit by Bit SAP-1 Computer Simulator, and organizational leadership at ACCESS DLSU (Associate Vice President for Academics, Sept 2026–Present & Junior Officer, Nov 2025–Sept 2026).',
@@ -242,7 +244,7 @@
           ]
         },
         {
-          id: 'south', name: '05 // REFERENCES & CONTACT', x: 42, z: 198, radius: 30, color: '#FB5607',
+          id: 'south', name: '05 // REFERENCES & CONTACT', x: 55, z: 260, radius: 30, color: '#FB5607',
           title: 'REFERENCES & SKY-GUESTBOOK',
           subtitle: 'DLSU ECE Faculty & ACCESS DLSU References · Direct Contact · ATS Resume',
           mainBody: 'Faculty Adviser for Embedded Systems & Wearable-Vision Sign Recognition Research (Dept. of Electronics & Computer Engineering, DLSU Manila) and ACCESS DLSU Executive Board & Faculty Adviser. Click "Leave Note / Links" above to download my Resume PDF!',
@@ -361,8 +363,8 @@
 
     // Scene & Renderer
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x90e0ef, 250, 720);
-    const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 1.0, 1200);
+    scene.fog = new THREE.Fog(0x90e0ef, 310, 960);
+    const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 1.0, 1500);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -380,21 +382,22 @@
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x40916c, 0.95);
     scene.add(hemiLight);
     const dl = new THREE.DirectionalLight(0xfff4d2, 1.25);
-    dl.position.set(140, 200, 120); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
-    dl.shadow.camera.left = -280; dl.shadow.camera.right = 280; dl.shadow.camera.top = 280; dl.shadow.camera.bottom = -280;
+    dl.position.set(180, 260, 150); dl.castShadow = true; dl.shadow.mapSize.set(2048, 2048);
+    dl.shadow.camera.left = -380; dl.shadow.camera.right = 380; dl.shadow.camera.top = 380; dl.shadow.camera.bottom = -380;
     scene.add(dl);
 
-    //Massive 600m x 600m Island
+    // Organic Real-Island Coastline Function (~960m x 960m archipelago with peninsulas & coves)
+    function getIslandRadius(ang) {
+      return 445
+        + Math.sin(ang * 2 + 0.5) * 52
+        + Math.cos(ang * 3 - 0.8) * 38
+        + Math.sin(ang * 5 + 1.2) * 20
+        + Math.cos(ang * 7) * 11;
+    }
+
     const oceanMat = new THREE.MeshStandardMaterial({ color: 0x0096c7, roughness: 0.22, metalness: 0.18 });
-    const ocean = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), oceanMat);
+    const ocean = new THREE.Mesh(new THREE.PlaneGeometry(3600, 3600), oceanMat);
     ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2.4; scene.add(ocean);
-    const beach = new THREE.Mesh(new THREE.CylinderGeometry(325, 342, 1.6, 80), new THREE.MeshStandardMaterial({ color: 0xf4d58d, roughness: 0.9 }));
-    beach.position.y = -1.4; beach.receiveShadow = true; scene.add(beach);
-    const grassMat = new THREE.MeshStandardMaterial({ color: 0x52b788, roughness: 0.85 });
-    const grass = new THREE.Mesh(new THREE.CylinderGeometry(300, 312, 1.0, 80), grassMat);
-    grass.position.y = -0.5; grass.receiveShadow = true; scene.add(grass);
-    const grid = new THREE.GridHelper(560, 80, 0x40916c, 0x40916c);
-    grid.position.y = 0.04; grid.material.opacity = 0.16; grid.material.transparent = true; scene.add(grid);
 
     // Track every single road point so ZERO trees or rocks ever spawn on or near roads!
     const ALL_ROAD_SAMPLES = [];
@@ -406,12 +409,11 @@
 
     function buildCurvedRoad(scene, points, width = 9.6, withLamps = true) {
       const curve = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.08, z)));
-      const divisions = 140;
+      const divisions = 160;
       const roadPts = curve.getSpacedPoints(divisions);
       const poly = [];
-      // Dense sampling for 100% road-clear tree check
-      for (let s = 0; s <= 240; s++) {
-        const pt = curve.getPointAt(s / 240);
+      for (let s = 0; s <= 280; s++) {
+        const pt = curve.getPointAt(s / 280);
         ALL_ROAD_SAMPLES.push({ x: pt.x, z: pt.z, halfWidth: width * 0.5 });
       }
 
@@ -453,14 +455,13 @@
         });
       }
 
-      // Roadside streetlamps (placed outside the road shoulder, clear of zones)
       if (withLamps) {
-        for (let i = 14; i < roadPts.length - 14; i += 22) {
+        for (let i = 14; i < roadPts.length - 14; i += 24) {
           const p = roadPts[i], tan = curve.getTangentAt(i / divisions).normalize();
           const norm = new THREE.Vector3(-tan.z, 0, tan.x);
-          const side = (i % 44 === 14) ? 1 : -1;
+          const side = (i % 48 === 14) ? 1 : -1;
           const lp = p.clone().addScaledVector(norm, side * (width * 0.5 + 3.2));
-          if (ZONES.some(z => Math.hypot(lp.x - z.x, lp.z - z.z) < z.radius + 8)) continue;
+          if (ZONES.some(z => Math.hypot(lp.x - z.x, lp.z - z.z) < z.radius + 9)) continue;
           const lampGrp = new THREE.Group();
           const post = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 6.2, 8), poleMat);
           post.position.y = 3.1; post.castShadow = true; lampGrp.add(post);
@@ -479,16 +480,101 @@
     }
 
     const roadCurves = [
-      buildCurvedRoad(scene, [[0, 0], [34, -62], [-48, -128], [-38, -195]], 9.6, true),
-      buildCurvedRoad(scene, [[0, 0], [72, -38], [134, 24], [205, -28]], 9.6, true),
-      buildCurvedRoad(scene, [[0, 0], [-65, 48], [-138, -18], [-200, 32]], 9.6, true),
-      buildCurvedRoad(scene, [[0, 0], [-36, 68], [52, 132], [42, 198]], 9.6, true),
-      buildCurvedRoad(scene, [[-38, -195], [115, -180], [205, -28], [185, 135], [42, 198], [-115, 175], [-200, 32], [-165, -125], [-38, -195]], 7.8, false)
+      buildCurvedRoad(scene, [[0, 0], [42, -82], [-62, -168], [-55, -255]], 9.6, true),
+      buildCurvedRoad(scene, [[0, 0], [92, -48], [178, 30], [270, -35]], 9.6, true),
+      buildCurvedRoad(scene, [[0, 0], [-82, 60], [-178, -22], [-260, 45]], 9.6, true),
+      buildCurvedRoad(scene, [[0, 0], [-45, 86], [68, 174], [55, 260]], 9.6, true),
+      buildCurvedRoad(scene, [[-55, -255], [150, -235], [270, -35], [240, 178], [55, 260], [-152, 232], [-260, 45], [-215, -165], [-55, -255]], 8.0, false)
     ];
 
-    // Strict Collision Check Function: Guarantees ZERO trees/rocks ever spawn on roads or stations!
+    // Bake Fast Uneven-Terrain Heightmap (O(1) bilinear lookup for car, trees, mountains & mesh)
+    const TERRAIN_SPAN = 1220;
+    const TERRAIN_RES = 160;
+    const heightGrid = new Float32Array((TERRAIN_RES + 1) * (TERRAIN_RES + 1));
+    const smoothstep = (e0, e1, v) => { const t = Math.max(0, Math.min(1, (v - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+    for (let gz = 0; gz <= TERRAIN_RES; gz++) {
+      for (let gx = 0; gx <= TERRAIN_RES; gx++) {
+        const wx = -TERRAIN_SPAN * 0.5 + (gx / TERRAIN_RES) * TERRAIN_SPAN;
+        const wz = -TERRAIN_SPAN * 0.5 + (gz / TERRAIN_RES) * TERRAIN_SPAN;
+        const ang = Math.atan2(wz, wx);
+        const r = Math.hypot(wx, wz);
+        const islandR = getIslandRadius(ang);
+
+        // Rolling uneven hills & ridges
+        let h = Math.sin(wx * 0.017) * Math.cos(wz * 0.015) * 7.4
+              + Math.sin((wx + wz) * 0.029) * 3.6
+              + Math.cos((wx - wz) * 0.043) * 1.9
+              + 3.4;
+
+        // Flatten smoothly near roads & station plazas so roads/pads sit cleanly
+        let flatFactor = 1.0;
+        for (let i = 0; i < ZONES.length; i++) {
+          const zd = Math.hypot(wx - ZONES[i].x, wz - ZONES[i].z);
+          flatFactor = Math.min(flatFactor, smoothstep(ZONES[i].radius + 7, ZONES[i].radius + 24, zd));
+        }
+        flatFactor = Math.min(flatFactor, smoothstep(20, 38, Math.hypot(wx, wz - 10)));
+        for (let i = 0; i < ALL_ROAD_SAMPLES.length; i += 2) {
+          const rp = ALL_ROAD_SAMPLES[i];
+          const rd = Math.hypot(wx - rp.x, wz - rp.z);
+          if (rd < rp.halfWidth + 22) {
+            flatFactor = Math.min(flatFactor, smoothstep(rp.halfWidth + 5, rp.halfWidth + 22, rd));
+          }
+        }
+        h = h * flatFactor;
+
+        // Taper smoothly down to sandy shoreline and ocean floor outside organic island edge
+        const shoreRatio = r / islandR;
+        if (shoreRatio > 0.84) {
+          const coastDrop = smoothstep(0.84, 1.08, shoreRatio);
+          h = h * (1 - coastDrop) + (-4.4) * coastDrop;
+        }
+        heightGrid[gz * (TERRAIN_RES + 1) + gx] = h;
+      }
+    }
+
+    function getTerrainHeight(x, z) {
+      const fx = ((x + TERRAIN_SPAN * 0.5) / TERRAIN_SPAN) * TERRAIN_RES;
+      const fz = ((z + TERRAIN_SPAN * 0.5) / TERRAIN_SPAN) * TERRAIN_RES;
+      const ix = Math.max(0, Math.min(TERRAIN_RES - 1, Math.floor(fx)));
+      const iz = Math.max(0, Math.min(TERRAIN_RES - 1, Math.floor(fz)));
+      const tx = Math.max(0, Math.min(1, fx - ix));
+      const tz = Math.max(0, Math.min(1, fz - iz));
+      const stride = TERRAIN_RES + 1;
+      const h00 = heightGrid[iz * stride + ix];
+      const h10 = heightGrid[iz * stride + ix + 1];
+      const h01 = heightGrid[(iz + 1) * stride + ix];
+      const h11 = heightGrid[(iz + 1) * stride + ix + 1];
+      return (h00 * (1 - tx) + h10 * tx) * (1 - tz) + (h01 * (1 - tx) + h11 * tx) * tz;
+    }
+
+    // Build Organic Vertex-Colored Uneven Island Mesh
+    const terrainGeo = new THREE.PlaneGeometry(TERRAIN_SPAN, TERRAIN_SPAN, TERRAIN_RES, TERRAIN_RES);
+    terrainGeo.rotateX(-Math.PI / 2);
+    const tPos = terrainGeo.attributes.position;
+    const tColors = new Float32Array(tPos.count * 3);
+    for (let i = 0; i < tPos.count; i++) {
+      const vx = tPos.getX(i), vz = tPos.getZ(i);
+      const vy = getTerrainHeight(vx, vz);
+      tPos.setY(i, vy);
+      let r = 0.32, g = 0.72, b = 0.53;
+      if (vy < -0.25) { r = 0.96; g = 0.84; b = 0.55; } // Sandy beach & shallows
+      else if (vy < 0.55) { r = 0.65; g = 0.79; b = 0.54; } // Coastal grass transition
+      else if (vy > 6.0) { r = 0.22; g = 0.54; b = 0.38; } // Highland hills
+      tColors[i * 3] = r; tColors[i * 3 + 1] = g; tColors[i * 3 + 2] = b;
+    }
+    terrainGeo.setAttribute('color', new THREE.BufferAttribute(tColors, 3));
+    terrainGeo.computeVertexNormals();
+    const grassMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, flatShading: false });
+    const terrainMesh = new THREE.Mesh(terrainGeo, grassMat);
+    terrainMesh.receiveShadow = true;
+    scene.add(terrainMesh);
+
+    // Strict Collision Check Function: Guarantees ZERO trees/rocks ever spawn on roads, stations, or ocean!
     function isPointClearOfRoadsAndZones(x, z, roadMargin = 6.5, zoneMargin = 12) {
-      if (Math.hypot(x, z - 12) < 28) return false; // Spawn & MIGUEL letters area
+      const ang = Math.atan2(z, x);
+      if (Math.hypot(x, z) > getIslandRadius(ang) * 0.90) return false;
+      if (Math.hypot(x, z - 12) < 30) return false;
       for (let i = 0; i < ZONES.length; i++) {
         if (Math.hypot(x - ZONES[i].x, z - ZONES[i].z) < ZONES[i].radius + zoneMargin) return false;
       }
@@ -499,19 +585,24 @@
       return true;
     }
 
-    // Pine & Cypress Forest + Boulders (100% Verified Road-Clear!)
+    // Pine & Cypress Forest + Boulders with REAL Collision Physics (100% Road-Clear!)
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7f4f24, roughness: 0.9 });
     const pineMat1 = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.75 });
     const pineMat2 = new THREE.MeshStandardMaterial({ color: 0x40916c, roughness: 0.75 });
     const rockMat = new THREE.MeshStandardMaterial({ color: 0x6c757d, roughness: 0.85 });
     const spawnedTrees = [];
-    for (let i = 0; i < 240; i++) {
-      const angle = (i / 240) * Math.PI * 2 + (i % 7) * 0.21;
-      const dist = 42 + ((i * 61) % 242);
+    const treeColliders = [];
+    for (let i = 0; i < 360; i++) {
+      const angle = (i / 360) * Math.PI * 2 + (i % 9) * 0.19;
+      const maxR = getIslandRadius(angle) * 0.88;
+      const dist = 48 + ((i * 89) % Math.max(80, Math.floor(maxR - 54)));
       const tx = Math.cos(angle) * dist, tz = Math.sin(angle) * dist;
-      if (!isPointClearOfRoadsAndZones(tx, tz, 6.8, 12)) continue;
+      if (!isPointClearOfRoadsAndZones(tx, tz, 7.2, 13)) continue;
+      const ty = getTerrainHeight(tx, tz);
+      if (ty < -0.2) continue;
+      const sc = 0.92 + (i % 4) * 0.25;
       const t = new THREE.Group();
-      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.55, 2.8, 8), trunkMat); tr.position.y = 1.4; tr.castShadow = true;
+      const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.58, 2.8, 8), trunkMat); tr.position.y = 1.4; tr.castShadow = true;
       const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4.2, 8), i % 2 === 0 ? pineMat1 : pineMat2); c1.position.y = 3.9; c1.castShadow = true;
       const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.75, 3.2, 8), pineMat2); c2.position.y = 5.8; c2.castShadow = true;
       t.add(tr, c1, c2);
@@ -519,32 +610,40 @@
         const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(1.1, 0), rockMat);
         rk.position.set(1.8, 0.5, 0.6); rk.scale.set(1.2, 0.7, 1.0); rk.castShadow = true; t.add(rk);
       }
-      t.scale.setScalar(0.88 + (i % 4) * 0.24);
-      t.position.set(tx, 0, tz);
+      t.scale.setScalar(sc);
+      t.position.set(tx, ty, tz);
       scene.add(t);
       spawnedTrees.push({ x: tx, z: tz });
+      treeColliders.push({ x: tx, z: tz, r: 1.05 * sc });
     }
 
-    // WORLD UPGRADE 1: Outer Island Rim Mountains & Snow Peaks
+    // WORLD UPGRADE 1: Massive Outer Rim Snow-Capped Mountains WITH Collision Physics
     const mtnMat = new THREE.MeshStandardMaterial({ color: 0x4a5759, roughness: 0.88 });
     const snowMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.5 });
-    for (let m = 0; m < 22; m++) {
-      const ang = (m / 22) * Math.PI * 2 + 0.12;
-      const r = 276 + (m % 3) * 10;
+    const mountainColliders = [];
+    for (let m = 0; m < 32; m++) {
+      const ang = (m / 32) * Math.PI * 2 + 0.09;
+      const r = getIslandRadius(ang) * (0.76 + (m % 3) * 0.05);
       const mx = Math.cos(ang) * r, mz = Math.sin(ang) * r;
-      if (!isPointClearOfRoadsAndZones(mx, mz, 14, 24)) continue;
-      const h = 26 + (m % 4) * 9, rad = 16 + (m % 3) * 5;
+      if (!isPointClearOfRoadsAndZones(mx, mz, 24, 38)) continue;
+      const my = getTerrainHeight(mx, mz);
+      const h = 48 + (m % 4) * 14, rad = 28 + (m % 3) * 8;
       const mGrp = new THREE.Group();
-      const base = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 7), mtnMat);
-      base.position.y = h * 0.5 - 0.5; base.castShadow = true; base.receiveShadow = true; mGrp.add(base);
-      const cap = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.36, h * 0.36, 7), snowMat);
-      cap.position.y = h * 0.82 - 0.45; mGrp.add(cap);
-      mGrp.position.set(mx, 0, mz);
+      const base = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 8), mtnMat);
+      base.position.y = h * 0.5 - 2.0; base.castShadow = true; base.receiveShadow = true; mGrp.add(base);
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.38, h * 0.38, 8), snowMat);
+      cap.position.y = h * 0.81 - 1.9; mGrp.add(cap);
+      // Secondary shoulder peak for natural mountain silhouette
+      const sub = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.62, h * 0.62, 7), mtnMat);
+      sub.position.set(rad * 0.45, h * 0.31 - 2.0, rad * 0.25); sub.castShadow = true; mGrp.add(sub);
+      mGrp.position.set(mx, my, mz);
       mGrp.rotation.y = m * 0.7;
       scene.add(mGrp);
+      mountainColliders.push({ x: mx, z: mz, r: rad * 0.76 });
     }
 
     // WORLD UPGRADE 2: Coastal Lighthouse with Rotating Spotlight Beam (Southeast Cape)
+    const lhX = 335, lhZ = 240, lhY = Math.max(0, getTerrainHeight(lhX, lhZ));
     const lighthouseGrp = new THREE.Group();
     const lhTower = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 3.6, 22, 16), whiteCurbMat);
     lhTower.position.y = 11; lhTower.castShadow = true; lighthouseGrp.add(lhTower);
@@ -565,12 +664,12 @@
     beamCone.rotation.x = Math.PI / 2; beamCone.position.z = 32.5;
     lhBeamPivot.add(beamCone);
     lighthouseGrp.add(lhBeamPivot);
-    lighthouseGrp.position.set(232, 0, 178);
+    lighthouseGrp.position.set(lhX, lhY, lhZ);
     scene.add(lighthouseGrp);
 
     // WORLD UPGRADE 3: Animated Wind Turbines on the Hills
     const windRotors = [];
-    [[-155, -185], [165, -175], [-235, 130], [140, 225]].forEach(([wx, wz]) => {
+    [[-210, -245], [225, -230], [-305, 175], [195, 295]].forEach(([wx, wz]) => {
       if (!isPointClearOfRoadsAndZones(wx, wz, 10, 16)) return;
       const tGrp = new THREE.Group();
       const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.9, 20, 12), whiteCurbMat);
@@ -585,7 +684,7 @@
         hub.add(bladeGrp);
       }
       tGrp.add(hub);
-      tGrp.position.set(wx, 0, wz);
+      tGrp.position.set(wx, getTerrainHeight(wx, wz), wz);
       scene.add(tGrp);
       windRotors.push(hub);
     });
@@ -593,23 +692,23 @@
     // WORLD UPGRADE 4: Drifting Sky Clouds & Bobbing Ocean Sailboats
     const clouds = [];
     const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.72 });
-    for (let c = 0; c < 12; c++) {
+    for (let c = 0; c < 14; c++) {
       const cGrp = new THREE.Group();
-      [[0,0,0,5.5], [4.2,-0.4,1.2,4.0], [-4.2,-0.5,-1.0,4.2]].forEach(([cx,cy,cz,cr]) => {
+      [[0,0,0,6.5], [5.0,-0.4,1.2,4.8], [-5.0,-0.5,-1.0,5.0]].forEach(([cx,cy,cz,cr]) => {
         const puff = new THREE.Mesh(new THREE.DodecahedronGeometry(cr, 1), cloudMat);
         puff.scale.set(1.4, 0.55, 1.0); puff.position.set(cx, cy, cz); cGrp.add(puff);
       });
-      const ang = (c / 12) * Math.PI * 2;
-      const dist = 180 + (c % 3) * 85;
-      cGrp.position.set(Math.cos(ang) * dist, 58 + (c % 4) * 8, Math.sin(ang) * dist);
+      const ang = (c / 14) * Math.PI * 2;
+      const dist = 240 + (c % 3) * 115;
+      cGrp.position.set(Math.cos(ang) * dist, 72 + (c % 4) * 10, Math.sin(ang) * dist);
       scene.add(cGrp);
-      clouds.push({ grp: cGrp, speed: 2.2 + (c % 3) * 0.8 });
+      clouds.push({ grp: cGrp, speed: 2.4 + (c % 3) * 0.9 });
     }
 
     const sailboats = [];
-    for (let s = 0; s < 8; s++) {
-      const ang = (s / 8) * Math.PI * 2 + 0.3;
-      const dist = 365 + (s % 2) * 35;
+    for (let s = 0; s < 10; s++) {
+      const ang = (s / 10) * Math.PI * 2 + 0.3;
+      const dist = getIslandRadius(ang) + 65 + (s % 2) * 45;
       const bGrp = new THREE.Group();
       const hull = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.2, 7.5), whiteCurbMat);
       hull.position.y = 0.4; bGrp.add(hull);
@@ -646,13 +745,20 @@
       boostPads.push({ x: pt.x, z: pt.z, grp: padGrp, cooldown: 0 });
     });
 
-    // Collectible Star Gates
+    // Collectible Star Gates along the expanded highways
     const collectibles = [];
     let ringsCollected = 0;
-    [[34,2.8,-62],[-48,2.8,-128],[72,2.8,-38],[134,2.8,24],[-65,2.8,48],[-138,2.8,-18],[-36,2.8,68],[52,2.8,132],[115,2.8,-180],[-115,2.8,175]].forEach(([x,y,z], idx) => {
+    [
+      [roadCurves[0], 0.25], [roadCurves[0], 0.62],
+      [roadCurves[1], 0.30], [roadCurves[1], 0.68],
+      [roadCurves[2], 0.30], [roadCurves[2], 0.68],
+      [roadCurves[3], 0.30], [roadCurves[3], 0.68],
+      [roadCurves[4], 0.28], [roadCurves[4], 0.72]
+    ].forEach(([curve, u], idx) => {
+      const pt = curve.getPointAt(u);
       const m = new THREE.Mesh(new THREE.TorusGeometry(2.8, 0.3, 12, 32), new THREE.MeshStandardMaterial({ color: 0xffb703, emissive: 0xfb8500, emissiveIntensity: 0.45, roughness: 0.25, metalness: 0.6 }));
-      m.position.set(x, y, z); scene.add(m);
-      collectibles.push({ mesh: m, baseY: y, phase: idx, collected: false });
+      m.position.set(pt.x, 2.9, pt.z); scene.add(m);
+      collectibles.push({ mesh: m, baseY: 2.9, phase: idx, collected: false });
     });
 
     // Custom Ground Texture: Dark Green 4-Layer PCB with Gold Traces matching FIG 02 (Station 3)
@@ -697,7 +803,6 @@
         g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1024); g.stroke();
         g.beginPath(); g.moveTo(0, i); g.lineTo(1024, i); g.stroke();
       }
-      // Central 8-Bit W-Bus Highway Spine (matching FIG 04 in e-portfolio)
       g.strokeStyle = '#0047FF'; g.lineWidth = 18;
       g.beginPath(); g.moveTo(512, 110); g.lineTo(512, 914); g.stroke();
       g.strokeStyle = '#00f5d4'; g.lineWidth = 4;
@@ -708,25 +813,45 @@
       const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8; return tex;
     }
 
-    // Build 5 Stations + Overhead-Readable Scattered Plaques & Main Notice Board
+    // Official 3D Raised Station Platforms with Drive-Up Bevel Ramps (Car drives UP onto the 3D layer!)
     const stationClusters = new Map();
+    const deckRimMat = new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.65 });
     ZONES.forEach((z) => {
       let padMat;
       if (z.id === 'east') padMat = new THREE.MeshStandardMaterial({ map: createPcbGroundTex(), roughness: 0.45, metalness: 0.2 });
       else if (z.id === 'west') padMat = new THREE.MeshStandardMaterial({ map: createCyberGroundTex(), roughness: 0.3, metalness: 0.4 });
-      else padMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.6 });
+      else padMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.55 });
 
-      const pad = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 2, z.radius - 1, 0.35, 48), padMat);
-      pad.position.set(z.x, 0.18, z.z); pad.receiveShadow = true; scene.add(pad);
-      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.9, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.78 }));
-      r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.22, z.z); scene.add(r);
-      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 1.5, 120, 16, 1, true), new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.14, side: THREE.DoubleSide }));
-      beam.position.set(z.x, 60, z.z); scene.add(beam);
+      // Beveled 3D Drive-Up Ramp Skirt + Official Raised Top Deck at y = STATION_DECK_H (1.25m)
+      const rampSkirt = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 1.5, z.radius + 3.6, STATION_DECK_H, 48), deckRimMat);
+      rampSkirt.position.set(z.x, STATION_DECK_H * 0.5, z.z); rampSkirt.receiveShadow = true; rampSkirt.castShadow = true; scene.add(rampSkirt);
+      const topDeck = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 1.6, z.radius - 1.6, 0.14, 48), padMat);
+      topDeck.position.set(z.x, STATION_DECK_H - 0.02, z.z); topDeck.receiveShadow = true; scene.add(topDeck);
+      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 2.3, z.radius - 1.5, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.88 }));
+      r.rotation.x = -Math.PI / 2; r.position.set(z.x, STATION_DECK_H + 0.06, z.z); scene.add(r);
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 1.5, 130, 16, 1, true), new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.14, side: THREE.DoubleSide }));
+      beam.position.set(z.x, 65, z.z); scene.add(beam);
 
       const st = createStationCluster(z);
       scene.add(st.cluster);
       stationClusters.set(z.id, st);
     });
+
+    function getStationDeckHeight(x, z) {
+      let maxH = 0;
+      for (let i = 0; i < ZONES.length; i++) {
+        const zObj = ZONES[i];
+        const d = Math.hypot(x - zObj.x, z - zObj.z);
+        if (d <= zObj.radius + 3.6) {
+          if (d <= zObj.radius - 1.5) maxH = Math.max(maxH, STATION_DECK_H);
+          else {
+            const rampFrac = 1 - (d - (zObj.radius - 1.5)) / 5.1;
+            maxH = Math.max(maxH, STATION_DECK_H * Math.max(0, Math.min(1, rampFrac)));
+          }
+        }
+      }
+      return maxH;
+    }
 
     // STATION 1 PROP: Giant Knockable 3D Block Letters spelling "MIGUEL" near Spawn!
     const miguelLetters = [];
@@ -767,13 +892,13 @@
     ];
     letterSpecs.forEach(ls => {
       const mesh = buildBlockLetterMesh(ls.ch, ls.c);
-      mesh.position.set(ls.x, 2.25, ls.z);
+      mesh.position.set(ls.x, STATION_DECK_H + 1.9, ls.z);
       scene.add(mesh);
-      miguelLetters.push({ mesh, homeX: ls.x, homeZ: ls.z, x: ls.x, y: 2.25, z: ls.z, vx: 0, vy: 0, vz: 0, rx: 0, rz: 0, vrx: 0, vrz: 0 });
+      miguelLetters.push({ mesh, homeX: ls.x, homeZ: ls.z, x: ls.x, y: STATION_DECK_H + 1.9, z: ls.z, vx: 0, vy: 0, vz: 0, rx: 0, rz: 0, vrx: 0, vrz: 0 });
     });
 
-    // STATION 2 PROP: 3 Angled 3D Project Billboards with Parking Trigger Zones (-38, -195)
-    // Strictly matching the 3 Technical Projects in miguel_andrei_b_abad_career_e_portfolio.html!
+    // STATION 2 PROP: 3 Angled 3D Project Billboards with Parking Trigger Zones
+    const st2 = ZONES[1];
     const flagshipBillboards = [];
     const flagshipSpecs = [
       {
@@ -802,7 +927,7 @@
       }
     ];
     flagshipSpecs.forEach(spec => {
-      const nx = -38 + spec.dx, nz = -195 + spec.dz;
+      const nx = st2.x + spec.dx, nz = st2.z + spec.dz;
       const c = document.createElement('canvas'); c.width = 920; c.height = 520;
       const g = c.getContext('2d');
       g.fillStyle = '#ffffff'; g.fillRect(0, 0, 920, 520);
@@ -820,23 +945,23 @@
       const face = new THREE.Mesh(new THREE.PlaneGeometry(11.4, 6.4), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: 0.3 }));
       face.position.z = 0.29;
       bbGroup.add(frame, face);
-      bbGroup.position.set(nx, 4.4, nz);
+      bbGroup.position.set(nx, STATION_DECK_H + 4.3, nz);
       bbGroup.rotation.y = spec.rotY;
       bbGroup.rotation.x = -0.68;
       scene.add(bbGroup);
 
-      // Parking Trigger Zone slightly in front of billboard
       const px = nx + Math.sin(spec.rotY) * 8.0;
       const pz = nz + Math.cos(spec.rotY) * 8.0;
       const ringMat = new THREE.MeshBasicMaterial({ color: 0x0077ff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
       const pRing = new THREE.Mesh(new THREE.RingGeometry(3.5, 4.3, 36), ringMat);
-      pRing.rotation.x = -Math.PI / 2; pRing.position.set(px, 0.37, pz); scene.add(pRing);
+      pRing.rotation.x = -Math.PI / 2; pRing.position.set(px, STATION_DECK_H + 0.09, pz); scene.add(pRing);
       const bayFill = new THREE.Mesh(new THREE.CircleGeometry(3.5, 32), new THREE.MeshBasicMaterial({ color: 0x00b4d8, transparent: true, opacity: 0.18 }));
-      bayFill.rotation.x = -Math.PI / 2; bayFill.position.set(px, 0.36, pz); scene.add(bayFill);
+      bayFill.rotation.x = -Math.PI / 2; bayFill.position.set(px, STATION_DECK_H + 0.08, pz); scene.add(bayFill);
       flagshipBillboards.push({ spec, px, pz, ringMat, bbGroup });
     });
 
-    // STATION 3 PROP: 3D Microchip IC Blocks strictly labeled with real e-Portfolio hardware & Proximity LEDs (East: 205, -28)
+    // STATION 3 PROP: 3D Microchip IC Blocks strictly labeled with real e-Portfolio hardware & Proximity LEDs
+    const st3 = ZONES[2];
     const icChips = [
       { dx: -9.5, dz: 4.5, w: 5.2, d: 3.6, label: 'PIC16F877A', sub: '40-DIP MCU' },
       { dx: 9.5,  dz: 4.5, w: 4.6, d: 4.6, label: 'ESP32 MCU', sub: 'BLE / Wi-Fi' },
@@ -849,7 +974,6 @@
       const grp = new THREE.Group();
       const body = new THREE.Mesh(new THREE.BoxGeometry(ic.w, 0.95, ic.d), icBodyMat);
       body.position.y = 0.55; body.castShadow = true; grp.add(body);
-      // Silkscreen top label on IC chip
       const lc = document.createElement('canvas'); lc.width = 256; lc.height = 160;
       const lctx = lc.getContext('2d');
       lctx.fillStyle = '#16181d'; lctx.fillRect(0, 0, 256, 160);
@@ -869,7 +993,7 @@
           leg.position.set(px, 0.32, pz); grp.add(leg);
         });
       }
-      grp.position.set(205 + ic.dx, 0.18, -28 + ic.dz);
+      grp.position.set(st3.x + ic.dx, STATION_DECK_H, st3.z + ic.dz);
       scene.add(grp);
     });
 
@@ -878,32 +1002,31 @@
     for (let i = 0; i < 16; i++) {
       const ang = (i / 16) * Math.PI * 2;
       const rad = 14 + (i % 2) * 8.5;
-      const lx = 205 + Math.cos(ang) * rad;
-      const lz = -28 + Math.sin(ang) * rad;
+      const lx = st3.x + Math.cos(ang) * rad;
+      const lz = st3.z + Math.sin(ang) * rad;
       const col = ledColors[i % ledColors.length];
       const ledMat = new THREE.MeshStandardMaterial({ color: 0x22332a, emissive: col, emissiveIntensity: 0.1, roughness: 0.2 });
       const dome = new THREE.Mesh(new THREE.SphereGeometry(0.58, 14, 12), ledMat);
-      dome.position.set(lx, 0.78, lz); scene.add(dome);
+      dome.position.set(lx, STATION_DECK_H + 0.58, lz); scene.add(dome);
       const haloMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.0 });
       const halo = new THREE.Mesh(new THREE.CircleGeometry(2.3, 20), haloMat);
-      halo.rotation.x = -Math.PI / 2; halo.position.set(lx, 0.37, lz); scene.add(halo);
+      halo.rotation.x = -Math.PI / 2; halo.position.set(lx, STATION_DECK_H + 0.08, lz); scene.add(halo);
       pcbLeds.push({ x: lx, z: lz, ledMat, haloMat, lit: false, col });
     }
 
-    // STATION 4 PROP: Live 3D Interactive SAP-1 8-Bit W-Bus + Holographic Software & Leadership Arena (-200, 32)
-    // Strictly featuring the real projects from miguel_andrei_b_abad_career_e_portfolio.html!
+    // STATION 4 PROP: Live 3D Interactive SAP-1 8-Bit W-Bus + Holographic Software & Leadership Arena
+    const st4 = ZONES[3];
     const holoCore = new THREE.Mesh(
       new THREE.IcosahedronGeometry(2.6, 1),
       new THREE.MeshBasicMaterial({ color: 0x00f5d4, wireframe: true, transparent: true, opacity: 0.85 })
     );
-    holoCore.position.set(-200, 4.5, 32); scene.add(holoCore);
+    holoCore.position.set(st4.x, STATION_DECK_H + 4.4, st4.z); scene.add(holoCore);
     const holoInner = new THREE.Mesh(
       new THREE.OctahedronGeometry(1.4, 0),
       new THREE.MeshStandardMaterial({ color: 0x0077ff, emissive: 0x00b4d8, emissiveIntensity: 0.9, roughness: 0.1 })
     );
-    holoInner.position.set(-200, 4.5, 32); scene.add(holoInner);
+    holoInner.position.set(st4.x, STATION_DECK_H + 4.4, st4.z); scene.add(holoInner);
 
-    // 3D SAP-1 Register Nodes along the W-Bus (matching FIG 04 in e-portfolio)
     const sapRegisters = [
       { dx: -8, dz: -6, name: 'PC (Program Counter)' },
       { dx: -8, dz: 1,  name: 'MAR & 16x8 RAM' },
@@ -917,7 +1040,7 @@
         new THREE.BoxGeometry(4.2, 0.55, 2.2),
         new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x0047ff, emissiveIntensity: 0.35, roughness: 0.3 })
       );
-      rBox.position.set(-200 + reg.dx, 0.5, 32 + reg.dz);
+      rBox.position.set(st4.x + reg.dx, STATION_DECK_H + 0.32, st4.z + reg.dz);
       scene.add(rBox);
     });
 
@@ -944,7 +1067,7 @@
       }
     ];
     swProjects.forEach((sw, idx) => {
-      const mx = -200 + sw.dx, mz = 32 + sw.dz;
+      const mx = st4.x + sw.dx, mz = st4.z + sw.dz;
       const c = document.createElement('canvas'); c.width = 720; c.height = 400;
       const g = c.getContext('2d');
       g.fillStyle = 'rgba(6, 20, 42, 0.94)'; g.fillRect(0, 0, 720, 400);
@@ -965,26 +1088,27 @@
       );
       cubeOrbit.position.set(0, 3.8, 0);
       mGrp.add(holoScreen, cubeOrbit);
-      mGrp.position.set(mx, 4.2, mz);
+      mGrp.position.set(mx, STATION_DECK_H + 4.1, mz);
       scene.add(mGrp);
-      holoMonoliths.push({ grp: mGrp, cube: cubeOrbit, baseY: 4.2, phase: idx * 2.1, mx, mz });
+      holoMonoliths.push({ grp: mGrp, cube: cubeOrbit, baseY: STATION_DECK_H + 4.1, phase: idx * 2.1, mx, mz });
 
-      const curve = new THREE.LineCurve3(new THREE.Vector3(-200, 0.4, 32), new THREE.Vector3(mx, 0.4, mz));
+      const curve = new THREE.LineCurve3(new THREE.Vector3(st4.x, STATION_DECK_H + 0.35, st4.z), new THREE.Vector3(mx, STATION_DECK_H + 0.35, mz));
       const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 12, 0.14, 6, false), new THREE.MeshBasicMaterial({ color: 0x0077ff, transparent: true, opacity: 0.55 }));
       scene.add(tube);
       const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.45, 10, 10), new THREE.MeshBasicMaterial({ color: 0x00f5d4 }));
       scene.add(pulse);
-      holoDataPulses.push({ mesh: pulse, startX: -200, startZ: 32, endX: mx, endZ: mz, phase: idx * 0.33 });
+      holoDataPulses.push({ mesh: pulse, startX: st4.x, startZ: st4.z, endX: mx, endZ: mz, phase: idx * 0.33 });
     });
 
-    // STATION 5 PROP: 3D Sky-Guestbook Terminal Kiosk (South Lounge: 42, 198)
+    // STATION 5 PROP: 3D Sky-Guestbook Terminal Kiosk
+    const st5 = ZONES[4];
     const kiosk = new THREE.Group();
     const kBase = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 3.2, 16), new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.35 }));
     kBase.position.y = 1.6; kBase.castShadow = true;
     const kBeacon = new THREE.Mesh(new THREE.OctahedronGeometry(1.25, 0), new THREE.MeshStandardMaterial({ color: 0xfb5607, emissive: 0xffb703, emissiveIntensity: 0.6 }));
     kBeacon.position.y = 4.6;
     kiosk.add(kBase, kBeacon);
-    kiosk.position.set(42, 0.2, 198 + 6);
+    kiosk.position.set(st5.x, STATION_DECK_H, st5.z + 6);
     scene.add(kiosk);
 
     // Super-Detailed Swiss GT Supercar
@@ -1268,7 +1392,7 @@
       return { group: fGroup, outer, core };
     });
 
-    const car = { x: 0, z: 24, heading: 0, speed: 0 };
+    const car = { x: 0, y: STATION_DECK_H, z: 24, heading: 0, speed: 0 };
 
     // GTA: CHINATOWN WARS Overhead Isometric/Tilted Camera!
     const camState = { yaw: 0, pitch: 0.98, distance: 46, dragging: false, lastX: 0, lastY: 0 };
@@ -1325,7 +1449,7 @@
         scene.fog.color.setHex(0x90e0ef);
         hemiLight.color.setHex(0xffffff); hemiLight.groundColor.setHex(0x40916c); hemiLight.intensity = 0.95;
         dl.color.setHex(0xfff4d2); dl.intensity = 1.25;
-        oceanMat.color.setHex(0x0096c7); grassMat.color.setHex(0x52b788);
+        oceanMat.color.setHex(0x0096c7); grassMat.color.setHex(0xffffff);
         streetLampBulbs.forEach(m => { m.emissiveIntensity = 0.7; });
         if (btn) btn.textContent = '☀ Day';
       } else if (skyMode === 1) {
@@ -1334,7 +1458,7 @@
         scene.fog.color.setHex(0xff8fa3);
         hemiLight.color.setHex(0xffccd5); hemiLight.groundColor.setHex(0x3a5a40); hemiLight.intensity = 0.82;
         dl.color.setHex(0xff9e00); dl.intensity = 1.15;
-        oceanMat.color.setHex(0x1d3557); grassMat.color.setHex(0x40916c);
+        oceanMat.color.setHex(0x1d3557); grassMat.color.setHex(0xffd6ba);
         streetLampBulbs.forEach(m => { m.emissiveIntensity = 1.8; });
         if (btn) btn.textContent = '🌅 Sunset';
       } else {
@@ -1343,7 +1467,7 @@
         scene.fog.color.setHex(0x0a0928);
         hemiLight.color.setHex(0x48cae4); hemiLight.groundColor.setHex(0x1b4332); hemiLight.intensity = 0.52;
         dl.color.setHex(0x90e0ef); dl.intensity = 0.65;
-        oceanMat.color.setHex(0x03045e); grassMat.color.setHex(0x1b4332);
+        oceanMat.color.setHex(0x03045e); grassMat.color.setHex(0x557799);
         streetLampBulbs.forEach(m => { m.emissiveIntensity = 2.8; });
         if (btn) btn.textContent = '🌙 Cyber Night';
       }
@@ -1735,14 +1859,15 @@
     // Click GPS Minimap to Warp
     const radarCanvas = document.getElementById('radarCanvas');
     const radarCtx = radarCanvas.getContext('2d');
+    const RADAR_SCALE = 136 / 1080;
     radarCanvas.addEventListener('click', (e) => {
       const rect = radarCanvas.getBoundingClientRect();
-      const scale = 136 / 600;
-      const wx = ((e.clientX - rect.left) - 68) / scale;
-      const wz = ((e.clientY - rect.top) - 68) / scale;
-      const target = ZONES.find(z => Math.hypot(wx - z.x, wz - z.z) < 42);
+      const wx = ((e.clientX - rect.left) - 68) / RADAR_SCALE;
+      const wz = ((e.clientY - rect.top) - 68) / RADAR_SCALE;
+      const target = ZONES.find(z => Math.hypot(wx - z.x, wz - z.z) < 55);
       if (target) {
-        car.x = target.x; car.z = target.z + 22; car.speed = 0; car.heading = 0;
+        car.x = target.x; car.z = target.z + 22; car.y = Math.max(getTerrainHeight(car.x, car.z), getStationDeckHeight(car.x, car.z));
+        car.speed = 0; car.heading = 0;
         showToast(`Warped to ${target.name}`);
       }
     });
@@ -1750,9 +1875,9 @@
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.code === 'KeyR') {
-        car.x = 0; car.z = 24; car.speed = 0; car.heading = 0; camState.yaw = 0;
+        car.x = 0; car.z = 24; car.y = STATION_DECK_H; car.speed = 0; car.heading = 0; camState.yaw = 0;
         miguelLetters.forEach(l => {
-          l.x = l.homeX; l.z = l.homeZ; l.y = 2.25; l.vx = 0; l.vy = 0; l.vz = 0; l.rx = 0; l.rz = 0; l.vrx = 0; l.vrz = 0;
+          l.x = l.homeX; l.z = l.homeZ; l.y = STATION_DECK_H + 1.9; l.vx = 0; l.vy = 0; l.vz = 0; l.rx = 0; l.rz = 0; l.vrx = 0; l.vrz = 0;
           l.mesh.position.set(l.x, l.y, l.z); l.mesh.rotation.set(0, 0, 0);
         });
         showToast('Car & MIGUEL letters reset');
@@ -1774,6 +1899,7 @@
     const parkingCardDesc = document.getElementById('parkingCardDesc');
     const parkingCardTags = document.getElementById('parkingCardTags');
     let lastParkedTitle = '';
+    let lastImpactAt = -10;
     const clock = new THREE.Clock();
     const camTarget = new THREE.Vector3();
 
@@ -1789,10 +1915,10 @@
         const right = !isTyping && (keys.has('KeyD') || keys.has('ArrowRight'));
         const boost = !isTyping && (keys.has('ShiftLeft') || keys.has('ShiftRight') || keys.has('Space') || touchInput.boost);
 
-        const maxSpeed = boost ? 72 : 46;
-        const accel = boost ? 74 : 42;
+        const maxSpeed = boost ? 74 : 48;
+        const accel = boost ? 76 : 44;
         if (fwd) car.speed += accel * dt;
-        else if (rev) car.speed -= 32 * dt;
+        else if (rev) car.speed -= 34 * dt;
         else car.speed *= Math.pow(0.22, dt);
         car.speed = THREE.MathUtils.clamp(car.speed, -18, maxSpeed);
 
@@ -1801,15 +1927,67 @@
 
         car.x -= Math.sin(car.heading) * car.speed * dt;
         car.z -= Math.cos(car.heading) * car.speed * dt;
-        const rDist = Math.hypot(car.x, car.z);
-        if (rDist > 292) { const s = 292 / rDist; car.x *= s; car.z *= s; car.speed *= 0.5; }
 
-        carGroup.position.set(car.x, 0, car.z);
+        // Organic Island Coastline Boundary
+        const carAng = Math.atan2(car.z, car.x);
+        const rDist = Math.hypot(car.x, car.z);
+        const maxShoreR = getIslandRadius(carAng) - 8;
+        if (rDist > maxShoreR) {
+          const s = maxShoreR / rDist;
+          car.x *= s; car.z *= s; car.speed *= 0.45;
+        }
+
+        // Real Collision Physics: Trees & Massive Mountains
+        const carRadius = 1.65;
+        for (let i = 0; i < treeColliders.length; i++) {
+          const tc = treeColliders[i];
+          const dx = car.x - tc.x, dz = car.z - tc.z;
+          const dist = Math.hypot(dx, dz);
+          const minD = carRadius + tc.r;
+          if (dist < minD && dist > 0.001) {
+            const nx = dx / dist, nz = dz / dist;
+            car.x = tc.x + nx * minD;
+            car.z = tc.z + nz * minD;
+            if (Math.abs(car.speed) > 6 && t - lastImpactAt > 0.4) {
+              lastImpactAt = t;
+              sound.playChime();
+            }
+            car.speed *= -0.35;
+          }
+        }
+        for (let i = 0; i < mountainColliders.length; i++) {
+          const mc = mountainColliders[i];
+          const dx = car.x - mc.x, dz = car.z - mc.z;
+          const dist = Math.hypot(dx, dz);
+          const minD = carRadius + mc.r;
+          if (dist < minD && dist > 0.001) {
+            const nx = dx / dist, nz = dz / dist;
+            car.x = mc.x + nx * minD;
+            car.z = mc.z + nz * minD;
+            if (Math.abs(car.speed) > 8 && t - lastImpactAt > 0.45) {
+              lastImpactAt = t;
+              showToast('⛰ Mountain Slope!');
+            }
+            car.speed *= -0.3;
+          }
+        }
+
+        // Uneven Terrain + Official Raised 3D Station Deck Climbing
+        const groundY = Math.max(getTerrainHeight(car.x, car.z), getStationDeckHeight(car.x, car.z));
+        car.y = THREE.MathUtils.lerp(car.y, groundY, Math.min(1, dt * 18));
+
+        // Subtle terrain slope pitch/roll so the supercar tilts naturally over hills & station ramps
+        const fwdX = -Math.sin(car.heading), fwdZ = -Math.cos(car.heading);
+        const hAhead = Math.max(getTerrainHeight(car.x + fwdX * 2.0, car.z + fwdZ * 2.0), getStationDeckHeight(car.x + fwdX * 2.0, car.z + fwdZ * 2.0));
+        const hBehind = Math.max(getTerrainHeight(car.x - fwdX * 2.0, car.z - fwdZ * 2.0), getStationDeckHeight(car.x - fwdX * 2.0, car.z - fwdZ * 2.0));
+        const slopePitch = Math.atan2(hAhead - hBehind, 4.0) * 0.65;
+
+        carGroup.position.set(car.x, car.y, car.z);
         carGroup.rotation.y = car.heading;
         const targetRoll = -steerInput * 0.055 * Math.min(1, Math.abs(car.speed) / 14);
-        const targetPitch = (rev ? 0.032 : fwd ? (boost ? -0.035 : -0.018) : 0);
+        const targetPitch = (rev ? 0.032 : fwd ? (boost ? -0.035 : -0.018) : 0) + slopePitch;
         chassisGroup.rotation.z = THREE.MathUtils.lerp(chassisGroup.rotation.z, targetRoll, Math.min(1, dt * 8));
-        chassisGroup.rotation.x = THREE.MathUtils.lerp(chassisGroup.rotation.x, targetPitch, Math.min(1, dt * 7));
+        chassisGroup.rotation.x = THREE.MathUtils.lerp(chassisGroup.rotation.x, targetPitch, Math.min(1, dt * 9));
         tlMat.color.setHex(rev ? 0xff1133 : 0xaa0011);
         underglowMat.opacity = boost && Math.abs(car.speed) > 4 ? 0.42 : 0.16;
 
@@ -1836,8 +2014,8 @@
         // GTA: Chinatown Wars Overhead Tilted Camera (fixed world orientation + drag-orbit)
         const hDist = Math.cos(camState.pitch) * camState.distance;
         const vDist = Math.sin(camState.pitch) * camState.distance;
-        camera.position.lerp(new THREE.Vector3(car.x + Math.sin(camState.yaw) * hDist, vDist, car.z + Math.cos(camState.yaw) * hDist), Math.min(1, dt * 7));
-        camTarget.lerp(new THREE.Vector3(car.x, 1.5, car.z), Math.min(1, dt * 9));
+        camera.position.lerp(new THREE.Vector3(car.x + Math.sin(camState.yaw) * hDist, car.y + vDist, car.z + Math.cos(camState.yaw) * hDist), Math.min(1, dt * 7));
+        camTarget.lerp(new THREE.Vector3(car.x, car.y + 1.5, car.z), Math.min(1, dt * 9));
         camera.lookAt(camTarget);
 
         // WORLD UPGRADES ANIMATION: Lighthouse, Wind Turbines, Clouds, Sailboats & Highway Turbo Pads
@@ -1845,7 +2023,7 @@
         windRotors.forEach((hub, idx) => { hub.rotation.z = t * 1.85 + idx * 1.1; });
         clouds.forEach((c) => {
           c.grp.position.x += c.speed * dt;
-          if (c.grp.position.x > 340) c.grp.position.x = -340;
+          if (c.grp.position.x > 460) c.grp.position.x = -460;
         });
         sailboats.forEach(sb => {
           sb.grp.position.y = -2.2 + Math.sin(t * 1.7 + sb.phase) * 0.22;
@@ -1860,7 +2038,7 @@
           }
         });
 
-        // STATION 1: Knockable MIGUEL 3D Block Letters Physics
+        // STATION 1: Knockable MIGUEL 3D Block Letters Physics (resting on Station 1 3D deck)
         miguelLetters.forEach(l => {
           const dx = l.x - car.x, dz = l.z - car.z;
           const dist = Math.hypot(dx, dz);
@@ -1873,10 +2051,11 @@
             l.vrz = (Math.random() - 0.5) * 8;
             sound.playChime();
           }
-          if (Math.abs(l.vx) > 0.05 || Math.abs(l.vz) > 0.05 || l.y > 0.85) {
+          const floorY = Math.max(getTerrainHeight(l.x, l.z), getStationDeckHeight(l.x, l.z)) + 0.85;
+          if (Math.abs(l.vx) > 0.05 || Math.abs(l.vz) > 0.05 || l.y > floorY) {
             l.x += l.vx * dt; l.z += l.vz * dt; l.y += l.vy * dt;
             l.vy -= 26 * dt;
-            if (l.y < 0.85) { l.y = 0.85; l.vy *= -0.32; }
+            if (l.y < floorY) { l.y = floorY; l.vy *= -0.32; }
             l.vx *= Math.pow(0.18, dt); l.vz *= Math.pow(0.18, dt);
             l.rx += l.vrx * dt; l.rz += l.vrz * dt;
             l.vrx *= Math.pow(0.25, dt); l.vrz *= Math.pow(0.25, dt);
@@ -1891,7 +2070,7 @@
           const isParked = Math.hypot(car.x - fb.px, car.z - fb.pz) < 4.8;
           fb.ringMat.color.setHex(isParked ? 0x00ff88 : 0x0077ff);
           fb.ringMat.opacity = isParked ? 0.95 : 0.6;
-          fb.bbGroup.position.y = THREE.MathUtils.lerp(fb.bbGroup.position.y, isParked ? 5.3 : 4.4, Math.min(1, dt * 6));
+          fb.bbGroup.position.y = THREE.MathUtils.lerp(fb.bbGroup.position.y, isParked ? STATION_DECK_H + 5.2 : STATION_DECK_H + 4.3, Math.min(1, dt * 6));
           if (isParked) parkedSpec = fb.spec;
         });
         if (parkedSpec) {
@@ -1935,7 +2114,7 @@
           const frac = (t * 0.55 + p.phase) % 1;
           p.mesh.position.set(
             THREE.MathUtils.lerp(p.startX, p.endX, frac),
-            0.55,
+            STATION_DECK_H + 0.45,
             THREE.MathUtils.lerp(p.startZ, p.endZ, frac)
           );
         });
@@ -1964,41 +2143,54 @@
         ZONES.forEach((z) => {
           const st = stationClusters.get(z.id);
           const isNear = Math.hypot(car.x - z.x, car.z - z.z) <= z.radius + 16;
-          st.currentY = THREE.MathUtils.lerp(st.currentY, isNear ? 0 : 38, Math.min(1, dt * 4.5));
+          st.currentY = THREE.MathUtils.lerp(st.currentY, isNear ? STATION_DECK_H : 38, Math.min(1, dt * 4.5));
           st.cluster.position.y = st.currentY;
         });
 
-        // Upgraded GPS Minimap with Road Network, 5 Stations, and Directional Car Arrow
+        // Upgraded GPS Minimap with Organic Island Coastline, Road Network, 5 Stations & Player Arrow
         radarCtx.clearRect(0, 0, 136, 136);
-        const scale = 136 / 600;
-        radarCtx.strokeStyle = 'rgba(43, 45, 66, 0.35)';
-        radarCtx.lineWidth = 2.2;
+        radarCtx.fillStyle = 'rgba(82, 183, 136, 0.26)';
+        radarCtx.strokeStyle = 'rgba(45, 106, 79, 0.45)';
+        radarCtx.lineWidth = 1.2;
+        radarCtx.beginPath();
+        for (let a = 0; a <= 48; a++) {
+          const ang = (a / 48) * Math.PI * 2;
+          const ir = getIslandRadius(ang) * RADAR_SCALE;
+          const px = 68 + Math.cos(ang) * ir, py = 68 + Math.sin(ang) * ir;
+          if (a === 0) radarCtx.moveTo(px, py); else radarCtx.lineTo(px, py);
+        }
+        radarCtx.closePath();
+        radarCtx.fill();
+        radarCtx.stroke();
+
+        radarCtx.strokeStyle = 'rgba(43, 45, 66, 0.45)';
+        radarCtx.lineWidth = 2.0;
         ALL_ROAD_POLYLINES.forEach(poly => {
           radarCtx.beginPath();
           poly.forEach(([rx, rz], idx) => {
-            if (idx === 0) radarCtx.moveTo(68 + rx * scale, 68 + rz * scale);
-            else radarCtx.lineTo(68 + rx * scale, 68 + rz * scale);
+            if (idx === 0) radarCtx.moveTo(68 + rx * RADAR_SCALE, 68 + rz * RADAR_SCALE);
+            else radarCtx.lineTo(68 + rx * RADAR_SCALE, 68 + rz * RADAR_SCALE);
           });
           radarCtx.stroke();
         });
         ZONES.forEach(z => {
           radarCtx.fillStyle = z.color;
           radarCtx.beginPath();
-          radarCtx.arc(68 + z.x * scale, 68 + z.z * scale, 5.2, 0, Math.PI * 2);
+          radarCtx.arc(68 + z.x * RADAR_SCALE, 68 + z.z * RADAR_SCALE, 4.8, 0, Math.PI * 2);
           radarCtx.fill();
           radarCtx.strokeStyle = '#ffffff';
-          radarCtx.lineWidth = 1.2;
+          radarCtx.lineWidth = 1.1;
           radarCtx.stroke();
         });
-        const cx = 68 + car.x * scale, cz = 68 + car.z * scale;
+        const cx = 68 + car.x * RADAR_SCALE, cz = 68 + car.z * RADAR_SCALE;
         radarCtx.save();
         radarCtx.translate(cx, cz);
         radarCtx.rotate(-car.heading);
         radarCtx.fillStyle = '#111111';
         radarCtx.beginPath();
-        radarCtx.moveTo(0, -6);
-        radarCtx.lineTo(4.2, 4.5);
-        radarCtx.lineTo(-4.2, 4.5);
+        radarCtx.moveTo(0, -5.5);
+        radarCtx.lineTo(3.8, 4.2);
+        radarCtx.lineTo(-3.8, 4.2);
         radarCtx.closePath();
         radarCtx.fill();
         radarCtx.restore();
