@@ -151,8 +151,8 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
     const avgLeftY = (hFL + hRL) * 0.5;
     const avgRightY = (hFR + hRR) * 0.5;
 
-    const slopePitch = THREE.MathUtils.clamp(Math.atan2(avgFrontY - avgRearY, 2.84), -0.45, 0.45);
-    const slopeRoll = THREE.MathUtils.clamp(Math.atan2(avgRightY - avgLeftY, 2.27), -0.45, 0.45);
+    const slopePitch = THREE.MathUtils.clamp(Math.atan2(avgFrontY - avgRearY, 2.84), -0.32, 0.32);
+    const slopeRoll = THREE.MathUtils.clamp(Math.atan2(avgRightY - avgLeftY, 2.27), -0.32, 0.32);
     const dynRoll = -steerInput * 0.055 * Math.min(1, Math.abs(car.speed) / 16);
     const dynPitch = rev ? 0.03 : fwd ? (boost ? -0.032 : -0.016) : 0;
 
