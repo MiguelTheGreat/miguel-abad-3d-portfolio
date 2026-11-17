@@ -108,13 +108,17 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
     }
     for (let i = 0; i < mountainColliders.length; i++) {
       const mc = mountainColliders[i];
-      resolveCircleCollider(car, mc.x, mc.z, carRadius + mc.r, 0.25, (impact) => {
-        if (t - lastImpactAt > 0.45) {
-          lastImpactAt = t;
-          sound.playImpact(impact);
-          showToast('⛰ Mountain Slope!');
-        }
-      });
+      const frac = THREE.MathUtils.clamp((car.y - mc.baseBottomY) / mc.h, 0, 1);
+      const effectiveR = mc.rad * (1 - frac) * 0.94;
+      if (effectiveR > 1.0) {
+        resolveCircleCollider(car, mc.x, mc.z, carRadius + effectiveR, 0.25, (impact) => {
+          if (t - lastImpactAt > 0.45) {
+            lastImpactAt = t;
+            sound.playImpact(impact);
+            showToast('⛰ Mountain Slope!');
+          }
+        });
+      }
     }
 
     // 4-Wheel Ground Contact Sampling -> Zero road floating, zero slope clipping
@@ -141,14 +145,14 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
       if (car.vy < 0) car.vy = 0;
     }
 
-    // Exact 4-wheel pitch & roll alignment to terrain/ramps
+    // Exact 4-wheel pitch & roll alignment to terrain/ramps (clamped for stability)
     const avgFrontY = (hFL + hFR) * 0.5;
     const avgRearY = (hRL + hRR) * 0.5;
     const avgLeftY = (hFL + hRL) * 0.5;
     const avgRightY = (hFR + hRR) * 0.5;
 
-    const slopePitch = Math.atan2(avgFrontY - avgRearY, 2.84);
-    const slopeRoll = Math.atan2(avgRightY - avgLeftY, 2.27);
+    const slopePitch = THREE.MathUtils.clamp(Math.atan2(avgFrontY - avgRearY, 2.84), -0.45, 0.45);
+    const slopeRoll = THREE.MathUtils.clamp(Math.atan2(avgRightY - avgLeftY, 2.27), -0.45, 0.45);
     const dynRoll = -steerInput * 0.055 * Math.min(1, Math.abs(car.speed) / 16);
     const dynPitch = rev ? 0.03 : fwd ? (boost ? -0.032 : -0.016) : 0;
 
