@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { STATION_DECK_H, loadGuestbookNotes, getZones } from './config/portfolioData.js';
-import { SoundEngine } from './audio/SoundEngine.js';
-import { buildRoadNetwork } from './world/roads.js';
-import { createTerrainSystem } from './world/terrain.js';
-import { buildEnvironment } from './world/environment.js';
-import { buildStations, drawMainBoardTex } from './world/stations.js';
-import { createSupercar } from './world/supercar.js';
-import { createCarPhysics } from './physics/carPhysics.js';
-import { setupUIAndModals } from './ui/hudAndModals.js';
+import { STATION_DECK_H, loadGuestbookNotes, getZones } from './config/portfolioData.js?v=2';
+import { SoundEngine } from './audio/SoundEngine.js?v=2';
+import { buildRoadNetwork } from './world/roads.js?v=2';
+import { createTerrainSystem } from './world/terrain.js?v=2';
+import { buildEnvironment } from './world/environment.js?v=2';
+import { buildStations, drawMainBoardTex } from './world/stations.js?v=2';
+import { createSupercar } from './world/supercar.js?v=2';
+import { createCarPhysics } from './physics/carPhysics.js?v=2';
+import { setupUIAndModals } from './ui/hudAndModals.js?v=2';
 
 const guestbookNotes = loadGuestbookNotes();
 let ZONES = getZones(guestbookNotes);
