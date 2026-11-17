@@ -98,7 +98,10 @@
           <span><strong>Phone:</strong> +63 977 652 9418</span>
           <button data-copy="+63 977 652 9418" class="px-2 py-0.5 border rounded hover:bg-black hover:text-white">Copy</button>
         </div>
-        <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" rel="noopener noreferrer" class="inline-block mt-1 px-3 py-1.5 rounded bg-[#0047FF] text-white font-semibold">Open LinkedIn Profile ↗</a>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded bg-[#0047FF] text-white font-semibold hover:bg-[#0035c4] transition-colors">LinkedIn Profile ↗</a>
+          <button id="downloadResumeBtn" type="button" class="flex-1 text-center px-3 py-2 rounded bg-[#E63946] text-white font-semibold hover:bg-[#c1121f] transition-colors">⬇ Download Resume</button>
+        </div>
       </div>
       <form id="gbForm" class="space-y-2 pt-2 border-t">
         <p class="text-xs font-bold uppercase">Post to Central Plaza Notice Board</p>
@@ -107,6 +110,26 @@
         <button class="w-full py-2 rounded bg-[#111111] text-white text-xs font-bold uppercase hover:bg-[#0047FF] transition-colors">Post Note</button>
       </form>
     </div>
+  </div>
+
+  <!-- Non-Intrusive Station 1 Intro Card (bottom-center compact) -->
+  <div id="introCard" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-10 pointer-events-none max-w-lg w-[90%] bg-white/92 backdrop-blur-md border-2 border-[#111111] rounded-lg px-4 py-3 shadow-xl transition-all">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-[#E63946]">01 // SPAWN &amp; ABOUT · KNOCK THE LETTERS!</span>
+      <span class="text-[10px] font-mono text-neutral-500">DLSU Manila</span>
+    </div>
+    <h2 class="text-sm sm:text-base font-bold tracking-tight mt-0.5">Miguel Andrei B. Abad — BS Computer Engineering</h2>
+    <p class="text-[11px] text-neutral-700 mt-0.5 leading-snug">Consistent Dean's Lister bridging <strong>4-layer PCB hardware</strong>, <strong>CNN-LSTM computer vision</strong>, and <strong>full-stack systems</strong>. Drive through the giant <strong>MIGUEL</strong> blocks or explore the 5 stations!</p>
+  </div>
+
+  <!-- Non-Intrusive Station 2 Parking Trigger Card -->
+  <div id="parkingCard" class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-10 pointer-events-none max-w-lg w-[90%] bg-[#111111]/92 text-white backdrop-blur-md border border-[#0077FF] rounded-lg px-4 py-3 shadow-xl">
+    <div class="flex items-center justify-between gap-2">
+      <span id="parkingCardTag" class="text-[10px] font-mono font-bold uppercase tracking-widest text-[#00B4D8]">FLAGSHIP SYSTEM</span>
+      <span class="text-[10px] font-mono text-emerald-400">● PARKED IN ZONE</span>
+    </div>
+    <h3 id="parkingCardTitle" class="text-sm font-bold mt-0.5">Project Title</h3>
+    <p id="parkingCardDesc" class="text-[11px] text-neutral-300 mt-0.5 leading-snug">Project details</p>
   </div>
 
   <!-- Rich 2D Classic View -->
@@ -173,62 +196,48 @@
     function getZones() {
       return [
         {
-          id: 'central', name: '01 // CENTRAL PLAZA', x: 0, z: 0, radius: 28, color: '#E63946',
+          id: 'central', name: '01 // SPAWN & ABOUT', x: 0, z: 0, radius: 28, color: '#E63946',
           title: 'MIGUEL ANDREI B. ABAD',
           subtitle: 'BS Computer Engineering · De La Salle University – Manila',
-          mainBody: 'Undergraduate Computer Engineering student specializing in embedded systems, computer vision, and full-stack software engineering. Bridging custom PCB hardware with intelligent software.',
+          mainBody: 'Consistent Dean\'s Lister specializing in embedded systems, computer vision, and full-stack software engineering. Bridging custom 4-layer PCB hardware with intelligent software. AVP for Academics @ ACCESS DLSU.',
           plaques: [
-            { dx: -16, dz: 10, label: 'DIRECT CONTACT', text: 'abadandrei22@gmail.com\n+63 977 652 9418' },
-            { dx: 16, dz: 10, label: 'LINKEDIN & LOCATION', text: 'linkedin.com/in/miguel-andrei-abad\nCavite, Philippines' },
-            { dx: -15, dz: -10, label: 'SKY-GUESTBOOK', text: guestbookNotes[0] ? `${guestbookNotes[0].sender_name}:\n"${guestbookNotes[0].message}"` : 'Leave a note!' },
-            { dx: 15, dz: -10, label: '3 PILLARS', text: '01 Hardware & PCB\n02 Computer Vision & ML\n03 Full-Stack & Mobile' }
+            { dx: -16, dz: -12, label: 'EDUCATION', text: 'DLSU Manila (2023–Present)\nBS Computer Engineering' },
+            { dx: 16, dz: -12, label: 'LEADERSHIP', text: 'AVP for Academics\nACCESS DLSU (2025–Present)' }
           ]
         },
         {
-          id: 'north', name: '02 // NORTH PAVILION', x: -38, z: -195, radius: 28, color: '#0077FF',
-          title: 'RESUME & TECHNICAL MATRIX',
-          subtitle: "DLSU Manila (2023–Present) · Consistent Dean's Lister",
-          mainBody: 'BS Computer Engineering undergraduate with a strong foundation in embedded microcontrollers, signal processing, digital logic, operating systems, and machine learning.',
+          id: 'north', name: '02 // FLAGSHIP SYSTEMS', x: -38, z: -195, radius: 32, color: '#0077FF',
+          title: 'FLAGSHIP ENGINEERING SYSTEMS',
+          subtitle: 'Park in any glowing bay below to inspect full system specs',
+          mainBody: 'Three flagship Computer Engineering builds spanning wearable-vision AI (CNN-LSTM), 4-layer microcontroller PCB design (KiCad), and cycle-accurate 8-bit CPU architecture simulation.',
+          plaques: []
+        },
+        {
+          id: 'east', name: '03 // HARDWARE & SILICON', x: 205, z: -28, radius: 32, color: '#10b981',
+          title: 'HARDWARE, PCB & SILICON',
+          subtitle: 'Drive across the PCB traces to energize the onboard LEDs!',
+          mainBody: 'KiCad 4-Layer PCB Layout (DRC Verified), PIC16F877A & ESP32-S3 Firmware, 6-DOF IMU Telemetry, Verilog Digital Logic, and Feedback Control Systems.',
           plaques: [
-            { dx: -17, dz: 10, label: 'PROGRAMMING', text: 'C / C++, Python, Java, Kotlin\nJavaScript, SQL, Verilog, MATLAB' },
-            { dx: 17, dz: 10, label: 'FRAMEWORKS & ML', text: 'PyTorch, OpenCV, MediaPipe\nKeras, Android SDK' },
-            { dx: -16, dz: -10, label: 'HARDWARE & EDA', text: 'KiCad (4-Layer PCB), AutoCAD\nPIC16F877A, ESP32, 6-DOF IMU' },
-            { dx: 16, dz: -10, label: 'COURSEWORK', text: 'Embedded Systems · Microprocessors\nDigital Logic · Control Systems' }
+            { dx: -18, dz: -14, label: 'EDA & SCHEMATICS', text: 'KiCad (4-Layer PCB)\nAutoCAD · Full DRC' },
+            { dx: 18, dz: -14, label: 'SILICON & MCU', text: 'PIC16F877A · ESP32\n6-DOF IMU · 20MHz XTAL' }
           ]
         },
         {
-          id: 'east', name: '03 // EAST SKY-LAB', x: 205, z: -28, radius: 30, color: '#00B4D8',
-          title: 'ACADEMIC WORK SAMPLES',
-          subtitle: 'Hardware Prototyping · Embedded AI · Full-Stack Systems',
-          mainBody: 'Selected engineering artifacts built during Computer Engineering coursework and research—spanning multi-modal wearable AI, 4-layer KiCad PCBs, RESTful web apps, and 8-bit CPU simulation.',
-          plaques: [
-            { dx: -18, dz: 11, label: '01 // FSL SIGN RECOGNITION', text: 'ESP32 6-DOF IMU + Camera\nPyTorch CNN-LSTM · Android' },
-            { dx: 18, dz: 11, label: '02 // PIC16F877A PCB', text: '4-Layer KiCad Breakout Board\n5V LDO · 20MHz XTAL · ICSP' },
-            { dx: -18, dz: -11, label: '03 // WEB PDF CATALOG', text: 'In-Browser PDF Reader + SQL\nMangaDex & Google Books APIs' },
-            { dx: 18, dz: -11, label: '04 // SAP-1 SIMULATOR', text: '8-Bit W-Bus & ALU Visualizer\nCycle-Accurate T-States' }
-          ]
+          id: 'west', name: '04 // SOFTWARE & WEB', x: -200, z: 32, radius: 32, color: '#00B4D8',
+          title: 'SOFTWARE, AI & WEB MATRIX',
+          subtitle: 'Holographic Software Architecture Showcase',
+          mainBody: 'Full-stack web platforms, native Android SDK apps, PyTorch CNN-LSTM pipelines, and interactive microprocessor visualizers backed by relational SQL & REST APIs.',
+          plaques: []
         },
         {
-          id: 'west', name: '04 // WEST STUDENT HUB', x: -200, z: 32, radius: 28, color: '#FFB703',
-          title: 'ACCESS DLSU LEADERSHIP',
-          subtitle: 'Association of Computer Engineering Students · Nov 2025 – Present',
-          mainBody: 'Leading peer academic mentorship, college-wide reviewer distribution, quantitative student performance research, and digital learning repositories for CpE undergraduates.',
+          id: 'south', name: '05 // CONTACT & GUESTBOOK', x: 42, z: 198, radius: 28, color: '#FB5607',
+          title: 'CONTACT & SKY-GUESTBOOK',
+          subtitle: 'Direct Channels · Download Resume · Leave a Note',
+          mainBody: 'Reach out directly for embedded systems, ML, or software engineering roles. Click "Leave Note / Links" at the top bar to download my ATS Resume PDF or sign the Sky-Guestbook!',
           plaques: [
-            { dx: -16, dz: 10, label: 'AVP FOR ACADEMICS', text: 'Sept 2026 – Present\nCollege-wide academic programs' },
-            { dx: 16, dz: 10, label: 'JUNIOR OFFICER', text: 'Nov 2025 – Sept 2026\nTechnical reviewers & clinics' },
-            { dx: -15, dz: -10, label: 'LEARNING REPOSITORY', text: 'Centralized digital archive\nby course code & lab primer' },
-            { dx: 15, dz: -10, label: 'TUTORIALS & RESEARCH', text: 'Microprocessors & Logic clinics\nStudent feedback analytics' }
-          ]
-        },
-        {
-          id: 'south', name: '05 // SOUTH LOUNGE', x: 42, z: 198, radius: 28, color: '#FB5607',
-          title: 'REFERENCES & CONTACT',
-          subtitle: 'Academic & Organizational Mentors · DLSU Manila',
-          mainBody: 'Faculty and organizational advisers familiar with my embedded systems research, machine learning engineering, and ACCESS DLSU leadership. Direct contacts available upon formal request.',
-          plaques: [
-            { dx: -16, dz: 10, label: 'FACULTY REFERENCE', text: 'Dept. of Electronics & CpE\nDLSU Manila Thesis Adviser' },
-            { dx: 16, dz: 10, label: 'ORG REFERENCE', text: 'ACCESS DLSU Executive Board\n& Faculty Adviser' },
-            { dx: 0, dz: 16, label: 'LEAVE A NOTE', text: 'Click "Leave Note / Links" above\nto sign the Sky-Guestbook!' }
+            { dx: -16, dz: 10, label: 'DIRECT EMAIL & PHONE', text: 'abadandrei22@gmail.com\n+63 977 652 9418' },
+            { dx: 16, dz: 10, label: 'LINKEDIN PROFILE', text: 'linkedin.com/in/\nmiguel-andrei-abad-a8845532a' },
+            { dx: 0, dz: 16, label: 'SKY-GUESTBOOK', text: guestbookNotes[0] ? `${guestbookNotes[0].sender_name}:\n"${guestbookNotes[0].message}"` : 'Open modal above to sign!' }
           ]
         }
       ];
@@ -441,12 +450,67 @@
       collectibles.push({ mesh: m, baseY: y, phase: idx, collected: false });
     });
 
+    // Custom Ground Texture: Dark Green PCB with Gold Traces (Station 3)
+    function createPcbGroundTex() {
+      const c = document.createElement('canvas'); c.width = 1024; c.height = 1024;
+      const g = c.getContext('2d');
+      g.fillStyle = '#083b21'; g.fillRect(0, 0, 1024, 1024);
+      // Subtle solder-mask grid
+      g.strokeStyle = 'rgba(255,255,255,0.04)'; g.lineWidth = 2;
+      for (let i = 0; i < 1024; i += 32) {
+        g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1024); g.stroke();
+        g.beginPath(); g.moveTo(0, i); g.lineTo(1024, i); g.stroke();
+      }
+      // Gold copper bus traces
+      g.strokeStyle = '#ffd166'; g.lineWidth = 7; g.lineCap = 'round'; g.lineJoin = 'round';
+      const traces = [
+        [[120,512],[340,512],[400,450],[620,450],[680,512],[904,512]],
+        [[180,320],[320,320],[380,380],[640,380],[700,320],[840,320]],
+        [[180,704],[320,704],[380,644],[640,644],[700,704],[840,704]],
+        [[512,120],[512,310],[460,360],[460,664],[512,714],[512,904]],
+        [[300,180],[300,280],[410,390],[410,634],[300,744],[300,844]],
+        [[724,180],[724,280],[614,390],[614,634],[724,744],[724,844]]
+      ];
+      traces.forEach(pts => {
+        g.beginPath(); pts.forEach(([x,y], idx) => idx === 0 ? g.moveTo(x,y) : g.lineTo(x,y)); g.stroke();
+        pts.forEach(([x,y]) => {
+          g.fillStyle = '#ffd166'; g.beginPath(); g.arc(x, y, 11, 0, Math.PI * 2); g.fill();
+          g.fillStyle = '#083b21'; g.beginPath(); g.arc(x, y, 4.5, 0, Math.PI * 2); g.fill();
+        });
+      });
+      // White silkscreen labels
+      g.fillStyle = 'rgba(255,255,255,0.82)'; g.font = 'bold 26px monospace';
+      g.fillText('VCC +5V', 140, 298); g.fillText('GND PLANE', 710, 735);
+      g.fillText('PIC16F877A // 20MHz XTAL', 330, 145); g.fillText('I2C / SPI BUS', 395, 895);
+      const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8; return tex;
+    }
+
+    // Custom Ground Texture: Holographic Cyber Matrix (Station 4)
+    function createCyberGroundTex() {
+      const c = document.createElement('canvas'); c.width = 1024; c.height = 1024;
+      const g = c.getContext('2d');
+      g.fillStyle = '#090d1a'; g.fillRect(0, 0, 1024, 1024);
+      g.strokeStyle = 'rgba(0, 180, 216, 0.25)'; g.lineWidth = 2;
+      for (let i = 0; i < 1024; i += 48) {
+        g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1024); g.stroke();
+        g.beginPath(); g.moveTo(0, i); g.lineTo(1024, i); g.stroke();
+      }
+      g.strokeStyle = '#00f5d4'; g.lineWidth = 5;
+      [160, 290, 420].forEach(rad => { g.beginPath(); g.arc(512, 512, rad, 0, Math.PI * 2); g.stroke(); });
+      const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8; return tex;
+    }
+
     // Build 5 Stations + Overhead-Readable Scattered Plaques & Main Notice Board
     const stationClusters = new Map();
     ZONES.forEach((z) => {
-      const pad = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 2, z.radius - 1, 0.35, 48), new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.6 }));
+      let padMat;
+      if (z.id === 'east') padMat = new THREE.MeshStandardMaterial({ map: createPcbGroundTex(), roughness: 0.45, metalness: 0.2 });
+      else if (z.id === 'west') padMat = new THREE.MeshStandardMaterial({ map: createCyberGroundTex(), roughness: 0.3, metalness: 0.4 });
+      else padMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.6 });
+
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(z.radius - 2, z.radius - 1, 0.35, 48), padMat);
       pad.position.set(z.x, 0.18, z.z); pad.receiveShadow = true; scene.add(pad);
-      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.9, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
+      const r = new THREE.Mesh(new THREE.RingGeometry(z.radius - 0.9, z.radius, 52), new THREE.MeshBasicMaterial({ color: z.color, side: THREE.DoubleSide, transparent: true, opacity: 0.78 }));
       r.rotation.x = -Math.PI / 2; r.position.set(z.x, 0.22, z.z); scene.add(r);
       const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 1.5, 120, 16, 1, true), new THREE.MeshBasicMaterial({ color: z.color, transparent: true, opacity: 0.14, side: THREE.DoubleSide }));
       beam.position.set(z.x, 60, z.z); scene.add(beam);
@@ -455,6 +519,219 @@
       scene.add(st.cluster);
       stationClusters.set(z.id, st);
     });
+
+    // STATION 1 PROP: Giant Knockable 3D Block Letters spelling "MIGUEL" near Spawn!
+    const miguelLetters = [];
+    function buildBlockLetterMesh(ch, hexColor) {
+      const grp = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({ color: hexColor, roughness: 0.3, metalness: 0.2 });
+      const addSeg = (w, h, d, x, y) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+        m.position.set(x, y, 0); m.castShadow = true; m.receiveShadow = true; grp.add(m);
+      };
+      const D = 1.2;
+      if (ch === 'M') {
+        addSeg(0.75, 3.8, D, -1.25, 0); addSeg(0.75, 3.8, D, 1.25, 0);
+        addSeg(0.7, 1.9, D, -0.55, 0.75); addSeg(0.7, 1.9, D, 0.55, 0.75);
+        addSeg(0.75, 1.1, D, 0, 0.15);
+      } else if (ch === 'I') {
+        addSeg(0.85, 3.8, D, 0, 0); addSeg(2.3, 0.7, D, 0, 1.55); addSeg(2.3, 0.7, D, 0, -1.55);
+      } else if (ch === 'G') {
+        addSeg(0.75, 3.8, D, -1.05, 0); addSeg(2.7, 0.75, D, 0, 1.52); addSeg(2.7, 0.75, D, 0, -1.52);
+        addSeg(0.75, 1.6, D, 1.05, -0.75); addSeg(1.3, 0.7, D, 0.65, -0.1);
+      } else if (ch === 'U') {
+        addSeg(0.75, 3.8, D, -1.0, 0); addSeg(0.75, 3.8, D, 1.0, 0); addSeg(2.75, 0.75, D, 0, -1.52);
+      } else if (ch === 'E') {
+        addSeg(0.75, 3.8, D, -1.0, 0); addSeg(2.6, 0.72, D, 0.05, 1.54);
+        addSeg(2.1, 0.68, D, -0.15, 0); addSeg(2.6, 0.72, D, 0.05, -1.54);
+      } else if (ch === 'L') {
+        addSeg(0.75, 3.8, D, -0.95, 0); addSeg(2.5, 0.75, D, 0.0, -1.52);
+      }
+      return grp;
+    }
+    const letterSpecs = [
+      { ch: 'M', x: -12.5, z: 10.5, c: 0xe63946 },
+      { ch: 'I', x: -7.5,  z: 10.5, c: 0x0077ff },
+      { ch: 'G', x: -2.5,  z: 10.5, c: 0xffb703 },
+      { ch: 'U', x: 2.5,   z: 10.5, c: 0x00b4d8 },
+      { ch: 'E', x: 7.5,   z: 10.5, c: 0xfb5607 },
+      { ch: 'L', x: 12.5,  z: 10.5, c: 0x1d3557 }
+    ];
+    letterSpecs.forEach(ls => {
+      const mesh = buildBlockLetterMesh(ls.ch, ls.c);
+      mesh.position.set(ls.x, 2.25, ls.z);
+      scene.add(mesh);
+      miguelLetters.push({ mesh, homeX: ls.x, homeZ: ls.z, x: ls.x, y: 2.25, z: ls.z, vx: 0, vy: 0, vz: 0, rx: 0, rz: 0, vrx: 0, vrz: 0 });
+    });
+
+    // STATION 2 PROP: 3 Angled 3D Project Billboards with Parking Trigger Zones (-38, -195)
+    const flagshipBillboards = [];
+    const flagshipSpecs = [
+      {
+        dx: -16, dz: 3, rotY: 0.35, color: '#E63946',
+        tag: 'SYSTEM 01 // EMBEDDED AI',
+        title: 'FSL Sign Recognition',
+        subtitle: 'ESP32 6-DOF IMU + Camera · PyTorch CNN-LSTM · Android SDK',
+        desc: 'Real-time Filipino Sign Language translator fusing wearable IMU telemetry with RGB camera feeds via a hybrid CNN-LSTM pipeline on Android.'
+      },
+      {
+        dx: 0, dz: -9, rotY: 0, color: '#0077FF',
+        tag: 'SYSTEM 02 // HARDWARE & EDA',
+        title: 'PIC16F877A 4-Layer PCB',
+        subtitle: 'KiCad 4-Layer Layout · 5V LDO · 20MHz XTAL · ICSP Header',
+        desc: 'Custom 4-layer microcontroller breakout board featuring dedicated power/ground planes, 5V regulation, 20MHz crystal, and full DRC verification.'
+      },
+      {
+        dx: 16, dz: 3, rotY: -0.35, color: '#00B4D8',
+        tag: 'SYSTEM 03 // ARCHITECTURE',
+        title: 'Bit by Bit — SAP-1 Sim',
+        subtitle: '8-Bit W-Bus · Cycle-Accurate T-States · ALU & Control Word',
+        desc: 'Interactive microprocessor simulator visualizing SAP-1 fetch-decode-execute T-states, 8-bit W-bus transfers, and control word bitmasks.'
+      }
+    ];
+    flagshipSpecs.forEach(spec => {
+      const nx = -38 + spec.dx, nz = -195 + spec.dz;
+      const c = document.createElement('canvas'); c.width = 900; c.height = 500;
+      const g = c.getContext('2d');
+      g.fillStyle = '#ffffff'; g.fillRect(0, 0, 900, 500);
+      g.strokeStyle = '#111111'; g.lineWidth = 14; g.strokeRect(7, 7, 886, 486);
+      g.fillStyle = spec.color; g.fillRect(14, 14, 872, 110);
+      g.fillStyle = '#ffffff'; g.font = 'bold 24px monospace'; g.fillText(spec.tag, 36, 56);
+      g.font = 'bold 42px sans-serif'; g.fillText(spec.title, 36, 105);
+      g.fillStyle = '#0047FF'; g.font = 'bold 23px sans-serif'; g.fillText(spec.subtitle, 36, 178);
+      g.fillStyle = '#222222'; g.font = 'normal 26px sans-serif'; wrapText(g, spec.desc, 36, 238, 828, 38);
+      g.fillStyle = '#111111'; g.font = 'bold 22px monospace'; g.fillText('▼ PARK IN ZONE BELOW TO INSPECT ▼', 36, 456);
+
+      const bbGroup = new THREE.Group();
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(11.6, 6.6, 0.55), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 }));
+      frame.castShadow = true;
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 6.2), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: 0.3 }));
+      face.position.z = 0.29;
+      bbGroup.add(frame, face);
+      bbGroup.position.set(nx, 4.4, nz);
+      bbGroup.rotation.y = spec.rotY;
+      bbGroup.rotation.x = -0.68; // Angled for overhead camera
+      scene.add(bbGroup);
+
+      // Parking Trigger Zone slightly in front of billboard
+      const px = nx + Math.sin(spec.rotY) * 7.5;
+      const pz = nz + Math.cos(spec.rotY) * 7.5;
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x0077ff, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
+      const pRing = new THREE.Mesh(new THREE.RingGeometry(3.4, 4.2, 36), ringMat);
+      pRing.rotation.x = -Math.PI / 2; pRing.position.set(px, 0.37, pz); scene.add(pRing);
+      const bayFill = new THREE.Mesh(new THREE.CircleGeometry(3.4, 32), new THREE.MeshBasicMaterial({ color: 0x00b4d8, transparent: true, opacity: 0.16 }));
+      bayFill.rotation.x = -Math.PI / 2; bayFill.position.set(px, 0.36, pz); scene.add(bayFill);
+      flagshipBillboards.push({ spec, px, pz, ringMat, bbGroup });
+    });
+
+    // STATION 3 PROP: 3D Microchip IC Blocks & Proximity-Lit Glowing LEDs (East Sky-Lab: 205, -28)
+    const icChips = [
+      { dx: -10, dz: 4, w: 4.8, d: 3.4, label: 'PIC16F877A' },
+      { dx: 10,  dz: 4, w: 4.4, d: 4.4, label: 'ESP32-S3' },
+      { dx: -9,  dz: -6, w: 3.6, d: 3.6, label: 'MPU-6050' },
+      { dx: 9,   dz: -6, w: 4.2, d: 3.2, label: '74LS181' }
+    ];
+    const icBodyMat = new THREE.MeshStandardMaterial({ color: 0x16181d, roughness: 0.4, metalness: 0.25 });
+    const pinMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.25, metalness: 0.85 });
+    icChips.forEach(ic => {
+      const grp = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(ic.w, 0.9, ic.d), icBodyMat);
+      body.position.y = 0.55; body.castShadow = true; grp.add(body);
+      const pin1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 12), pinMat);
+      pin1.position.set(-ic.w * 0.34, 1.02, -ic.d * 0.32); grp.add(pin1);
+      // Gull-wing pins on both sides
+      const pinCount = 6;
+      for (let p = 0; p < pinCount; p++) {
+        const pz = -ic.d * 0.38 + (p / (pinCount - 1)) * (ic.d * 0.76);
+        [-ic.w / 2 - 0.35, ic.w / 2 + 0.35].forEach(px => {
+          const leg = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.26), pinMat);
+          leg.position.set(px, 0.32, pz); grp.add(leg);
+        });
+      }
+      grp.position.set(205 + ic.dx, 0.18, -28 + ic.dz);
+      scene.add(grp);
+    });
+
+    const pcbLeds = [];
+    const ledColors = [0x00ff88, 0x00e5ff, 0xffb703, 0xff2a55];
+    for (let i = 0; i < 14; i++) {
+      const ang = (i / 14) * Math.PI * 2;
+      const rad = 14 + (i % 2) * 8;
+      const lx = 205 + Math.cos(ang) * rad;
+      const lz = -28 + Math.sin(ang) * rad;
+      const col = ledColors[i % ledColors.length];
+      const ledMat = new THREE.MeshStandardMaterial({ color: 0x22332a, emissive: col, emissiveIntensity: 0.08, roughness: 0.2 });
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 12), ledMat);
+      dome.position.set(lx, 0.75, lz); scene.add(dome);
+      const haloMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.0 });
+      const halo = new THREE.Mesh(new THREE.CircleGeometry(2.1, 20), haloMat);
+      halo.rotation.x = -Math.PI / 2; halo.position.set(lx, 0.37, lz); scene.add(halo);
+      pcbLeds.push({ x: lx, z: lz, ledMat, haloMat, lit: false, col });
+    }
+
+    // STATION 4 PROP: Never-Before-Seen Holographic Software & Web Arena (-200, 32)
+    const holoCore = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(2.6, 1),
+      new THREE.MeshBasicMaterial({ color: 0x00f5d4, wireframe: true, transparent: true, opacity: 0.85 })
+    );
+    holoCore.position.set(-200, 4.5, 32); scene.add(holoCore);
+    const holoInner = new THREE.Mesh(
+      new THREE.OctahedronGeometry(1.4, 0),
+      new THREE.MeshStandardMaterial({ color: 0x0077ff, emissive: 0x00b4d8, emissiveIntensity: 0.9, roughness: 0.1 })
+    );
+    holoInner.position.set(-200, 4.5, 32); scene.add(holoInner);
+
+    const holoMonoliths = [];
+    const holoDataPulses = [];
+    const swProjects = [
+      { dx: -16, dz: 8, title: 'WEB PDF CATALOG', sub: 'JS · SQL RDBMS · REST APIs', body: 'In-browser PDF Reader with MangaDex & Google Books API metadata sync.' },
+      { dx: 16,  dz: 8, title: 'SAP-1 VISUALIZER', sub: 'HTML5 · 8-Bit W-Bus · ALU', body: 'Real-time fetch-decode-execute cycle & control word bitmask simulator.' },
+      { dx: 0,   dz: 18, title: 'ACCESS REPOSITORY', sub: 'DLSU CpE Academic Archive', body: 'Centralized course-code archive, exam reviewers & student analytics.' }
+    ];
+    swProjects.forEach((sw, idx) => {
+      const mx = -200 + sw.dx, mz = 32 + sw.dz;
+      const c = document.createElement('canvas'); c.width = 640; c.height = 380;
+      const g = c.getContext('2d');
+      g.fillStyle = 'rgba(6, 20, 42, 0.92)'; g.fillRect(0, 0, 640, 380);
+      g.strokeStyle = '#00f5d4'; g.lineWidth = 10; g.strokeRect(5, 5, 630, 370);
+      g.fillStyle = '#00f5d4'; g.font = 'bold 34px monospace'; g.fillText(sw.title, 32, 70);
+      g.fillStyle = '#60a5fa'; g.font = 'bold 22px monospace'; g.fillText(sw.sub, 32, 118);
+      g.fillStyle = '#e2e8f0'; g.font = 'normal 26px sans-serif'; wrapText(g, sw.body, 32, 185, 576, 38);
+
+      const mGrp = new THREE.Group();
+      const holoScreen = new THREE.Mesh(
+        new THREE.PlaneGeometry(9.6, 5.7),
+        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity: 0.92, side: THREE.DoubleSide })
+      );
+      holoScreen.rotation.x = -0.72;
+      const cubeOrbit = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, 1.1, 1.1),
+        new THREE.MeshBasicMaterial({ color: 0x00f5d4, wireframe: true })
+      );
+      cubeOrbit.position.set(0, 3.8, 0);
+      mGrp.add(holoScreen, cubeOrbit);
+      mGrp.position.set(mx, 4.2, mz);
+      scene.add(mGrp);
+      holoMonoliths.push({ grp: mGrp, cube: cubeOrbit, baseY: 4.2, phase: idx * 2.1, mx, mz });
+
+      // Glowing fiber-optic floor conduit + animated data pulse
+      const curve = new THREE.LineCurve3(new THREE.Vector3(-200, 0.4, 32), new THREE.Vector3(mx, 0.4, mz));
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 12, 0.14, 6, false), new THREE.MeshBasicMaterial({ color: 0x0077ff, transparent: true, opacity: 0.5 }));
+      scene.add(tube);
+      const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.45, 10, 10), new THREE.MeshBasicMaterial({ color: 0x00f5d4 }));
+      scene.add(pulse);
+      holoDataPulses.push({ mesh: pulse, startX: -200, startZ: 32, endX: mx, endZ: mz, phase: idx * 0.33 });
+    });
+
+    // STATION 5 PROP: 3D Sky-Guestbook Terminal Kiosk (South Lounge: 42, 198)
+    const kiosk = new THREE.Group();
+    const kBase = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 3.2, 16), new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.35 }));
+    kBase.position.y = 1.6; kBase.castShadow = true;
+    const kBeacon = new THREE.Mesh(new THREE.OctahedronGeometry(1.25, 0), new THREE.MeshStandardMaterial({ color: 0xfb5607, emissive: 0xffb703, emissiveIntensity: 0.6 }));
+    kBeacon.position.y = 4.6;
+    kiosk.add(kBase, kBeacon);
+    kiosk.position.set(42, 0.2, 198 + 8);
+    scene.add(kiosk);
 
     // Super-Detailed Swiss GT Supercar
     const carGroup = new THREE.Group();
@@ -799,6 +1076,66 @@
       btn.addEventListener('click', () => { navigator.clipboard?.writeText(btn.dataset.copy); showToast('Copied ' + btn.dataset.copy); });
     });
 
+    document.getElementById('downloadResumeBtn').addEventListener('click', () => {
+      const lines = [
+        'MIGUEL ANDREI B. ABAD',
+        'BS Computer Engineering | De La Salle University - Manila (2023 - Present)',
+        'Email: abadandrei22@gmail.com | Phone: +63 977 652 9418 | Cavite, Philippines',
+        'LinkedIn: https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/',
+        '--------------------------------------------------------------------------------',
+        'EDUCATION & STANDING',
+        'De La Salle University - Manila | BS in Computer Engineering (Consistent Dean\'s Lister)',
+        'Coursework: Embedded Systems, Microprocessor Architecture, Digital Logic, Control Systems, ML',
+        '',
+        'FLAGSHIP ENGINEERING SYSTEMS',
+        '1. Real-Time FSL Sign Recognition via Wearable-Vision Fusion (Ongoing Thesis)',
+        '   - Native Android app fusing ESP32 6-DOF IMU telemetry & RGB camera via PyTorch CNN-LSTM.',
+        '2. PIC16F877A Microcontroller Development Board (Hardware / KiCad)',
+        '   - Custom 4-layer PCB breakout with 5V LDO, 20MHz XTAL, ICSP header (DRC verified).',
+        '3. Web-Based PDF Reader & Digital Catalog (Full-Stack Web)',
+        '   - In-browser PDF reader with MangaDex & Google Books REST APIs and SQL RDBMS.',
+        '4. Bit by Bit - Interactive SAP-1 Computer Simulator (Architecture)',
+        '   - Cycle-accurate 8-bit W-bus, ALU, and control word bitmask visualizer.',
+        '',
+        'TECHNICAL MATRIX',
+        'Languages: C / C++, Python, Java, Kotlin, JavaScript, SQL, Verilog, MATLAB, HTML5/CSS3',
+        'ML & Frameworks: PyTorch, OpenCV, MediaPipe, Keras, Android SDK',
+        'Hardware & EDA: KiCad (4-Layer PCB), AutoCAD, PIC16F877A, ESP32, Arduino, 6-DOF IMU',
+        '',
+        'LEADERSHIP - ACCESS DLSU',
+        'Associate Vice President for Academics (Sept 2026 - Present) | Junior Officer (Nov 2025 - Sept 2026)',
+        'Spearheaded digital learning repositories, peer tutorials, and college-wide exam reviewers.'
+      ];
+      const esc = s => s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+      let stream = 'BT\n/F1 10 Tf\n48 750 Td\n14 TL\n';
+      lines.forEach((l, i) => {
+        if (i === 0) stream += '/F1 14 Tf (' + esc(l) + ') Tj T* /F1 9.5 Tf ';
+        else stream += '(' + esc(l) + ') Tj T* ';
+      });
+      stream += 'ET';
+      const objs = [
+        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
+        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
+        '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj',
+        `4 0 obj << /Length ${stream.length} >> stream\n${stream}\nendstream endobj`,
+        '5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj'
+      ];
+      let pdf = '%PDF-1.4\n';
+      const offs = [0];
+      objs.forEach(o => { offs.push(pdf.length); pdf += o + '\n'; });
+      const xrefPos = pdf.length;
+      pdf += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+      for (let i = 1; i <= objs.length; i++) pdf += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+      pdf += `trailer << /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+      const blob = new Blob([pdf], { type: 'application/pdf' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Miguel_Andrei_Abad_Resume.pdf';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('Downloaded Miguel_Andrei_Abad_Resume.pdf');
+    });
+
     document.getElementById('gbForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
@@ -1028,7 +1365,14 @@
 
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.code === 'KeyR') { car.x = 0; car.z = 24; car.speed = 0; car.heading = 0; camState.yaw = 0; showToast('Car reset'); }
+      if (e.code === 'KeyR') {
+        car.x = 0; car.z = 24; car.speed = 0; car.heading = 0; camState.yaw = 0;
+        miguelLetters.forEach(l => {
+          l.x = l.homeX; l.z = l.homeZ; l.y = 2.25; l.vx = 0; l.vy = 0; l.vz = 0; l.rx = 0; l.rz = 0; l.vrx = 0; l.vrz = 0;
+          l.mesh.position.set(l.x, l.y, l.z); l.mesh.rotation.set(0, 0, 0);
+        });
+        showToast('Car & MIGUEL letters reset');
+      }
       keys.add(e.code);
     });
     window.addEventListener('keyup', (e) => keys.delete(e.code));
@@ -1039,6 +1383,11 @@
     });
 
     const stationBadge = document.getElementById('stationBadge');
+    const introCard = document.getElementById('introCard');
+    const parkingCard = document.getElementById('parkingCard');
+    const parkingCardTag = document.getElementById('parkingCardTag');
+    const parkingCardTitle = document.getElementById('parkingCardTitle');
+    const parkingCardDesc = document.getElementById('parkingCardDesc');
     const clock = new THREE.Clock();
     const camTarget = new THREE.Vector3();
 
@@ -1105,6 +1454,83 @@
         camTarget.lerp(new THREE.Vector3(car.x, 1.5, car.z), Math.min(1, dt * 9));
         camera.lookAt(camTarget);
 
+        // STATION 1: Knockable MIGUEL 3D Block Letters Physics
+        miguelLetters.forEach(l => {
+          const dx = l.x - car.x, dz = l.z - car.z;
+          const dist = Math.hypot(dx, dz);
+          if (dist < 2.8 && dist > 0.01) {
+            const impact = Math.max(12, Math.abs(car.speed) * 1.15);
+            l.vx = (dx / dist) * impact;
+            l.vz = (dz / dist) * impact;
+            l.vy = Math.min(11, impact * 0.35);
+            l.vrx = (Math.random() - 0.5) * 8;
+            l.vrz = (Math.random() - 0.5) * 8;
+            sound.playChime();
+          }
+          if (Math.abs(l.vx) > 0.05 || Math.abs(l.vz) > 0.05 || l.y > 0.85) {
+            l.x += l.vx * dt; l.z += l.vz * dt; l.y += l.vy * dt;
+            l.vy -= 26 * dt;
+            if (l.y < 0.85) { l.y = 0.85; l.vy *= -0.32; }
+            l.vx *= Math.pow(0.18, dt); l.vz *= Math.pow(0.18, dt);
+            l.rx += l.vrx * dt; l.rz += l.vrz * dt;
+            l.vrx *= Math.pow(0.25, dt); l.vrz *= Math.pow(0.25, dt);
+            l.mesh.position.set(l.x, l.y, l.z);
+            l.mesh.rotation.set(l.rx, 0, l.rz);
+          }
+        });
+
+        // STATION 2: 3 Angled Project Billboards + Parking Trigger Zones
+        let parkedSpec = null;
+        flagshipBillboards.forEach(fb => {
+          const isParked = Math.hypot(car.x - fb.px, car.z - fb.pz) < 4.8;
+          fb.ringMat.color.setHex(isParked ? 0x00ff88 : 0x0077ff);
+          fb.ringMat.opacity = isParked ? 0.95 : 0.6;
+          fb.bbGroup.position.y = THREE.MathUtils.lerp(fb.bbGroup.position.y, isParked ? 5.3 : 4.4, Math.min(1, dt * 6));
+          if (isParked) parkedSpec = fb.spec;
+        });
+        if (parkedSpec) {
+          parkingCardTag.textContent = parkedSpec.tag;
+          parkingCardTitle.textContent = parkedSpec.title;
+          parkingCardDesc.textContent = parkedSpec.desc;
+          parkingCard.classList.remove('hidden');
+        } else {
+          parkingCard.classList.add('hidden');
+        }
+
+        // STATION 3: Hardware & Silicon Proximity-Lit PCB LEDs
+        pcbLeds.forEach(led => {
+          if (!led.lit && Math.hypot(car.x - led.x, car.z - led.z) < 10.5) {
+            led.lit = true;
+            led.ledMat.emissiveIntensity = 2.4;
+            led.haloMat.opacity = 0.48;
+            sound.playChime();
+          }
+          if (led.lit) {
+            led.haloMat.opacity = 0.35 + Math.sin(t * 5 + led.x) * 0.15;
+          }
+        });
+
+        // STATION 4: Software & Web Holographic Arena
+        holoCore.rotation.y = t * 0.9; holoCore.rotation.x = t * 0.45;
+        holoInner.rotation.y = -t * 1.4;
+        holoMonoliths.forEach(m => {
+          m.grp.position.y = m.baseY + Math.sin(t * 1.8 + m.phase) * 0.45;
+          m.cube.rotation.y = t * 1.6 + m.phase;
+          m.cube.rotation.x = t * 1.1;
+        });
+        holoDataPulses.forEach(p => {
+          const frac = (t * 0.55 + p.phase) % 1;
+          p.mesh.position.set(
+            THREE.MathUtils.lerp(p.startX, p.endX, frac),
+            0.55,
+            THREE.MathUtils.lerp(p.startZ, p.endZ, frac)
+          );
+        });
+
+        // STATION 5: Sky-Guestbook Terminal Beacon
+        kBeacon.rotation.y = t * 1.3;
+        kBeacon.position.y = 4.6 + Math.sin(t * 2.2) * 0.28;
+
         collectibles.forEach(c => {
           c.mesh.rotation.y = t * 1.5 + c.phase;
           if (!c.collected && Math.hypot(car.x - c.mesh.position.x, car.z - c.mesh.position.z) < 4.5) {
@@ -1120,6 +1546,7 @@
           if (nearest) { sound.playChime(); stationBadge.textContent = nearest.name; stationBadge.classList.remove('hidden'); }
           else stationBadge.classList.add('hidden');
         }
+        introCard.classList.toggle('hidden', activeZone?.id !== 'central');
 
         ZONES.forEach((z) => {
           const st = stationClusters.get(z.id);
