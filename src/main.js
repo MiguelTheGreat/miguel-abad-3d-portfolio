@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { STATION_DECK_H, loadGuestbookNotes, getZones } from './config/portfolioData.js?v=2';
-import { SoundEngine } from './audio/SoundEngine.js?v=2';
-import { buildRoadNetwork } from './world/roads.js?v=2';
-import { createTerrainSystem } from './world/terrain.js?v=2';
-import { buildEnvironment } from './world/environment.js?v=2';
-import { buildStations, drawMainBoardTex } from './world/stations.js?v=2';
-import { createSupercar } from './world/supercar.js?v=2';
-import { createCarPhysics } from './physics/carPhysics.js?v=2';
-import { setupUIAndModals } from './ui/hudAndModals.js?v=2';
+import { STATION_DECK_H, loadGuestbookNotes, getZones } from './config/portfolioData.js?v=3';
+import { SoundEngine } from './audio/SoundEngine.js?v=3';
+import { buildRoadNetwork } from './world/roads.js?v=3';
+import { createTerrainSystem } from './world/terrain.js?v=3';
+import { buildEnvironment } from './world/environment.js?v=3';
+import { buildStations, drawMainBoardTex } from './world/stations.js?v=3';
+import { createSupercar } from './world/supercar.js?v=3';
+import { createCarPhysics } from './physics/carPhysics.js?v=3';
+import { setupUIAndModals } from './ui/hudAndModals.js?v=3';
 
 const guestbookNotes = loadGuestbookNotes();
 let ZONES = getZones(guestbookNotes);
@@ -55,20 +55,63 @@ const stations = buildStations(scene, ZONES);
 const supercar = createSupercar(scene, STATION_DECK_H);
 
 const car = { x: 0, y: STATION_DECK_H, z: 24, heading: 0, speed: 0, vx: 0, vz: 0, vy: 0 };
-const camState = { yaw: 0, pitch: 0.98, distance: 46, dragging: false, lastX: 0, lastY: 0 };
+
+// Shortest-angle radian interpolation helper
+function lerpAngle(a, b, t) {
+  let diff = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+  if (diff < -Math.PI) diff += Math.PI * 2;
+  return a + diff * t;
+}
+
+const DEFAULT_CAM_PITCH = 0.88; // Signature Chinatown Wars overhead angled view
+const DEFAULT_CAM_DIST = 40;
+
+const camState = {
+  followYaw: 0,
+  yawOffset: 0,
+  pitch: DEFAULT_CAM_PITCH,
+  distance: DEFAULT_CAM_DIST,
+  isCustom: false,
+  dragging: false,
+  lastX: 0,
+  lastY: 0
+};
+
+const resetCameraBtn = document.getElementById('resetCameraBtn');
+function updateResetCamBtnStyle() {
+  if (!resetCameraBtn) return;
+  if (camState.isCustom) {
+    resetCameraBtn.classList.remove('bg-white/90', 'text-[#111111]');
+    resetCameraBtn.classList.add('bg-[#0047FF]', 'text-white');
+  } else {
+    resetCameraBtn.classList.add('bg-white/90', 'text-[#111111]');
+    resetCameraBtn.classList.remove('bg-[#0047FF]', 'text-white');
+  }
+}
 
 renderer.domElement.addEventListener('pointerdown', (e) => {
-  camState.dragging = true; camState.lastX = e.clientX; camState.lastY = e.clientY;
+  camState.dragging = true;
+  camState.lastX = e.clientX;
+  camState.lastY = e.clientY;
 });
 window.addEventListener('pointermove', (e) => {
   if (!camState.dragging) return;
-  camState.yaw -= (e.clientX - camState.lastX) * 0.005;
-  camState.pitch = THREE.MathUtils.clamp(camState.pitch + (e.clientY - camState.lastY) * 0.005, 0.45, 1.35);
-  camState.lastX = e.clientX; camState.lastY = e.clientY;
+  const dx = e.clientX - camState.lastX;
+  const dy = e.clientY - camState.lastY;
+  if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+    camState.isCustom = true;
+    updateResetCamBtnStyle();
+  }
+  camState.yawOffset -= dx * 0.0055;
+  camState.pitch = THREE.MathUtils.clamp(camState.pitch + dy * 0.005, 0.26, 1.34);
+  camState.lastX = e.clientX;
+  camState.lastY = e.clientY;
 });
 window.addEventListener('pointerup', () => { camState.dragging = false; });
 renderer.domElement.addEventListener('wheel', (e) => {
-  camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.025, 24, 82);
+  camState.distance = THREE.MathUtils.clamp(camState.distance + e.deltaY * 0.025, 20, 78);
+  camState.isCustom = true;
+  updateResetCamBtnStyle();
 }, { passive: true });
 
 // Touch Controls
@@ -124,19 +167,35 @@ const ui = setupUIAndModals({
   onClassicChange: (val) => { isClassic = val; }
 });
 
+function resetCameraToNormal() {
+  camState.pitch = DEFAULT_CAM_PITCH;
+  camState.distance = DEFAULT_CAM_DIST;
+  camState.yawOffset = 0;
+  camState.followYaw = car.heading;
+  camState.isCustom = false;
+  updateResetCamBtnStyle();
+  ui.showToast('🎥 Camera reset to Chinatown Wars view');
+}
+
+resetCameraBtn?.addEventListener('click', resetCameraToNormal);
+
 const physics = createCarPhysics(terrain, env, stations, sound, ui.showToast);
 
 window.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'KeyC') {
+    resetCameraToNormal();
+  }
   if (e.code === 'KeyR') {
     car.x = 0; car.z = 24; car.y = STATION_DECK_H;
-    car.vx = 0; car.vz = 0; car.vy = 0; car.speed = 0; car.heading = 0; camState.yaw = 0;
+    car.vx = 0; car.vz = 0; car.vy = 0; car.speed = 0; car.heading = 0;
+    resetCameraToNormal();
     stations.miguelLetters.forEach(l => {
       l.x = l.homeX; l.z = l.homeZ; l.y = STATION_DECK_H + 1.9;
       l.vx = 0; l.vy = 0; l.vz = 0; l.rx = 0; l.rz = 0; l.vrx = 0; l.vrz = 0;
       l.mesh.position.set(l.x, l.y, l.z); l.mesh.rotation.set(0, 0, 0);
     });
-    ui.showToast('Car & MIGUEL letters reset');
+    ui.showToast('Car, camera & MIGUEL letters reset');
   }
   keys.add(e.code);
 });
@@ -156,7 +215,8 @@ const parkingCardDesc = document.getElementById('parkingCardDesc');
 const parkingCardTags = document.getElementById('parkingCardTags');
 
 const clock = new THREE.Clock();
-const camTarget = new THREE.Vector3();
+const camFocus = new THREE.Vector3(0, STATION_DECK_H + 1.2, 24);
+const lookAheadOffset = new THREE.Vector3();
 
 function animate() {
   requestAnimationFrame(animate);
@@ -199,15 +259,35 @@ function animate() {
   document.getElementById('speedBarFill').style.height = `${Math.min(100, Math.max(4, (kmh / 245) * 100))}%`;
   document.getElementById('boostStatus').classList.toggle('hidden', !nitroActive);
 
-  // Chinatown Wars Overhead Camera
+  // Upgraded Chinatown Wars & Custom Back-of-Car Follow Camera
+  // When driving and not actively dragging, smoothly swing yawOffset back behind the car's rear
+  if (!camState.dragging && Math.abs(car.speed) > 1.0) {
+    const recenterRate = camState.isCustom ? 4.8 : 6.0;
+    camState.yawOffset = lerpAngle(camState.yawOffset, 0, Math.min(1, dt * recenterRate));
+  }
+  const desiredYaw = car.heading + camState.yawOffset;
+  const yawTrackSpeed = camState.dragging ? 25.0 : (camState.isCustom ? 9.5 : 6.5);
+  camState.followYaw = lerpAngle(camState.followYaw, desiredYaw, Math.min(1, dt * yawTrackSpeed));
+
+  // Forward velocity look-ahead so the car stays framed with clear view of the road ahead
+  lookAheadOffset.lerp(
+    new THREE.Vector3(car.vx * 0.11, 0, car.vz * 0.11),
+    Math.min(1, dt * 8)
+  );
+  camFocus.set(
+    car.x + lookAheadOffset.x,
+    THREE.MathUtils.lerp(camFocus.y, car.y + 1.25, Math.min(1, dt * 18)),
+    car.z + lookAheadOffset.z
+  );
+
   const hDist = Math.cos(camState.pitch) * camState.distance;
   const vDist = Math.sin(camState.pitch) * camState.distance;
-  camera.position.lerp(
-    new THREE.Vector3(car.x + Math.sin(camState.yaw) * hDist, car.y + vDist, car.z + Math.cos(camState.yaw) * hDist),
-    Math.min(1, dt * 7)
+  camera.position.set(
+    camFocus.x + Math.sin(camState.followYaw) * hDist,
+    camFocus.y + vDist,
+    camFocus.z + Math.cos(camState.followYaw) * hDist
   );
-  camTarget.lerp(new THREE.Vector3(car.x, car.y + 1.5, car.z), Math.min(1, dt * 9));
-  camera.lookAt(camTarget);
+  camera.lookAt(camFocus);
 
   // Animate World Props
   env.lhBeamPivot.rotation.y = t * 1.15;

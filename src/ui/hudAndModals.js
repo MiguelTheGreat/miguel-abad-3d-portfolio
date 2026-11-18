@@ -1,5 +1,5 @@
-import { PORTFOLIO_PROJECTS, STATION_DECK_H } from '../config/portfolioData.js';
-import { getIslandRadius } from '../world/terrain.js';
+import { PORTFOLIO_PROJECTS, STATION_DECK_H } from '../config/portfolioData.js?v=3';
+import { getIslandRadius } from '../world/terrain.js?v=3';
 
 export function setupUIAndModals({
   scene, hemiLight, dl, oceanMat, grassMat, sctx, skyTex, streetLampBulbs,

@@ -44,8 +44,8 @@ export function createSupercar(scene, startY) {
     new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false })
   );
   carShadow.rotation.x = -Math.PI / 2;
-  carShadow.position.y = 0.03;
-  carGroup.add(carShadow);
+  carShadow.position.y = 0.025;
+  chassisGroup.add(carShadow);
 
   const underglowMat = new THREE.MeshBasicMaterial({ color: 0x00b4d8, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide });
   const underglow = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 4.4), underglowMat);

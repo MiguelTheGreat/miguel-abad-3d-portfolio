@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { getIslandRadius } from '../world/terrain.js';
+import { getIslandRadius } from '../world/terrain.js?v=3';
+import { getMountainSurfaceRadius } from '../world/environment.js?v=3';
 
 const WHEEL_OFFSETS = [
   [-1.12, -1.42], // FL
@@ -79,11 +80,11 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
     car.x += car.vx * dt;
     car.z += car.vz * dt;
 
-    // Organic Island Coastline Boundary
+    // Organic Island Shoreline Boundary (stops car on dry sandy beach before ocean water)
     const carAng = Math.atan2(car.z, car.x);
     const rDist = Math.hypot(car.x, car.z);
-    const maxShoreR = getIslandRadius(carAng) - 8;
-    if (rDist > maxShoreR) {
+    const maxShoreR = getIslandRadius(carAng) * 0.875;
+    if (rDist > maxShoreR && rDist > 0.001) {
       const nx = -car.x / rDist;
       const nz = -car.z / rDist;
       car.x = (car.x / rDist) * maxShoreR;
@@ -92,26 +93,31 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
       if (vn < 0) {
         car.vx -= 1.25 * vn * nx;
         car.vz -= 1.25 * vn * nz;
+        if (Math.abs(vn) > 8 && t - lastImpactAt > 0.6) {
+          lastImpactAt = t;
+          showToast('🌊 Shoreline Boundary!');
+        }
       }
     }
 
-    // Tangential Slide + Impulse Collisions: Trees & Mountains
-    const carRadius = 1.65;
+    // Tangential Slide + Impulse Collisions: Trees & Exact Ridge-Aware Mountains
+    const treeCarRadius = 1.75;
     for (let i = 0; i < treeColliders.length; i++) {
       const tc = treeColliders[i];
-      resolveCircleCollider(car, tc.x, tc.z, carRadius + tc.r, 0.35, (impact) => {
+      resolveCircleCollider(car, tc.x, tc.z, treeCarRadius + tc.r, 0.35, (impact) => {
         if (t - lastImpactAt > 0.38) {
           lastImpactAt = t;
           sound.playImpact(impact);
         }
       });
     }
+
+    const mtnCarRadius = 2.45; // Full front-nose clearance so bumper never phases into rock
     for (let i = 0; i < mountainColliders.length; i++) {
       const mc = mountainColliders[i];
-      const frac = THREE.MathUtils.clamp((car.y - mc.baseBottomY) / mc.h, 0, 1);
-      const effectiveR = mc.rad * (1 - frac) * 0.94;
-      if (effectiveR > 1.0) {
-        resolveCircleCollider(car, mc.x, mc.z, carRadius + effectiveR, 0.25, (impact) => {
+      const surfaceR = getMountainSurfaceRadius(mc, car.x, car.z, car.y);
+      if (surfaceR > 1.0) {
+        resolveCircleCollider(car, mc.x, mc.z, mtnCarRadius + surfaceR, 0.28, (impact) => {
           if (t - lastImpactAt > 0.45) {
             lastImpactAt = t;
             sound.playImpact(impact);
@@ -121,7 +127,7 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
       }
     }
 
-    // 4-Wheel Ground Contact Sampling -> Zero road floating, zero slope clipping
+    // 4-Wheel Ground Contact Sampling -> Locked ground contact (zero road/hill/water floating)
     let hFL = 0, hFR = 0, hRL = 0, hRR = 0;
     for (let w = 0; w < 4; w++) {
       const [lx, lz] = WHEEL_OFFSETS[w];
@@ -135,24 +141,19 @@ export function createCarPhysics(terrain, env, stations, sound, showToast) {
     }
     const centerY = getSurfaceHeight(car.x, car.z);
     const avgWheelY = (hFL + hFR + hRL + hRR) * 0.25;
-    const supportY = Math.max(avgWheelY, centerY);
+    // Plant tires directly on the 4-wheel average plane (with center-ridge anti-clip protection)
+    const targetY = Math.max(avgWheelY, centerY - 0.14) - 0.02;
+    car.y = THREE.MathUtils.lerp(car.y, targetY, Math.min(1, dt * 38));
+    car.vy = 0;
 
-    // Vertical gravity & ground clamping
-    car.vy -= 32 * dt;
-    car.y += car.vy * dt;
-    if (car.y <= supportY) {
-      car.y = supportY;
-      if (car.vy < 0) car.vy = 0;
-    }
-
-    // Exact 4-wheel pitch & roll alignment to terrain/ramps (clamped for stability)
+    // Exact 4-wheel pitch & roll alignment to terrain/ramps
     const avgFrontY = (hFL + hFR) * 0.5;
     const avgRearY = (hRL + hRR) * 0.5;
     const avgLeftY = (hFL + hRL) * 0.5;
     const avgRightY = (hFR + hRR) * 0.5;
 
-    const slopePitch = THREE.MathUtils.clamp(Math.atan2(avgFrontY - avgRearY, 2.84), -0.32, 0.32);
-    const slopeRoll = THREE.MathUtils.clamp(Math.atan2(avgRightY - avgLeftY, 2.27), -0.32, 0.32);
+    const slopePitch = THREE.MathUtils.clamp(Math.atan2(avgFrontY - avgRearY, 2.84), -0.34, 0.34);
+    const slopeRoll = THREE.MathUtils.clamp(Math.atan2(avgRightY - avgLeftY, 2.27), -0.34, 0.34);
     const dynRoll = -steerInput * 0.055 * Math.min(1, Math.abs(car.speed) / 16);
     const dynPitch = rev ? 0.03 : fwd ? (boost ? -0.032 : -0.016) : 0;
 
