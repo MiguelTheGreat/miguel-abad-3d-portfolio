@@ -1,32 +1,118 @@
 import * as THREE from 'three';
-import { getIslandRadius } from './terrain.js';
+import { getIslandRadius } from './terrain.js?v=3';
 
 function createJaggedMountainGeo(rad, h, seed) {
-  const geo = new THREE.ConeGeometry(rad, h, 24, 7);
+  const geo = new THREE.ConeGeometry(rad, h, 32, 8);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const z = pos.getZ(i);
     const r = Math.hypot(x, z);
-    if (r > 0.5) {
+    if (r > 0.2) {
       const ang = Math.atan2(z, x);
-      const heightFrac = (y + h * 0.5) / h;
+      const heightFrac = THREE.MathUtils.clamp((y + h * 0.5) / h, 0, 1);
       const ridge = 1.0 + Math.sin(ang * 5 + seed) * 0.14 + Math.cos(ang * 3 - seed * 0.7) * 0.11;
       const scale = 1.0 + (ridge - 1.0) * (1.0 - heightFrac * 0.4);
       pos.setX(i, x * scale);
       pos.setZ(i, z * scale);
-      pos.setY(i, y + Math.sin(ang * 4 + seed) * 1.6 * (1 - heightFrac));
     }
   }
   geo.computeVertexNormals();
   return geo;
 }
 
+export function getMountainSurfaceRadius(mc, worldX, worldZ, worldY) {
+  const heightFrac = THREE.MathUtils.clamp((worldY - mc.baseBottomY) / mc.h, 0, 1);
+  if (heightFrac >= 0.98) return 0;
+  const dx = worldX - mc.x;
+  const dz = worldZ - mc.z;
+  const cosR = Math.cos(mc.rotY);
+  const sinR = Math.sin(mc.rotY);
+  const lx = dx * cosR - dz * sinR;
+  const lz = dx * sinR + dz * cosR;
+  const localAng = Math.atan2(lz, lx);
+  const ridge = 1.0 + Math.sin(localAng * 5 + mc.seed) * 0.14 + Math.cos(localAng * 3 - mc.seed * 0.7) * 0.11;
+  const scale = 1.0 + (ridge - 1.0) * (1.0 - heightFrac * 0.4);
+  return mc.rad * (1.0 - heightFrac) * scale * 1.04;
+}
+
 export function buildEnvironment(scene, terrain, redCurbMat, whiteCurbMat) {
   const { getTerrainHeight, isPointClearOfRoadsAndZones } = terrain;
 
-  // High-poly Pine & Cypress Forest + Boulders (100% Road-Clear, Real Collision Physics)
+  // 1. High-Poly Jagged Alpine Mountains Rooted Firmly Into Terrain (Zero Floating, Exact Surface Colliders)
+  const mtnMat = new THREE.MeshStandardMaterial({ color: 0x4a5759, roughness: 0.9, flatShading: true });
+  const snowMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.5, flatShading: true });
+  const mountainColliders = [];
+
+  for (let m = 0; m < 32; m++) {
+    const ang = (m / 32) * Math.PI * 2 + 0.09;
+    const r = getIslandRadius(ang) * (0.65 + (m % 3) * 0.04);
+    const mx = Math.cos(ang) * r;
+    const mz = Math.sin(ang) * r;
+    if (!isPointClearOfRoadsAndZones(mx, mz, 26, 40)) continue;
+
+    const h = 58 + (m % 4) * 14;
+    const rad = 28 + (m % 3) * 8;
+    let minGround = getTerrainHeight(mx, mz);
+    for (let s = 0; s < 16; s++) {
+      const sa = (s / 16) * Math.PI * 2;
+      minGround = Math.min(
+        minGround,
+        getTerrainHeight(mx + Math.cos(sa) * rad * 0.65, mz + Math.sin(sa) * rad * 0.65),
+        getTerrainHeight(mx + Math.cos(sa) * rad * 1.05, mz + Math.sin(sa) * rad * 1.05),
+        getTerrainHeight(mx + Math.cos(sa) * rad * 1.35, mz + Math.sin(sa) * rad * 1.35)
+      );
+    }
+
+    const buryDepth = 6.0;
+    const seedMain = m * 1.7;
+    const seedSub = m * 2.3;
+    const mGrp = new THREE.Group();
+
+    // Main peak + deep subterranean foundation skirt
+    const base = new THREE.Mesh(createJaggedMountainGeo(rad, h, seedMain), mtnMat);
+    base.position.y = h * 0.5 - buryDepth;
+    base.castShadow = true; base.receiveShadow = true;
+    mGrp.add(base);
+
+    const skirt = new THREE.Mesh(new THREE.CylinderGeometry(rad * 0.95, rad * 1.15, 18, 24), mtnMat);
+    skirt.position.y = -buryDepth - 8.0;
+    mGrp.add(skirt);
+
+    const cap = new THREE.Mesh(createJaggedMountainGeo(rad * 0.37, h * 0.37, seedMain + 0.4), snowMat);
+    cap.position.y = h * 0.81 - buryDepth + 0.15;
+    mGrp.add(cap);
+
+    // Secondary peak + foundation skirt
+    const subLocalX = rad * 0.42;
+    const subLocalZ = rad * 0.24;
+    const subRad = rad * 0.64;
+    const subH = h * 0.62;
+    const sub = new THREE.Mesh(createJaggedMountainGeo(subRad, subH, seedSub), mtnMat);
+    sub.position.set(subLocalX, subH * 0.5 - buryDepth, subLocalZ);
+    sub.castShadow = true; sub.receiveShadow = true;
+    mGrp.add(sub);
+
+    const subSkirt = new THREE.Mesh(new THREE.CylinderGeometry(subRad * 0.95, subRad * 1.15, 18, 20), mtnMat);
+    subSkirt.position.set(subLocalX, -buryDepth - 8.0, subLocalZ);
+    mGrp.add(subSkirt);
+
+    const rotY = m * 0.7;
+    mGrp.position.set(mx, minGround, mz);
+    mGrp.rotation.y = rotY;
+    scene.add(mGrp);
+
+    const baseBottomY = minGround - buryDepth;
+    mountainColliders.push({ x: mx, z: mz, rad, h, baseBottomY, seed: seedMain, rotY });
+    const cosR = Math.cos(rotY);
+    const sinR = Math.sin(rotY);
+    const subWorldX = mx + subLocalX * cosR + subLocalZ * sinR;
+    const subWorldZ = mz - subLocalX * sinR + subLocalZ * cosR;
+    mountainColliders.push({ x: subWorldX, z: subWorldZ, rad: subRad, h: subH, baseBottomY, seed: seedSub, rotY });
+  }
+
+  // 2. High-poly Pine & Cypress Forest + Boulders (100% Road-Clear and Mountain-Clear)
   const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7f4f24, roughness: 0.9 });
   const pineMat1 = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.75 });
   const pineMat2 = new THREE.MeshStandardMaterial({ color: 0x40916c, roughness: 0.75 });
@@ -36,14 +122,25 @@ export function buildEnvironment(scene, terrain, redCurbMat, whiteCurbMat) {
   const treeColliders = [];
   for (let i = 0; i < 380; i++) {
     const angle = (i / 380) * Math.PI * 2 + (i % 9) * 0.19;
-    const maxR = getIslandRadius(angle) * 0.88;
+    const maxR = getIslandRadius(angle) * 0.84;
     const dist = 48 + ((i * 89) % Math.max(80, Math.floor(maxR - 54)));
     const tx = Math.cos(angle) * dist;
     const tz = Math.sin(angle) * dist;
     if (!isPointClearOfRoadsAndZones(tx, tz, 7.2, 13)) continue;
 
     const ty = getTerrainHeight(tx, tz);
-    if (ty < -0.2) continue;
+    if (ty < 0.02) continue;
+
+    let insideMtn = false;
+    for (let m = 0; m < mountainColliders.length; m++) {
+      const mc = mountainColliders[m];
+      const mr = getMountainSurfaceRadius(mc, tx, tz, ty);
+      if (Math.hypot(tx - mc.x, tz - mc.z) < mr + 3.5) {
+        insideMtn = true;
+        break;
+      }
+    }
+    if (insideMtn) continue;
 
     const sc = 0.92 + (i % 4) * 0.25;
     const t = new THREE.Group();
@@ -63,73 +160,14 @@ export function buildEnvironment(scene, terrain, redCurbMat, whiteCurbMat) {
       t.add(rk);
     }
     t.scale.setScalar(sc);
-    t.position.set(tx, ty - 0.3, tz);
+    t.position.set(tx, ty - 0.25, tz);
     scene.add(t);
     spawnedTrees.push({ x: tx, z: tz });
     treeColliders.push({ x: tx, z: tz, r: 1.05 * sc });
   }
 
-  // High-Poly Jagged Alpine Mountains Rooted Firmly Into Terrain (Zero Sloping/Floating Bases)
-  const mtnMat = new THREE.MeshStandardMaterial({ color: 0x4a5759, roughness: 0.9, flatShading: true });
-  const snowMat = new THREE.MeshStandardMaterial({ color: 0xf8f9fa, roughness: 0.5, flatShading: true });
-  const mountainColliders = [];
-
-  for (let m = 0; m < 32; m++) {
-    const ang = (m / 32) * Math.PI * 2 + 0.09;
-    const r = getIslandRadius(ang) * (0.70 + (m % 3) * 0.04);
-    const mx = Math.cos(ang) * r;
-    const mz = Math.sin(ang) * r;
-    if (!isPointClearOfRoadsAndZones(mx, mz, 24, 38)) continue;
-
-    const h = 58 + (m % 4) * 14;
-    const rad = 28 + (m % 3) * 8;
-    // Sample wide perimeter (inner + outer including secondary peak reach) so mountain never floats on slopes
-    let minGround = getTerrainHeight(mx, mz);
-    for (let s = 0; s < 12; s++) {
-      const sa = (s / 12) * Math.PI * 2;
-      minGround = Math.min(
-        minGround,
-        getTerrainHeight(mx + Math.cos(sa) * rad * 0.7, mz + Math.sin(sa) * rad * 0.7),
-        getTerrainHeight(mx + Math.cos(sa) * rad * 1.18, mz + Math.sin(sa) * rad * 1.18)
-      );
-    }
-
-    const buryDepth = 14.0;
-    const mGrp = new THREE.Group();
-    const base = new THREE.Mesh(createJaggedMountainGeo(rad, h, m * 1.7), mtnMat);
-    base.position.y = h * 0.5 - buryDepth;
-    base.castShadow = true; base.receiveShadow = true;
-    mGrp.add(base);
-
-    const cap = new THREE.Mesh(createJaggedMountainGeo(rad * 0.37, h * 0.37, m * 1.7 + 0.4), snowMat);
-    cap.position.y = h * 0.81 - buryDepth + 0.2;
-    mGrp.add(cap);
-
-    const subLocalX = rad * 0.42;
-    const subLocalZ = rad * 0.24;
-    const subRad = rad * 0.64;
-    const subH = h * 0.62;
-    const sub = new THREE.Mesh(createJaggedMountainGeo(subRad, subH, m * 2.3), mtnMat);
-    sub.position.set(subLocalX, subH * 0.5 - buryDepth, subLocalZ);
-    sub.castShadow = true;
-    mGrp.add(sub);
-
-    const rotY = m * 0.7;
-    mGrp.position.set(mx, minGround, mz);
-    mGrp.rotation.y = rotY;
-    scene.add(mGrp);
-
-    const baseBottomY = minGround - buryDepth;
-    mountainColliders.push({ x: mx, z: mz, rad, h, baseBottomY });
-    const cosR = Math.cos(rotY);
-    const sinR = Math.sin(rotY);
-    const subWorldX = mx + subLocalX * cosR + subLocalZ * sinR;
-    const subWorldZ = mz - subLocalX * sinR + subLocalZ * cosR;
-    mountainColliders.push({ x: subWorldX, z: subWorldZ, rad: subRad, h: subH, baseBottomY });
-  }
-
-  // Coastal Lighthouse with Rotating Spotlight Beam (Southeast Cape)
-  const lhX = 335, lhZ = 240, lhY = Math.max(0, getTerrainHeight(lhX, lhZ));
+  // 3. Coastal Lighthouse with Rotating Spotlight Beam (Southeast Cape)
+  const lhX = 315, lhZ = 215, lhY = Math.max(0.2, getTerrainHeight(lhX, lhZ));
   const lighthouseGrp = new THREE.Group();
   const lhTower = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 3.6, 22, 24), whiteCurbMat);
   lhTower.position.y = 11; lhTower.castShadow = true; lighthouseGrp.add(lhTower);
@@ -152,8 +190,9 @@ export function buildEnvironment(scene, terrain, redCurbMat, whiteCurbMat) {
   lighthouseGrp.add(lhBeamPivot);
   lighthouseGrp.position.set(lhX, lhY - 0.5, lhZ);
   scene.add(lighthouseGrp);
+  treeColliders.push({ x: lhX, z: lhZ, r: 3.8 });
 
-  // Animated Wind Turbines on the Hills
+  // 4. Animated Wind Turbines on the Hills
   const windRotors = [];
   [[-210, -245], [225, -230], [-305, 175], [195, 295]].forEach(([wx, wz]) => {
     if (!isPointClearOfRoadsAndZones(wx, wz, 10, 16)) return;
@@ -173,9 +212,10 @@ export function buildEnvironment(scene, terrain, redCurbMat, whiteCurbMat) {
     tGrp.position.set(wx, getTerrainHeight(wx, wz) - 0.4, wz);
     scene.add(tGrp);
     windRotors.push(hub);
+    treeColliders.push({ x: wx, z: wz, r: 1.2 });
   });
 
-  // Drifting Sky Clouds & Bobbing Ocean Sailboats
+  // 5. Drifting Sky Clouds & Bobbing Ocean Sailboats
   const clouds = [];
   const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.72 });
   for (let c = 0; c < 14; c++) {
