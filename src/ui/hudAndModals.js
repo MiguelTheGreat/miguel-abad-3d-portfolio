@@ -1,5 +1,5 @@
-import { PORTFOLIO_PROJECTS, STATION_DECK_H } from '../config/portfolioData.js?v=3';
-import { getIslandRadius } from '../world/terrain.js?v=3';
+import { PORTFOLIO_PROJECTS, STATION_DECK_H } from '../config/portfolioData.js?v=4';
+import { getIslandRadius } from '../world/terrain.js?v=4';
 
 export function setupUIAndModals({
   scene, hemiLight, dl, oceanMat, grassMat, sctx, skyTex, streetLampBulbs,
@@ -27,7 +27,11 @@ export function setupUIAndModals({
       hemiLight.color.setHex(0xffffff); hemiLight.groundColor.setHex(0x40916c); hemiLight.intensity = 0.95;
       dl.color.setHex(0xfff4d2); dl.intensity = 1.25;
       oceanMat.color.setHex(0x0096c7); grassMat.color.setHex(0xffffff);
-      streetLampBulbs.forEach(m => { m.emissiveIntensity = 0.7; });
+      streetLampBulbs.forEach(m => {
+        m.emissiveIntensity = 0.85;
+        if (m._coneMat) m._coneMat.opacity = 0.08;
+        if (m._poolMat) m._poolMat.opacity = 0.28;
+      });
       if (btn) btn.textContent = '☀ Day';
     } else if (skyMode === 1) {
       sgrad.addColorStop(0, '#240046'); sgrad.addColorStop(0.45, '#c9184a'); sgrad.addColorStop(0.8, '#ff758f'); sgrad.addColorStop(1, '#ffb703');
@@ -35,7 +39,11 @@ export function setupUIAndModals({
       hemiLight.color.setHex(0xffccd5); hemiLight.groundColor.setHex(0x3a5a40); hemiLight.intensity = 0.82;
       dl.color.setHex(0xff9e00); dl.intensity = 1.15;
       oceanMat.color.setHex(0x1d3557); grassMat.color.setHex(0xffd6ba);
-      streetLampBulbs.forEach(m => { m.emissiveIntensity = 1.8; });
+      streetLampBulbs.forEach(m => {
+        m.emissiveIntensity = 2.0;
+        if (m._coneMat) m._coneMat.opacity = 0.19;
+        if (m._poolMat) m._poolMat.opacity = 0.62;
+      });
       if (btn) btn.textContent = '🌅 Sunset';
     } else {
       sgrad.addColorStop(0, '#03045e'); sgrad.addColorStop(0.5, '#0a0928'); sgrad.addColorStop(1, '#10002b');
@@ -43,7 +51,11 @@ export function setupUIAndModals({
       hemiLight.color.setHex(0x48cae4); hemiLight.groundColor.setHex(0x1b4332); hemiLight.intensity = 0.52;
       dl.color.setHex(0x90e0ef); dl.intensity = 0.65;
       oceanMat.color.setHex(0x03045e); grassMat.color.setHex(0x557799);
-      streetLampBulbs.forEach(m => { m.emissiveIntensity = 2.8; });
+      streetLampBulbs.forEach(m => {
+        m.emissiveIntensity = 3.2;
+        if (m._coneMat) m._coneMat.opacity = 0.28;
+        if (m._poolMat) m._poolMat.opacity = 0.88;
+      });
       if (btn) btn.textContent = '🌙 Cyber Night';
     }
     sctx.fillStyle = sgrad;

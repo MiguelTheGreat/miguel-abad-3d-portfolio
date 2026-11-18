@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getIslandRadius } from './terrain.js?v=3';
+import { getIslandRadius } from './terrain.js?v=4';
 
 function createJaggedMountainGeo(rad, h, seed) {
   const geo = new THREE.ConeGeometry(rad, h, 32, 8);
