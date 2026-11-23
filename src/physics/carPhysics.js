@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { getIslandRadius } from '../world/terrain.js?v=4';
-import { getMountainSurfaceRadius } from '../world/environment.js?v=4';
+import { getIslandRadius } from '../world/terrain.js?v=5';
+import { getMountainSurfaceRadius } from '../world/environment.js?v=5';
 
 const WHEEL_OFFSETS = [
   [-1.12, -1.42], // FL

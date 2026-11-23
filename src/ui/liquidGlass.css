@@ -1,0 +1,355 @@
+/* ==========================================================================
+   LIQUID GLASS DESIGN SYSTEM — Sculpted Glass Keycaps, HUD & Fluid Animations
+   ========================================================================== */
+
+:root {
+  --lg-bg: rgba(255, 255, 255, 0.30);
+  --lg-bg-hover: rgba(255, 255, 255, 0.46);
+  --lg-bg-active: rgba(255, 255, 255, 0.62);
+  --lg-border: rgba(255, 255, 255, 0.62);
+  --lg-shadow: 0 10px 30px rgba(10, 24, 48, 0.16), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --lg-inset:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.88),
+    inset 0 -1.5px 2px rgba(255, 255, 255, 0.28),
+    inset 0 0 14px rgba(255, 255, 255, 0.22);
+  --lg-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Base Liquid Glass Surface */
+.lg-surface,
+.lg-btn,
+.lg-key {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.54) 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(215, 242, 255, 0.30) 100%
+  );
+  backdrop-filter: blur(22px) saturate(195%) brightness(1.07);
+  -webkit-backdrop-filter: blur(22px) saturate(195%) brightness(1.07);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-shadow), var(--lg-inset);
+  color: #0f172a;
+  transition:
+    transform 0.34s var(--lg-spring),
+    background 0.25s ease,
+    box-shadow 0.28s ease,
+    border-color 0.25s ease,
+    color 0.22s ease;
+}
+
+/* Specular pointer-tracked caustic highlight */
+.lg-surface::before,
+.lg-btn::before,
+.lg-key::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    130px circle at var(--mx, 50%) var(--my, 15%),
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.16) 42%,
+    transparent 72%
+  );
+  opacity: 0.45;
+  transition: opacity 0.28s ease;
+  z-index: 0;
+}
+
+.lg-surface > *,
+.lg-btn > *,
+.lg-key > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top liquid refraction rim sheen */
+.lg-btn::after,
+.lg-key::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 8%;
+  right: 8%;
+  height: 44%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Interactive Liquid Glass Buttons */
+.lg-btn {
+  border-radius: 9999px;
+  cursor: pointer;
+  user-select: none;
+  will-change: transform;
+}
+
+.lg-btn:hover {
+  transform: translateY(-1.5px) scale(1.03);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.68) 0%,
+    rgba(255, 255, 255, 0.34) 50%,
+    rgba(220, 245, 255, 0.44) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 14px 32px rgba(10, 24, 48, 0.22),
+    inset 0 2px 2px rgba(255, 255, 255, 0.95),
+    inset 0 0 18px rgba(255, 255, 255, 0.35);
+}
+
+.lg-btn:hover::before {
+  opacity: 0.9;
+}
+
+.lg-btn:active,
+.lg-btn.is-pressed {
+  transform: translateY(1px) scale(0.93, 0.91);
+  box-shadow:
+    0 4px 12px rgba(10, 24, 48, 0.16),
+    inset 0 2px 6px rgba(255, 255, 255, 0.95),
+    inset 0 0 22px rgba(255, 255, 255, 0.45);
+}
+
+/* Tinted Liquid Glass Accents */
+.lg-tint-dark {
+  background: linear-gradient(
+    135deg,
+    rgba(17, 24, 39, 0.68) 0%,
+    rgba(15, 23, 42, 0.48) 55%,
+    rgba(30, 41, 59, 0.56) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.28),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.42),
+    inset 0 0 14px rgba(255, 255, 255, 0.12);
+}
+
+.lg-tint-dark:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(17, 24, 39, 0.80) 0%,
+    rgba(0, 71, 255, 0.56) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.62);
+  color: #ffffff;
+}
+
+.lg-tint-blue {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 119, 255, 0.68) 0%,
+    rgba(0, 71, 255, 0.48) 55%,
+    rgba(0, 180, 216, 0.56) 100%
+  );
+  border-color: rgba(180, 228, 255, 0.78);
+  color: #ffffff;
+  box-shadow:
+    0 10px 28px rgba(0, 71, 255, 0.34),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.78),
+    inset 0 0 16px rgba(144, 224, 239, 0.32);
+}
+
+.lg-tint-blue:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 130, 255, 0.80) 0%,
+    rgba(0, 71, 255, 0.64) 100%
+  );
+  color: #ffffff;
+}
+
+.lg-tint-red {
+  background: linear-gradient(
+    135deg,
+    rgba(230, 57, 70, 0.72) 0%,
+    rgba(217, 4, 41, 0.52) 60%,
+    rgba(255, 117, 143, 0.55) 100%
+  );
+  border-color: rgba(255, 200, 208, 0.72);
+  color: #ffffff;
+  box-shadow:
+    0 10px 26px rgba(230, 57, 70, 0.32),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.72);
+}
+
+.lg-tint-amber {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 195, 0, 0.68) 0%,
+    rgba(255, 183, 3, 0.44) 60%,
+    rgba(255, 234, 167, 0.62) 100%
+  );
+  border-color: rgba(255, 245, 200, 0.84);
+  color: #111111;
+  box-shadow:
+    0 10px 24px rgba(255, 183, 3, 0.28),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.88);
+}
+
+/* Sculpted 3D Liquid Glass Keycaps (WASD, SHIFT, SPACE, DRAG, SCROLL, C, R) */
+.lg-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 9px;
+  font-weight: 800;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: #0f172a;
+  box-shadow:
+    0 4px 10px rgba(10, 24, 48, 0.16),
+    0 2px 0 rgba(255, 255, 255, 0.42),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.92),
+    inset 0 -2px 3px rgba(15, 23, 42, 0.10);
+  cursor: pointer;
+  will-change: transform, box-shadow;
+}
+
+.lg-key:hover {
+  transform: translateY(-1.5px) scale(1.06);
+  border-color: rgba(255, 255, 255, 0.92);
+}
+
+/* Active / Pressed Liquid Glass Keycap Animation */
+.lg-key.is-pressed,
+.lg-key:active {
+  transform: translateY(2px) scale(0.89, 0.86);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 140, 255, 0.72) 0%,
+    rgba(0, 212, 255, 0.56) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.96);
+  color: #ffffff;
+  box-shadow:
+    0 0 18px rgba(0, 160, 255, 0.55),
+    0 1px 3px rgba(10, 24, 48, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.95);
+}
+
+/* Liquid Glass Ripple Wave (spawned dynamically on press/click) */
+.lg-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.15);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(144, 224, 239, 0.45) 45%,
+    rgba(255, 255, 255, 0) 75%
+  );
+  animation: lgRippleWave 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 2;
+}
+
+@keyframes lgRippleWave {
+  0% {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(0.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.8);
+  }
+}
+
+/* Periodic Ambient Liquid Shimmer Sweep */
+.lg-shimmer {
+  position: relative;
+}
+
+.lg-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 45%;
+  height: 180%;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-22deg);
+  animation: lgShimmerSweep 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes lgShimmerSweep {
+  0%, 62% { left: -65%; opacity: 0; }
+  70% { opacity: 0.9; }
+  100% { left: 135%; opacity: 0; }
+}
+
+/* Fluid Glass Pop-In Animation for Cards, Badges & Modals */
+.lg-pop {
+  animation: lgFluidPop 0.38s var(--lg-spring) both;
+}
+
+@keyframes lgFluidPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.92);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.lg-modal-panel {
+  animation: lgModalPop 0.38s var(--lg-spring) both;
+}
+
+@keyframes lgModalPop {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.93);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Liquid Glass Form Inputs */
+.lg-input {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lg-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 119, 255, 0.75);
+  box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.18);
+}
+
+/* Liquid Glass Speedometer Track */
+.lg-track {
+  background: rgba(15, 23, 42, 0.12);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.15), 0 1px 0 rgba(255, 255, 255, 0.6);
+}

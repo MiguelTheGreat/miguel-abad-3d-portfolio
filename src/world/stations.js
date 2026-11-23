@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { STATION_DECK_H } from '../config/portfolioData.js?v=4';
+import { STATION_DECK_H } from '../config/portfolioData.js?v=5';
 
 export function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   const paragraphs = text.split('\n');

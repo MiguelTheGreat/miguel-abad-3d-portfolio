@@ -1,5 +1,5 @@
-import { PORTFOLIO_PROJECTS, STATION_DECK_H } from '../config/portfolioData.js?v=4';
-import { getIslandRadius } from '../world/terrain.js?v=4';
+import { PORTFOLIO_PROJECTS, STATION_DECK_H } from '../config/portfolioData.js?v=5';
+import { getIslandRadius } from '../world/terrain.js?v=5';
 
 export function setupUIAndModals({
   scene, hemiLight, dl, oceanMat, grassMat, sctx, skyTex, streetLampBulbs,
@@ -193,9 +193,9 @@ export function setupUIAndModals({
             <a href="#c-ref" class="hover:text-[#0047FF]">05. References</a>
           </nav>
           <div class="flex items-center gap-2">
-            <button id="openAtsBtn2D" class="px-3 py-2 rounded border border-black/20 hover:bg-black hover:text-white text-xs font-semibold">ATS Resume</button>
-            <button onclick="window.print()" class="px-3 py-2 rounded border border-black/20 hover:bg-black hover:text-white text-xs font-semibold">Print / PDF</button>
-            <button id="back3dBtn" class="px-3.5 py-2 rounded bg-[#E63946] text-white text-xs font-bold uppercase tracking-wider">🏎 3D World</button>
+            <button id="openAtsBtn2D" class="lg-btn px-3.5 py-2 text-xs font-semibold">ATS Resume</button>
+            <button onclick="window.print()" class="lg-btn px-3.5 py-2 text-xs font-semibold">Print / PDF</button>
+            <button id="back3dBtn" class="lg-btn lg-tint-red lg-shimmer px-4 py-2 text-xs font-bold uppercase tracking-wider">🏎 3D World</button>
           </div>
         </div>
       </header>
@@ -213,9 +213,9 @@ export function setupUIAndModals({
               <div><span class="block text-[11px] uppercase tracking-widest text-[#595959]">Location</span><span class="font-medium">Cavite, Philippines</span></div>
             </div>
             <div class="p-4 rounded-lg border border-black/20 bg-white space-y-2 text-xs">
-              <div class="flex justify-between items-center"><span class="font-mono">abadandrei22@gmail.com</span><button data-c2="abadandrei22@gmail.com" class="px-2 py-0.5 border rounded">Copy</button></div>
-              <div class="flex justify-between items-center"><span class="font-mono">+63 977 652 9418</span><button data-c2="+63 977 652 9418" class="px-2 py-0.5 border rounded">Copy</button></div>
-              <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" class="block text-center py-2 rounded bg-[#0047FF] text-white font-semibold">LinkedIn Profile ↗</a>
+              <div class="flex justify-between items-center"><span class="font-mono">abadandrei22@gmail.com</span><button data-c2="abadandrei22@gmail.com" class="lg-btn px-2.5 py-0.5 text-[11px] font-semibold">Copy</button></div>
+              <div class="flex justify-between items-center"><span class="font-mono">+63 977 652 9418</span><button data-c2="+63 977 652 9418" class="lg-btn px-2.5 py-0.5 text-[11px] font-semibold">Copy</button></div>
+              <a href="https://www.linkedin.com/in/miguel-andrei-abad-a8845532a/" target="_blank" class="lg-btn lg-tint-blue block text-center py-2 text-xs font-semibold">LinkedIn Profile ↗</a>
             </div>
           </div>
           <div class="lg:col-span-8 space-y-6">

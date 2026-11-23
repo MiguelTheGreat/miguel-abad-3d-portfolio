@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { STATION_DECK_H } from '../config/portfolioData.js?v=4';
+import { STATION_DECK_H } from '../config/portfolioData.js?v=5';
 
 export const TERRAIN_SPAN = 1220;
 export const TERRAIN_RES = 260;

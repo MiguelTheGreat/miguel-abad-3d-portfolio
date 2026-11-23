@@ -1,13 +1,14 @@
 import * as THREE from 'three';
-import { STATION_DECK_H, loadGuestbookNotes, getZones } from './config/portfolioData.js?v=4';
-import { SoundEngine } from './audio/SoundEngine.js?v=4';
-import { buildRoadNetwork } from './world/roads.js?v=4';
-import { createTerrainSystem } from './world/terrain.js?v=4';
-import { buildEnvironment } from './world/environment.js?v=4';
-import { buildStations, drawMainBoardTex } from './world/stations.js?v=4';
-import { createSupercar } from './world/supercar.js?v=4';
-import { createCarPhysics } from './physics/carPhysics.js?v=4';
-import { setupUIAndModals } from './ui/hudAndModals.js?v=4';
+import { STATION_DECK_H, loadGuestbookNotes, getZones } from './config/portfolioData.js?v=5';
+import { SoundEngine } from './audio/SoundEngine.js?v=5';
+import { buildRoadNetwork } from './world/roads.js?v=5';
+import { createTerrainSystem } from './world/terrain.js?v=5';
+import { buildEnvironment } from './world/environment.js?v=5';
+import { buildStations, drawMainBoardTex } from './world/stations.js?v=5';
+import { createSupercar } from './world/supercar.js?v=5';
+import { createCarPhysics } from './physics/carPhysics.js?v=5';
+import { setupUIAndModals } from './ui/hudAndModals.js?v=5';
+import { initLiquidGlass } from './ui/liquidGlass.js?v=5';
 
 const guestbookNotes = loadGuestbookNotes();
 let ZONES = getZones(guestbookNotes);
@@ -81,11 +82,9 @@ const resetCameraBtn = document.getElementById('resetCameraBtn');
 function updateResetCamBtnStyle() {
   if (!resetCameraBtn) return;
   if (camState.isCustom) {
-    resetCameraBtn.classList.remove('bg-white/90', 'text-[#111111]');
-    resetCameraBtn.classList.add('bg-[#0047FF]', 'text-white');
+    resetCameraBtn.classList.add('lg-tint-blue', 'lg-shimmer');
   } else {
-    resetCameraBtn.classList.add('bg-white/90', 'text-[#111111]');
-    resetCameraBtn.classList.remove('bg-[#0047FF]', 'text-white');
+    resetCameraBtn.classList.remove('lg-tint-blue', 'lg-shimmer');
   }
 }
 
@@ -177,7 +176,25 @@ function resetCameraToNormal() {
   ui.showToast('🎥 Camera reset to Chinatown Wars view');
 }
 
+function resetCarAndWorld() {
+  car.x = 0; car.z = 24; car.y = STATION_DECK_H;
+  car.vx = 0; car.vz = 0; car.vy = 0; car.speed = 0; car.heading = 0;
+  resetCameraToNormal();
+  stations.miguelLetters.forEach(l => {
+    l.x = l.homeX; l.z = l.homeZ; l.y = STATION_DECK_H + 1.9;
+    l.vx = 0; l.vy = 0; l.vz = 0; l.rx = 0; l.rz = 0; l.vrx = 0; l.vrz = 0;
+    l.mesh.position.set(l.x, l.y, l.z); l.mesh.rotation.set(0, 0, 0);
+  });
+  ui.showToast('Car, camera & MIGUEL letters reset');
+}
+
 resetCameraBtn?.addEventListener('click', resetCameraToNormal);
+initLiquidGlass({
+  onKeyCapAction: (cap) => {
+    if (cap === 'C') resetCameraToNormal();
+    if (cap === 'R') resetCarAndWorld();
+  }
+});
 
 const physics = createCarPhysics(terrain, env, stations, sound, ui.showToast);
 
@@ -187,15 +204,7 @@ window.addEventListener('keydown', (e) => {
     resetCameraToNormal();
   }
   if (e.code === 'KeyR') {
-    car.x = 0; car.z = 24; car.y = STATION_DECK_H;
-    car.vx = 0; car.vz = 0; car.vy = 0; car.speed = 0; car.heading = 0;
-    resetCameraToNormal();
-    stations.miguelLetters.forEach(l => {
-      l.x = l.homeX; l.z = l.homeZ; l.y = STATION_DECK_H + 1.9;
-      l.vx = 0; l.vy = 0; l.vz = 0; l.rx = 0; l.rz = 0; l.vrx = 0; l.vrz = 0;
-      l.mesh.position.set(l.x, l.y, l.z); l.mesh.rotation.set(0, 0, 0);
-    });
-    ui.showToast('Car, camera & MIGUEL letters reset');
+    resetCarAndWorld();
   }
   keys.add(e.code);
 });
